@@ -4,7 +4,7 @@ using AuthCore.Domain.ValueObjects;
 
 namespace AuthCore.Domain.Entities
 {
-    public class User : Entity
+    public sealed class User : Entity
     {
         #region Properties
 
@@ -34,7 +34,7 @@ namespace AuthCore.Domain.Entities
         {
             FirstName = firstName;
             LastName = lastName;
-            Email = email;
+            Email = email.ToLowerInvariant();
             Password = password;
             Role = role;
             Active = active;
@@ -44,14 +44,14 @@ namespace AuthCore.Domain.Entities
 
         #endregion
 
-        #region Methods
+        #region Factory
 
         public static User Create(
             string firstName,
             string lastName,
             string email,
             string password,
-            Role role = Role.Member,
+            Role role = Role.User,
             bool active = true)
         {
             if (string.IsNullOrWhiteSpace(firstName))
@@ -63,8 +63,12 @@ namespace AuthCore.Domain.Entities
             if (string.IsNullOrWhiteSpace(password))
                 throw new DomainException("A senha é obrigatória.");
 
-            return new User(firstName, lastName, email.ToLowerInvariant(), password, role, active);
+            return new User(firstName, lastName, email, password, role, active);
         }
+
+        #endregion
+
+        #region Behavior
 
         public void Activate()
         {
@@ -88,7 +92,7 @@ namespace AuthCore.Domain.Entities
 
         public void RegisterFailedLogin()
         {
-            LoginAttempts = LoginAttempts.FailedAttempt();
+            LoginAttempts = LoginAttempts.RegisterFailure();
         }
 
         public void ResetLoginAttempts()

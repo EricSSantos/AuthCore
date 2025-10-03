@@ -1,13 +1,23 @@
 ﻿namespace AuthCore.Domain.ValueObjects
 {
-    public sealed class LoginAttempts
+    public sealed class LoginAttempts : ValueObject
     {
-        public int FailedAttempts { get; private set; }
-        public DateTimeOffset? LastFailedAt { get; private set; }
-        public DateTimeOffset? LockedUntil { get; private set; }
+        #region Constants
 
         private const int MAX_ATTEMPTS = 5;
         private static readonly TimeSpan LockDuration = TimeSpan.FromMinutes(15);
+
+        #endregion
+
+        #region Properties
+
+        public int FailedAttempts { get; }
+        public DateTimeOffset? LastFailedAt { get; }
+        public DateTimeOffset? LockedUntil { get; }
+
+        #endregion
+
+        #region Constructors
 
         protected LoginAttempts() { }
 
@@ -21,16 +31,26 @@
             LockedUntil = lockedUntil;
         }
 
+        #endregion
+
+        #region Factory
+
         public static LoginAttempts Create()
         {
             return new LoginAttempts(0, null, null);
         }
 
-        public LoginAttempts FailedAttempt()
+        #endregion
+
+        #region Behavior
+
+        public LoginAttempts RegisterFailure()
         {
             var now = DateTimeOffset.UtcNow;
             var failedAttempts = FailedAttempts + 1;
-            var lockedUntil = failedAttempts >= MAX_ATTEMPTS ? now.Add(LockDuration) : LockedUntil;
+            var lockedUntil = failedAttempts >= MAX_ATTEMPTS
+                ? now.Add(LockDuration)
+                : LockedUntil;
 
             return new LoginAttempts(failedAttempts, now, lockedUntil);
         }
@@ -52,5 +72,14 @@
 
             return null;
         }
+
+        protected override IEnumerable<object> GetValues()
+        {
+            yield return FailedAttempts;
+            yield return LastFailedAt ?? DateTimeOffset.MinValue;
+            yield return LockedUntil ?? DateTimeOffset.MinValue;
+        }
+
+        #endregion
     }
 }
