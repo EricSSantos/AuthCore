@@ -23,7 +23,7 @@ namespace AuthCore.Application.Models.Output
             {
                 Id = user.Id,
                 Email = user.Email,
-                Name = user.FirstName + user.LastName,
+                Name = $"{user.FirstName} {user.LastName}",
                 CreatedAt = user.CreatedAt
             };
         }

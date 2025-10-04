@@ -23,10 +23,11 @@ namespace AuthCore.Application.Models.Input
         public User ToEntity(string hashedPassword)
         {
             return User.Create(
-                FirstName, 
-                LastName, 
-                Email, 
-                hashedPassword);
+                firstName: FirstName,
+                lastName: LastName,
+                email: Email,
+                password: hashedPassword
+            );
         }
     }
 }

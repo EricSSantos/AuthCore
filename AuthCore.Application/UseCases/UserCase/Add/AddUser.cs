@@ -40,11 +40,15 @@ namespace AuthCore.Application.UseCases.UserCase.Add
             return UserViewModel.ToViewModel(user);
         }
 
+        #region Private Methods
+
         private bool IsStrong(string password)
         {
             // 8 caracteres, 1 minúscula e 1 maiúscula
             var regex = new Regex(@"^(?=.*[a-z])(?=.*[A-Z]).{8,}$");
             return regex.IsMatch(password);
         }
+
+        #endregion
     }
 }
