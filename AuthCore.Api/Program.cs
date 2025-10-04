@@ -1,4 +1,4 @@
-using AuthCore.Api.Configurations;
+﻿using AuthCore.Api.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
