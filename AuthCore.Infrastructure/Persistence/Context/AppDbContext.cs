@@ -1,14 +1,13 @@
 ﻿using AuthCore.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace AuthCore.Infrastructure.Data.Context
+namespace AuthCore.Infrastructure.Persistence.Context
 {
     public partial class AppDbContext : DbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; } = null!;
-        public DbSet<Session> Sessions { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

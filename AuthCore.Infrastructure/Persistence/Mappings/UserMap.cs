@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace AuthCore.Infrastructure.Data.Mappings
+namespace AuthCore.Infrastructure.Persistence.Mappings
 {
     internal class UserMap : IEntityTypeConfiguration<User>
     {
@@ -11,6 +11,7 @@ namespace AuthCore.Infrastructure.Data.Mappings
             builder.ToTable("users");
 
             builder.HasKey(u => u.Id);
+
             builder.Property(u => u.Id)
                    .HasColumnName("id");
 
@@ -38,7 +39,7 @@ namespace AuthCore.Infrastructure.Data.Mappings
                    .HasColumnName("role")
                    .IsRequired();
 
-            builder.Property(u => u.Atictive)
+            builder.Property(u => u.Active)
                    .HasColumnName("activate")
                    .IsRequired();
 
@@ -48,6 +49,20 @@ namespace AuthCore.Infrastructure.Data.Mappings
 
             builder.Property(u => u.InactivatedAt)
                    .HasColumnName("inactivated_at");
+
+            builder.OwnsOne(u => u.LoginAttempts, vo =>
+            {
+                vo.Property(p => p.FailedAttempts)
+                  .HasColumnName("failed_attempts");
+
+                vo.Property(p => p.LastFailedAt)
+                  .HasColumnName("last_failed_at");
+
+                vo.Property(p => p.LockedUntil)
+                  .HasColumnName("locked_until");
+
+                vo.WithOwner();
+            });
         }
     }
 }

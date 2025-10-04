@@ -1,8 +1,8 @@
-﻿using AuthCore.Domain.Interfaces.Security;
+﻿using AuthCore.Domain.Interfaces.Adapters.Security.Cripto;
 
-namespace AuthCore.Infrastructure.Security
+namespace AuthCore.Infrastructure.Adapters.Security.Cripto
 {
-    public sealed class BcryptHasher : IBcryptHasher
+    public sealed class BCryptAdapter : IBCryptAdapter
     {
         public string Hash(string password)
         {

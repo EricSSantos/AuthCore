@@ -1,6 +1,6 @@
-﻿namespace AuthCore.Domain.Interfaces.Security
+﻿namespace AuthCore.Domain.Interfaces.Adapters.Security.Cripto
 {
-    public interface IBcryptHasher
+    public interface IBCryptAdapter
     {
         string Hash(string plainText);
         bool isValid(string plainText, string hash);
