@@ -6,6 +6,8 @@ namespace AuthCore.Infrastructure.Adapters.Sessions.Documents
 {
     internal sealed class SessionDocument
     {
+        #region Properties
+
         [JsonPropertyName("sid")]
         public Guid Sid { get; set; }
 
@@ -24,25 +26,44 @@ namespace AuthCore.Infrastructure.Adapters.Sessions.Documents
         [JsonPropertyName("last_used_at")]
         public DateTimeOffset? LastUsedAt { get; set; }
 
+        [JsonPropertyName("revoked_at")]
+        public DateTimeOffset? RevokedAt { get; set; }
+
+        [JsonPropertyName("revoked")]
+        public bool Revoked
+        {
+            get { return RevokedAt.HasValue; }
+        }
+
         [JsonPropertyName("device")]
         public DeviceDocument Device { get; set; } = default!;
 
-        public static SessionDocument ToDocument(Session session) => new()
+        #endregion
+
+        #region Conversion
+
+        public static SessionDocument ToDocument(Session session)
         {
-            Sid = session.Id,
-            Sub = session.UserId,
-            RefreshToken = session.RefreshToken,
-            CreatedAt = session.CreatedAt,
-            ExpiresAt = session.ExpiresAt,
-            LastUsedAt = session.LastUsedAt,
-            Device = new DeviceDocument
+            var document = new SessionDocument
             {
-                Ip = session.DeviceInfo.Ip,
-                Platform = session.DeviceInfo.Platform,
-                Browser = session.DeviceInfo.Browser,
-                Location = session.DeviceInfo.Location
-            }
-        };
+                Sid = session.Id,
+                Sub = session.UserId,
+                RefreshToken = session.RefreshToken,
+                CreatedAt = session.CreatedAt,
+                ExpiresAt = session.ExpiresAt,
+                LastUsedAt = session.LastUsedAt,
+                RevokedAt = session.RevokedAt,
+                Device = new DeviceDocument
+                {
+                    Ip = session.DeviceInfo.Ip,
+                    Platform = session.DeviceInfo.Platform,
+                    Browser = session.DeviceInfo.Browser,
+                    Location = session.DeviceInfo.Location
+                }
+            };
+
+            return document;
+        }
 
         public Session ToEntity()
         {
@@ -59,8 +80,11 @@ namespace AuthCore.Infrastructure.Adapters.Sessions.Documents
             typeof(Session).GetProperty("CreatedAt")!.SetValue(session, CreatedAt);
             typeof(Session).GetProperty("ExpiresAt")!.SetValue(session, ExpiresAt);
             typeof(Session).GetProperty("LastUsedAt")!.SetValue(session, LastUsedAt);
+            typeof(Session).GetProperty("RevokedAt")!.SetValue(session, RevokedAt);
 
             return session;
         }
+
+        #endregion
     }
 }

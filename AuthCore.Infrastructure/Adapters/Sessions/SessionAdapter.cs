@@ -1,4 +1,5 @@
 ﻿using AuthCore.Domain.Entities;
+using AuthCore.Domain.Exceptions;
 using AuthCore.Domain.Interfaces.Adapters.Sessions;
 using AuthCore.Domain.ValueObjects;
 using AuthCore.Infrastructure.Adapters.Sessions.Documents;
@@ -11,7 +12,8 @@ namespace AuthCore.Infrastructure.Adapters.Sessions
     {
         #region Constants
 
-        private const string PREFIX = "session:";
+        private const string ROOT = "sessions:";
+        private const string INDEX = ROOT + "index:";
 
         #endregion
 
@@ -22,21 +24,22 @@ namespace AuthCore.Infrastructure.Adapters.Sessions
             _cache = cache;
         }
 
+        #region Reading
+
         public async Task<Session?> GetBySid(Guid sid)
         {
-            var json = await _cache.GetStringAsync($"{PREFIX}{sid}");
+            var json = await _cache.GetStringAsync($"{ROOT}{sid}");
             if (string.IsNullOrWhiteSpace(json))
                 return null;
 
             var document = JsonSerializer.Deserialize<SessionDocument>(json);
-            return document is null ? null : document.ToEntity();
+            return document?.ToEntity();
         }
 
         public async Task<Session?> GetBySubAndDevice(Guid sub, DeviceInfo device)
         {
-            var indexKey = $"{PREFIX}index:{sub}";
+            var indexKey = $"{INDEX}{sub}";
             var sessionIdsJson = await _cache.GetStringAsync(indexKey);
-
             if (string.IsNullOrWhiteSpace(sessionIdsJson))
                 return null;
 
@@ -46,54 +49,93 @@ namespace AuthCore.Infrastructure.Adapters.Sessions
 
             foreach (var sid in sessionIds)
             {
-                var json = await _cache.GetStringAsync($"{PREFIX}{sid}");
-                if (string.IsNullOrWhiteSpace(json))
-                    continue;
-
-                var document = JsonSerializer.Deserialize<SessionDocument>(json);
-                if (document is null)
-                    continue;
-
-                var entity = document.ToEntity();
-                if (entity.UserId == sub && entity.DeviceInfo == device)
-                    return entity;
+                var session = await GetBySid(sid);
+                if (session is not null && session.UserId == sub && session.DeviceInfo == device)
+                    return session;
             }
 
             return null;
         }
 
-        public async Task Add(Session session, TimeSpan? ttl = null)
+        public async Task<Session> Validate(Guid sessionId, Guid userId)
         {
-            var document = SessionDocument.ToDocument(session);
-            var json = JsonSerializer.Serialize(document);
+            var session = await GetBySid(sessionId)
+                ?? throw new NotFoundException("Sessão não encontrada.");
 
-            var options = new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = ttl ?? TimeSpan.FromDays(7)
-            };
+            if (session.UserId != userId)
+                throw new UnauthorizedAccessException("A sessão não pertence ao usuário autenticado.");
 
-            await _cache.SetStringAsync($"{PREFIX}{session.Id}", json, options);
+            if (!session.IsValid())
+                throw new UnauthorizedAccessException("A sessão está expirada ou foi revogada.");
 
-            // Cria um índice no Redis que vincula o usuário às suas sessões ativas,
-            // facilitando futuras consultas e validações de login.
-            var index = $"{PREFIX}index:{session.UserId}";
-            var existing = await _cache.GetStringAsync(index);
+            return session;
+        }
 
-            var sids = string.IsNullOrWhiteSpace(existing)
-                ? new List<Guid>()
-                : JsonSerializer.Deserialize<List<Guid>>(existing) ?? new();
+        #endregion
 
-            if (!sids.Contains(session.Id))
-            {
-                sids.Add(session.Id);
-                var sidsJson = JsonSerializer.Serialize(sids);
-                await _cache.SetStringAsync(index, sidsJson, options);
-            }
+        #region Writing
+
+        public async Task Add(Session session)
+        {
+            await Save(session);
+            await AddToIndex(session);
+        }
+
+        public async Task Update(Session session)
+        {
+            await Save(session);
         }
 
         public async Task Delete(Guid sid)
         {
-            await _cache.RemoveAsync($"{PREFIX}{sid}");
+            await _cache.RemoveAsync($"{ROOT}{sid}");
         }
+
+        #endregion
+
+        #region Private Methods
+
+        private async Task Save(Session session)
+        {
+            var document = SessionDocument.ToDocument(session);
+            var json = JsonSerializer.Serialize(document);
+
+            var ttl = session.ExpiresAt - DateTimeOffset.UtcNow;
+            if (ttl <= TimeSpan.Zero)
+                ttl = TimeSpan.FromDays(7);
+
+            var options = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = ttl
+            };
+
+            await _cache.SetStringAsync($"{ROOT}{session.Id}", json, options);
+        }
+
+        private async Task AddToIndex(Session session)
+        {
+            var indexKey = $"{INDEX}{session.UserId}";
+            var existing = await _cache.GetStringAsync(indexKey);
+
+            var sids = string.IsNullOrWhiteSpace(existing)
+                ? new List<Guid>()
+                : JsonSerializer.Deserialize<List<Guid>>(existing) ?? new List<Guid>();
+
+            if (!sids.Contains(session.Id))
+            {
+                sids.Add(session.Id);
+
+                var json = JsonSerializer.Serialize(sids);
+                var ttl = session.ExpiresAt - DateTimeOffset.UtcNow;
+                var options = new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = ttl
+                };
+
+                await _cache.SetStringAsync(indexKey, json, options);
+            }
+        }
+
+        #endregion
     }
 }

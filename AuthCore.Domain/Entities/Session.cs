@@ -14,6 +14,11 @@ namespace AuthCore.Domain.Entities
         public DateTimeOffset CreatedAt { get; private set; }
         public DateTimeOffset ExpiresAt { get; private set; }
         public DateTimeOffset? LastUsedAt { get; private set; }
+        public DateTimeOffset? RevokedAt { get; private set; }
+        public bool Revoked
+        {
+            get { return RevokedAt.HasValue; }
+        }
 
         #endregion
 
@@ -38,8 +43,10 @@ namespace AuthCore.Domain.Entities
         {
             if (userId == Guid.Empty)
                 throw new DomainException("O user_id é obrigatório.");
+
             if (string.IsNullOrWhiteSpace(refreshToken))
                 throw new DomainException("O refresh_token é obrigatório.");
+
             if (deviceInfo is null)
                 throw new DomainException("O device_info é obrigatório.");
 
@@ -56,13 +63,16 @@ namespace AuthCore.Domain.Entities
                 throw new DomainException("O novo refresh_token é obrigatório.");
 
             RefreshToken = newRefreshToken;
-            ExpiresAt = DateTimeOffset.UtcNow.Add(TimeSpan.FromDays(7));
+            ExpiresAt = DateTimeOffset.UtcNow.AddDays(7);
             LastUsedAt = DateTimeOffset.UtcNow;
         }
 
         public void Revoke()
         {
-            ExpiresAt = DateTimeOffset.UtcNow;
+            if (Revoked)
+                return;
+
+            RevokedAt = DateTimeOffset.UtcNow;
         }
 
         public void Touch()
@@ -70,9 +80,9 @@ namespace AuthCore.Domain.Entities
             LastUsedAt = DateTimeOffset.UtcNow;
         }
 
-        public bool IsActive()
+        public bool IsValid()
         {
-            return DateTimeOffset.UtcNow <= ExpiresAt;
+            return !Revoked && DateTimeOffset.UtcNow <= ExpiresAt;
         }
 
         #endregion

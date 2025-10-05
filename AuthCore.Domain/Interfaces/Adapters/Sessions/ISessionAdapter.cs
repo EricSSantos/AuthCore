@@ -7,7 +7,9 @@ namespace AuthCore.Domain.Interfaces.Adapters.Sessions
     {
         Task<Session?> GetBySid(Guid sid);
         Task<Session?> GetBySubAndDevice(Guid sub, DeviceInfo device);
-        Task Add(Session session, TimeSpan? ttl = null);
+        Task<Session> Validate(Guid sessionId, Guid userId);
+        Task Add(Session session);
+        Task Update(Session session);
         Task Delete(Guid sid);
     }
 }
