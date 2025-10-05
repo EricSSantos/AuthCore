@@ -2,6 +2,9 @@
 {
     public interface IAccessTokenAdapter
     {
-        string GenerateAccessToken(Guid userId);
+        string Generate(Guid userId);
+        Guid GetUserId();
+        Guid GetJti();
+        long GetIssuedAt();
     }
 }
