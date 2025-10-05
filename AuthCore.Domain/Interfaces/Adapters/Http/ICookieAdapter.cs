@@ -2,7 +2,7 @@
 {
     public interface ICookieAdapter
     {
-        string? GetSessionId();
+        Guid GetSessionId();
         string? GetAccessToken();
         string? GetRefreshToken();
         void SetAuthCookies(Guid sessionId, string accessToken, string refreshToken);

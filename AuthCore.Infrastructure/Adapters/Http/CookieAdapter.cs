@@ -9,9 +9,9 @@ namespace AuthCore.Infrastructure.Adapters.Http
     {
         #region Constants
 
-        public const string SESSION_ID = "sid";
-        public const string ACCESS_TOKEN = "act";
-        public const string REFRESH_TOKEN = "rft";
+        public const string SESSION_ID = "session";
+        public const string ACCESS_TOKEN = "access_token";
+        public const string REFRESH_TOKEN = "refresh_token";
 
         #endregion
 
@@ -24,17 +24,21 @@ namespace AuthCore.Infrastructure.Adapters.Http
             _lifetime = settings.Value.Lifetime;
         }
 
-        public string? GetSessionId()
+        public Guid GetSessionId()
         {
-            return Get(SESSION_ID);
+            var value = Get(SESSION_ID);
+            if (!Guid.TryParse(value, out var sid))
+                throw new UnauthorizedAccessException("Identificador de sessão inválido.");
+
+            return sid;
         }
 
-        public string? GetAccessToken()
+        public string GetAccessToken()
         {
             return Get(ACCESS_TOKEN);
         }
 
-        public string? GetRefreshToken()
+        public string GetRefreshToken()
         {
             return Get(REFRESH_TOKEN);
         }
@@ -58,20 +62,25 @@ namespace AuthCore.Infrastructure.Adapters.Http
 
         #region Private Methods
 
-        private string? Get(string key)
+        private HttpContext GetContext()
         {
-            var context = _http.HttpContext;
-            if (context is null)
-                return null;
+            return _http.HttpContext
+                ?? throw new InvalidOperationException("Contexto HTTP indisponível.");
+        }
 
-            return context.Request.Cookies[key];
+        private string Get(string key)
+        {
+            var context = GetContext();
+
+            if (!context.Request.Cookies.TryGetValue(key, out var value) || string.IsNullOrWhiteSpace(value))
+                throw new UnauthorizedAccessException($"'{key}' ausente ou inválido.");
+
+            return value.Trim();
         }
 
         private void Set(string key, string value, TimeSpan? expires = null, bool httpOnly = true, bool secure = true)
         {
-            var context = _http.HttpContext;
-            if (context is null)
-                return;
+            var context = GetContext();
 
             var options = new CookieOptions
             {
@@ -88,10 +97,7 @@ namespace AuthCore.Infrastructure.Adapters.Http
 
         private void Remove(string key)
         {
-            var context = _http.HttpContext;
-            if (context is null)
-                return;
-
+            var context = GetContext();
             context.Response.Cookies.Delete(key);
         }
 
