@@ -4,6 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddDatabases();
 builder.AddInjections();
+builder.AddAuthentication();
 builder.AddSwaggerService();
 
 builder.Services.AddControllers();
@@ -18,6 +19,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
