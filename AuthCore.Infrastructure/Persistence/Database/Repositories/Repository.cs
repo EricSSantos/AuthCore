@@ -1,5 +1,5 @@
-﻿using AuthCore.Domain.Entities;
-using AuthCore.Domain.Interfaces.Repositories;
+﻿using AuthCore.Domain.Commons.Interfaces.Repositories;
+using AuthCore.Domain.Entities;
 using AuthCore.Infrastructure.Persistence.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;

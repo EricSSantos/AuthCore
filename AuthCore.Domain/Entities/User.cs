@@ -1,6 +1,6 @@
-﻿using AuthCore.Domain.Enums;
-using AuthCore.Domain.Exceptions;
-using AuthCore.Domain.ValueObjects;
+﻿using AuthCore.Domain.Commons.Exceptions;
+using AuthCore.Domain.Entities.ValueObjects;
+using AuthCore.Domain.Enums;
 
 namespace AuthCore.Domain.Entities
 {
@@ -56,10 +56,13 @@ namespace AuthCore.Domain.Entities
         {
             if (string.IsNullOrWhiteSpace(firstName))
                 throw new DomainException("O nome é obrigatório.");
+
             if (string.IsNullOrWhiteSpace(lastName))
                 throw new DomainException("O sobrenome é obrigatório.");
+
             if (string.IsNullOrWhiteSpace(email))
                 throw new DomainException("O email é obrigatório.");
+
             if (string.IsNullOrWhiteSpace(password))
                 throw new DomainException("A senha é obrigatória.");
 
@@ -90,24 +93,34 @@ namespace AuthCore.Domain.Entities
 
         #region Security
 
+        public void EnsureCanSignIn()
+        {
+            if (LoginAttempts.IsLocked())
+                throw new UnauthorizedException(LoginAttempts.GetLockMessage()!);
+        }
+
         public void RegisterFailedLogin()
         {
             LoginAttempts = LoginAttempts.RegisterFailure();
         }
 
-        public void ResetLoginAttempts()
+        public void RegisterSuccessfulLogin()
         {
-            LoginAttempts = LoginAttempts.Reset();
+            if (LoginAttempts.FailedAttempts > 0)
+                LoginAttempts = LoginAttempts.Reset();
         }
 
-        public bool IsLocked()
+        public void ValidateSignIn(bool passwordIsValid)
         {
-            return LoginAttempts.IsLocked();
-        }
+            EnsureCanSignIn();
 
-        public string? GetLockMessage()
-        {
-            return LoginAttempts.GetLockMessage();
+            if (!passwordIsValid)
+            {
+                RegisterFailedLogin();
+                throw new UnauthorizedException();
+            }
+
+            RegisterSuccessfulLogin();
         }
 
         #endregion

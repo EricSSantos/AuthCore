@@ -1,5 +1,5 @@
-﻿using AuthCore.Domain.Interfaces.Security.Cryptography;
-using AuthCore.Domain.Settings;
+﻿using AuthCore.Domain.Commons.Interfaces.Security.Cryptography;
+using AuthCore.Domain.Commons.Settings;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
@@ -25,6 +25,7 @@ namespace AuthCore.Infrastructure.Security.Cryptography
         {
             using var hmac = new HMACSHA256(_key);
             var hash = hmac.ComputeHash(data);
+
             return Base64UrlEncoder.Encode(hash);
         }
 

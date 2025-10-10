@@ -1,5 +1,5 @@
-﻿using AuthCore.Domain.Interfaces.Http;
-using AuthCore.Domain.ValueObjects;
+﻿using AuthCore.Domain.Commons.Interfaces.Http;
+using AuthCore.Domain.Entities.ValueObjects;
 using Microsoft.AspNetCore.Http;
 using UAParser;
 
@@ -22,22 +22,22 @@ namespace AuthCore.Infrastructure.Http
             {
                 var context = _http.HttpContext;
                 if (context is null)
-                    return DeviceInfo.Create("unknown", "unknown", "unknown", "unknown");
+                    return DeviceInfo.Create("unknown", "unknown", "unknown");
 
-                var ip = ResolveIp(context);
                 var userAgent = context.Request.Headers["User-Agent"].FirstOrDefault() ?? "Unknown";
+
+                var ip = GetIp(context);
                 var clientInfo = _parser.Parse(userAgent);
                 var platform = clientInfo.OS.Family.Trim();
                 var browser = $"{clientInfo.UA.Family} {clientInfo.UA.Major}".Trim();
-                var location = "Unknown";
 
-                return DeviceInfo.Create(ip, platform, browser, location);
+                return DeviceInfo.Create(ip, platform, browser);
             }
         }
 
         #region Private Methods
 
-        private static string ResolveIp(HttpContext context)
+        private static string GetIp(HttpContext context)
         {
             var request = context.Request;
 

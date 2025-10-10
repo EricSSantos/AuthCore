@@ -1,4 +1,4 @@
-﻿using AuthCore.Domain.Interfaces.Http;
+﻿using AuthCore.Domain.Commons.Interfaces.Http;
 using Microsoft.AspNetCore.Http;
 
 namespace AuthCore.Infrastructure.Http
@@ -22,14 +22,7 @@ namespace AuthCore.Infrastructure.Http
 
         public string Session
         {
-            get
-            {
-                var value = Get(SESSION_ID);
-                if (string.IsNullOrWhiteSpace(value))
-                    throw new UnauthorizedAccessException("Identificador de sessão ausente ou inválido.");
-
-                return value;
-            }
+            get { return Get(SESSION_ID); }
         }
 
         public string AccessToken
