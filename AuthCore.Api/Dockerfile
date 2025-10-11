@@ -2,31 +2,33 @@
 
 # Esta fase é usada durante a execução no VS no modo rápido (Padrão para a configuração de Depuração)
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
-USER $APP_UID
+#USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-
-# Esta fase é usada para compilar o projeto de serviço
+# Build
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+
 COPY ["AuthCore.Api/AuthCore.Api.csproj", "AuthCore.Api/"]
 COPY ["AuthCore.Application/AuthCore.Application.csproj", "AuthCore.Application/"]
 COPY ["AuthCore.Domain/AuthCore.Domain.csproj", "AuthCore.Domain/"]
 COPY ["AuthCore.Infrastructure/AuthCore.Infrastructure.csproj", "AuthCore.Infrastructure/"]
+
 RUN dotnet restore "./AuthCore.Api/AuthCore.Api.csproj"
+
 COPY . .
 WORKDIR "/src/AuthCore.Api"
 RUN dotnet build "./AuthCore.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# Esta fase é usada para publicar o projeto de serviço a ser copiado para a fase final
+# Publish
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./AuthCore.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# Esta fase é usada na produção ou quando executada no VS no modo normal (padrão quando não está usando a configuração de Depuração)
+# Final
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .

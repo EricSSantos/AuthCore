@@ -2,28 +2,29 @@
 
 var builder = WebApplication.CreateBuilder(args);
 
+#region Services
+
 builder.AddDatabases();
 builder.AddInjections();
 builder.AddAuthentication();
 builder.AddSwaggerService();
 
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+#endregion
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.UseHttpsRedirection();
-
-}
+#region Middleware
 
 app.UseSwaggerDocumentation();
 app.UseExceptionHandling();
-app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+#endregion
 
 app.Run();
