@@ -1,7 +1,8 @@
-﻿using AuthCore.Domain.Commons.Exceptions;
-using AuthCore.Domain.Entities.ValueObjects;
+﻿using AuthCore.Domain.Aggregates.UserAggregate;
+using AuthCore.Domain.Commons.Exceptions;
+using AuthCore.Domain.Shared;
 
-namespace AuthCore.Domain.Entities
+namespace AuthCore.Domain.Aggregates.SessionAggregate
 {
     public sealed class Session : Entity
     {

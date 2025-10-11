@@ -1,20 +1,21 @@
 ﻿using AuthCore.Application.Models.Input;
 using AuthCore.Application.Models.Output;
-using AuthCore.Domain.Exceptions;
-using AuthCore.Domain.Interfaces.Adapters.Security.Cripto;
-using AuthCore.Domain.Interfaces.Repositories;
+using AuthCore.Domain.Commons.Exceptions;
 using System.Text.RegularExpressions;
+using AuthCore.Application.UseCases.UserCase.Interfaces;
+using AuthCore.Domain.Aggregates.UserAggregate;
+using AuthCore.Domain.Commons.Interfaces.Security;
 
-namespace AuthCore.Application.UseCases.UserCase.Add
+namespace AuthCore.Application.UseCases.UserCase
 {
     public sealed class AddUser : IAddUser
     {
         private readonly IUserRepository _userRepository;
-        private readonly IBCryptAdapter _bcrypt;
+        private readonly IBCrypt _bcrypt;
 
         public AddUser(
             IUserRepository userRepository,
-            IBCryptAdapter bcrypt)
+            IBCrypt bcrypt)
         {
             _userRepository = userRepository;
             _bcrypt = bcrypt;

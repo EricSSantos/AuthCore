@@ -1,5 +1,5 @@
-﻿using AuthCore.Domain.Settings;
-using AuthCore.Infrastructure.Persistence.Context;
+﻿using AuthCore.Domain.Commons.Settings;
+using AuthCore.Infrastructure.Persistence.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -36,16 +36,23 @@ namespace AuthCore.Api.Configurations
         #region Redis
         private static void AddRedis(this WebApplicationBuilder builder)
         {
+            var redisSettings = builder.Configuration
+                .GetSection("Database:Redis")
+                .Get<RedisSettings>()!;
+
+            if (string.IsNullOrWhiteSpace(redisSettings.ConnectionString))
+                throw new InvalidOperationException("A string de conexão do Redis não foi definida.");
+
+            var multiplexer = StackExchange.Redis.ConnectionMultiplexer.Connect(redisSettings.ConnectionString);
+            builder.Services.AddSingleton<StackExchange.Redis.IConnectionMultiplexer>(multiplexer);
+
             builder.Services.AddStackExchangeRedisCache(options =>
             {
-                var redisSettings = builder.Configuration
-                    .GetSection("Database:Redis")
-                    .Get<RedisSettings>()!;
-
                 options.InstanceName = redisSettings.InstanceName;
                 options.Configuration = redisSettings.ConnectionString;
             });
         }
         #endregion
+
     }
 }

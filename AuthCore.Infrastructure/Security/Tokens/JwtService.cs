@@ -1,8 +1,7 @@
-﻿using AuthCore.Domain.Commons.Exceptions;
-using AuthCore.Domain.Commons.Interfaces.Security.Cryptography;
-using AuthCore.Domain.Commons.Interfaces.Security.Tokens;
+﻿using AuthCore.Domain.Aggregates.UserAggregate;
+using AuthCore.Domain.Commons.Exceptions;
+using AuthCore.Domain.Commons.Interfaces.Security;
 using AuthCore.Domain.Commons.Settings;
-using AuthCore.Domain.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;

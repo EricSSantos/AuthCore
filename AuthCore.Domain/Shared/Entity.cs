@@ -1,4 +1,4 @@
-﻿namespace AuthCore.Domain.Entities
+﻿namespace AuthCore.Domain.Shared
 {
     public abstract class Entity
     {

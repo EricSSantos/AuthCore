@@ -1,4 +1,4 @@
-﻿using AuthCore.Domain.Entities;
+﻿using AuthCore.Domain.Shared;
 using System.Linq.Expressions;
 
 namespace AuthCore.Domain.Commons.Interfaces.Repositories

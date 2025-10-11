@@ -1,8 +1,7 @@
 ﻿using AuthCore.Domain.Commons.Exceptions;
-using AuthCore.Domain.Entities.ValueObjects;
-using AuthCore.Domain.Enums;
+using AuthCore.Domain.Shared;
 
-namespace AuthCore.Domain.Entities
+namespace AuthCore.Domain.Aggregates.UserAggregate
 {
     public sealed class User : Entity
     {

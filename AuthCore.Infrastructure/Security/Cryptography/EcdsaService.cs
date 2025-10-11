@@ -1,4 +1,4 @@
-﻿using AuthCore.Domain.Commons.Interfaces.Security.Cryptography;
+﻿using AuthCore.Domain.Commons.Interfaces.Security;
 using AuthCore.Domain.Commons.Settings;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;

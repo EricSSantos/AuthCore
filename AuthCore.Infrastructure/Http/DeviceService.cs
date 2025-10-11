@@ -1,5 +1,5 @@
-﻿using AuthCore.Domain.Commons.Interfaces.Http;
-using AuthCore.Domain.Entities.ValueObjects;
+﻿using AuthCore.Domain.Aggregates.SessionAggregate;
+using AuthCore.Domain.Commons.Interfaces.Http;
 using Microsoft.AspNetCore.Http;
 using UAParser;
 

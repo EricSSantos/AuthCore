@@ -1,4 +1,6 @@
-﻿namespace AuthCore.Domain.Entities.ValueObjects
+﻿using AuthCore.Domain.Shared;
+
+namespace AuthCore.Domain.Aggregates.SessionAggregate
 {
     public sealed class DeviceInfo : ValueObject
     {

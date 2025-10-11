@@ -1,6 +1,6 @@
-﻿using AuthCore.Domain.Entities;
+﻿using AuthCore.Domain.Commons.Interfaces.Repositories;
 
-namespace AuthCore.Domain.Commons.Interfaces.Repositories
+namespace AuthCore.Domain.Aggregates.UserAggregate
 {
     public interface IUserRepository : IRepository<User>
     {

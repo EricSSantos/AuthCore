@@ -1,6 +1,6 @@
-﻿using AuthCore.Domain.Enums;
+﻿using AuthCore.Domain.Aggregates.UserAggregate;
 
-namespace AuthCore.Domain.Commons.Interfaces.Security.Tokens
+namespace AuthCore.Domain.Commons.Interfaces.Security
 {
     public interface IAccessToken
     {

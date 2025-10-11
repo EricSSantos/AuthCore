@@ -1,4 +1,4 @@
-﻿using AuthCore.Domain.Entities;
+﻿using AuthCore.Domain.Aggregates.UserAggregate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

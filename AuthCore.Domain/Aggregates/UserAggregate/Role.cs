@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace AuthCore.Domain.Enums
+namespace AuthCore.Domain.Aggregates.UserAggregate
 {
     public enum Role
     {

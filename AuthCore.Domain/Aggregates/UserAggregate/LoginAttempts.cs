@@ -1,4 +1,6 @@
-﻿namespace AuthCore.Domain.Entities.ValueObjects
+﻿using AuthCore.Domain.Shared;
+
+namespace AuthCore.Domain.Aggregates.UserAggregate
 {
     public sealed class LoginAttempts : ValueObject
     {

@@ -1,5 +1,6 @@
 ﻿using AuthCore.Application.Models.Input;
-using AuthCore.Application.UseCases.AuthCase.SignIn;
+using AuthCore.Application.UseCases.AuthCase.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthCore.Api.Controllers.v1
@@ -8,17 +9,39 @@ namespace AuthCore.Api.Controllers.v1
     [Route("api/v1/auth")]
     public sealed class AuthController : Controller
     {
-        private readonly ISigIn _sigIn;
+        private readonly ISignIn _signIn;
+        private readonly ISignOut _signOut;
+        private readonly IRefresh _refresh;
 
-        public AuthController(ISigIn sigIn)
+        public AuthController(
+            ISignIn sigIn,
+            ISignOut signOut,
+            IRefresh refresh)
         {
-            _sigIn = sigIn;
+            _signIn = sigIn;
+            _signOut = signOut;
+            _refresh = refresh;
         }
 
-        [HttpPost("signIn")]
-        public async Task<IActionResult> SignIn(SigInInputModel input)
+        [HttpPost("sign-in")]
+        public async Task<IActionResult> SignIn(SignInInputModel input)
         {
-            var result = await _sigIn.OnExecute(input);
+            await _signIn.OnExecute(input);
+            return NoContent();
+        }
+
+        [Authorize]
+        [HttpPost("sign-out")]
+        public async Task<IActionResult> SignOut()
+        {
+            await _signOut.OnExecute();
+            return NoContent();
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken()
+        {
+            await _refresh.OnExecute();
             return NoContent();
         }
     }

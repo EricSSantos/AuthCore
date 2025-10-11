@@ -1,4 +1,4 @@
-﻿using AuthCore.Domain.Entities.ValueObjects;
+﻿using AuthCore.Domain.Aggregates.SessionAggregate;
 
 namespace AuthCore.Domain.Commons.Interfaces.Http
 {

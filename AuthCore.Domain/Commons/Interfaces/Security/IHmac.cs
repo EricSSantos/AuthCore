@@ -1,4 +1,4 @@
-﻿namespace AuthCore.Domain.Commons.Interfaces.Security.Cryptography
+﻿namespace AuthCore.Domain.Commons.Interfaces.Security
 {
     public interface IHmac
     {

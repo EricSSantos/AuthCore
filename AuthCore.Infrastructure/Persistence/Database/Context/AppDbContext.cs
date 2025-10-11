@@ -1,4 +1,4 @@
-﻿using AuthCore.Domain.Entities;
+﻿using AuthCore.Domain.Aggregates.UserAggregate;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthCore.Infrastructure.Persistence.Database.Context

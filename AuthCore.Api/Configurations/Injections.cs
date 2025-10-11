@@ -1,16 +1,20 @@
-﻿using AuthCore.Application.UseCases.AuthCase.SignIn;
-using AuthCore.Application.UseCases.UserCase.Add;
-using AuthCore.Domain.Interfaces.Adapters.Http;
-using AuthCore.Domain.Interfaces.Adapters.Security.Cripto;
-using AuthCore.Domain.Interfaces.Adapters.Security.Tokens;
-using AuthCore.Domain.Interfaces.Adapters.Sessions;
-using AuthCore.Domain.Interfaces.Repositories;
-using AuthCore.Domain.Settings;
-using AuthCore.Infrastructure.Adapters.Http;
-using AuthCore.Infrastructure.Adapters.Security.Cripto;
-using AuthCore.Infrastructure.Adapters.Security.Tokens;
-using AuthCore.Infrastructure.Adapters.Sessions;
-using AuthCore.Infrastructure.Persistence.Repositories;
+﻿using AuthCore.Application.UseCases.AuthCase;
+using AuthCore.Application.UseCases.AuthCase.Interfaces;
+using AuthCore.Application.UseCases.UserCase;
+using AuthCore.Application.UseCases.UserCase.Interfaces;
+using AuthCore.Domain.Aggregates.SessionAggregate;
+using AuthCore.Domain.Aggregates.UserAggregate;
+using AuthCore.Domain.Commons.Interfaces.Helpers;
+using AuthCore.Domain.Commons.Interfaces.Http;
+using AuthCore.Domain.Commons.Interfaces.Repositories;
+using AuthCore.Domain.Commons.Interfaces.Security;
+using AuthCore.Domain.Commons.Settings;
+using AuthCore.Infrastructure.Helpers;
+using AuthCore.Infrastructure.Http;
+using AuthCore.Infrastructure.Persistence.Database.Repositories;
+using AuthCore.Infrastructure.Persistence.Redis.Repositories;
+using AuthCore.Infrastructure.Security.Cryptography;
+using AuthCore.Infrastructure.Security.Tokens;
 using Microsoft.Extensions.Options;
 
 namespace AuthCore.Api.Configurations
@@ -22,7 +26,7 @@ namespace AuthCore.Api.Configurations
             var services = builder.Services;
             services.AddSettings(builder.Configuration);
             services.AddUseCases();
-            services.AddAdapters();
+            services.AddInfrastructureServices();
             services.AddRepositories();
             services.AddHttpContextAccessor();
         }
@@ -33,6 +37,7 @@ namespace AuthCore.Api.Configurations
             services.Configure<ApiSettings>(config.GetSection("Api"));
             services.Configure<DatabaseSettings>(config.GetSection("Database"));
             services.Configure<SecuritySettings>(config.GetSection("Security"));
+            services.Configure<RedisSettings>(config.GetSection("Redis"));
 
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<ApiSettings>>().Value);
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<DatabaseSettings>>().Value);
@@ -46,23 +51,29 @@ namespace AuthCore.Api.Configurations
         #region UseCases
         private static IServiceCollection AddUseCases(this IServiceCollection services)
         {
-            services.AddScoped<ISigIn, SigIn>();
+            services.AddScoped<ISignIn, SignIn>();
+            services.AddScoped<ISignOut, SignOut>();
+            services.AddScoped<IRefresh, Refresh>();
             services.AddScoped<IAddUser, AddUser>();
 
             return services;
         }
         #endregion
 
-        #region Adapters
-        private static IServiceCollection AddAdapters(this IServiceCollection services)
+        #region Infras Services
+        private static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
         {
-            services.AddScoped<ICookieAdapter, CookieAdapter>();
-            services.AddScoped<IDeviceAdapter, DeviceAdapter>();
-            services.AddScoped<IBCryptAdapter, BCryptAdapter>();
-            services.AddScoped<IRsaAdapter, RsaAdapter>();
-            services.AddScoped<IAccessTokenAdapter, AccessTokenAdapter>();
-            services.AddScoped<IRefreshTokenAdapter, RefreshTokenAdapter>();
-            services.AddScoped<ISessionAdapter, SessionAdapter>();
+            services.AddScoped<ICookie, CookieService>();
+            services.AddScoped<IDevice, DeviceService>();
+
+            services.AddScoped<IBCrypt, BCryptService>();
+            services.AddScoped<IHmac, HmacService>();
+            services.AddScoped<IEcdsaSigner, EcdsaService>();
+            services.AddScoped<IEcdsaProvider, EcdsaService>();
+            services.AddScoped<IEntropy, EntropyService>();
+            services.AddScoped<IAccessToken, JwtService>();
+
+            services.AddScoped<IJsonSerializer, JsonSerializer>();
 
             return services;
         }
@@ -73,7 +84,7 @@ namespace AuthCore.Api.Configurations
         {
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IUserRepository, UserRepository>();
-
+            services.AddScoped<ISessionRepository, SessionRepository>();
             return services;
         }
         #endregion

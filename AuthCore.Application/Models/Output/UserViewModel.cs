@@ -1,4 +1,4 @@
-﻿using AuthCore.Domain.Entities;
+﻿using AuthCore.Domain.Aggregates.UserAggregate;
 using System.Text.Json.Serialization;
 
 namespace AuthCore.Application.Models.Output

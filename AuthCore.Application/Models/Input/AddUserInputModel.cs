@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Serialization;
-using AuthCore.Domain.Entities;
+using AuthCore.Domain.Aggregates.UserAggregate;
 
 namespace AuthCore.Application.Models.Input
 {

@@ -1,6 +1,5 @@
-﻿using AuthCore.Domain.Commons.Interfaces.Helpers;
-using AuthCore.Domain.Commons.Interfaces.Repositories;
-using AuthCore.Domain.Entities;
+﻿using AuthCore.Domain.Aggregates.SessionAggregate;
+using AuthCore.Domain.Commons.Interfaces.Helpers;
 using AuthCore.Infrastructure.Persistence.Redis.Mappings;
 using Microsoft.Extensions.Caching.Distributed;
 

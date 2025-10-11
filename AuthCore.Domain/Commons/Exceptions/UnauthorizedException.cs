@@ -4,13 +4,24 @@ namespace AuthCore.Domain.Commons.Exceptions
 {
     public sealed class UnauthorizedException : DomainException
     {
+        public override HttpStatusCode StatusCode
+        {
+            get { return HttpStatusCode.Unauthorized; }
+        }
+
+        public override string Title
+        {
+            get { return "Acesso não autorizado."; }
+        }
+
         public UnauthorizedException()
-            : base("O acesso não foi autorizado.") { }
+            : base("O acesso não foi autorizado.")
+        {
+        }
 
         public UnauthorizedException(string message)
-            : base(message) { }
-
-        public override HttpStatusCode StatusCode => HttpStatusCode.Unauthorized;
-        public override string Title => "Acesso não autorizado";
+            : base(message)
+        {
+        }
     }
 }

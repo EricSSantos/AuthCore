@@ -4,13 +4,24 @@ namespace AuthCore.Domain.Commons.Exceptions
 {
     public class ConflictException : DomainException
     {
+        public override HttpStatusCode StatusCode
+        {
+            get { return HttpStatusCode.Conflict; }
+        }
+
+        public override string Title
+        {
+            get { return "Conflito de recurso."; }
+        }
+
         public ConflictException()
-            : base("O recurso já existe.") { }
+            : base("O recurso já existe.")
+        {
+        }
 
         public ConflictException(string message)
-            : base(message) { }
-
-        public override HttpStatusCode StatusCode => HttpStatusCode.Conflict;
-        public override string Title => "Conflito de recurso";
+            : base(message)
+        {
+        }
     }
 }

@@ -1,10 +1,10 @@
-﻿using AuthCore.Domain.Commons.Interfaces.Security.Cryptography;
+﻿using AuthCore.Domain.Commons.Interfaces.Security;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
 
 namespace AuthCore.Infrastructure.Security.Cryptography
 {
-    public sealed class EntropyService : IEntropyService
+    public sealed class EntropyService : IEntropy
     {
         private readonly IHmac _hmac;
 

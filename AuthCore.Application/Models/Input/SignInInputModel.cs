@@ -2,7 +2,7 @@
 
 namespace AuthCore.Application.Models.Input
 {
-    public sealed record SigInInputModel
+    public sealed record SignInInputModel
     {
         [JsonPropertyName("email")]
         public string Email { get; init; } = string.Empty;

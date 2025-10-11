@@ -1,5 +1,4 @@
-﻿using AuthCore.Domain.Commons.Interfaces.Repositories;
-using AuthCore.Domain.Entities;
+﻿using AuthCore.Domain.Aggregates.UserAggregate;
 using AuthCore.Infrastructure.Persistence.Database.Context;
 using Microsoft.EntityFrameworkCore;
 

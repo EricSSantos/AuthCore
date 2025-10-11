@@ -1,4 +1,4 @@
-﻿using AuthCore.Domain.Settings;
+﻿using AuthCore.Domain.Commons.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -22,20 +22,21 @@ namespace AuthCore.Api.Configurations
             Configure(services, settings, publicKey);
         }
 
-        private static RsaSecurityKey PublicKey(SecuritySettings securitySettings)
+        private static ECDsaSecurityKey PublicKey(SecuritySettings securitySettings)
         {
             var publicKeyPath = securitySettings.Keys.Asymmetric.PublicKeyPath;
             if (string.IsNullOrWhiteSpace(publicKeyPath) || !File.Exists(publicKeyPath))
                 throw new FileNotFoundException("Chave pública não encontrada");
 
             var publicKeyPem = File.ReadAllText(publicKeyPath);
-            var rsa = RSA.Create();
-            rsa.ImportFromPem(publicKeyPem);
 
-            return new RsaSecurityKey(rsa);
+            var ecdsa = ECDsa.Create();
+            ecdsa.ImportFromPem(publicKeyPem);
+
+            return new ECDsaSecurityKey(ecdsa);
         }
 
-        private static void Configure(IServiceCollection services, SecuritySettings settings, RsaSecurityKey publicKey)
+        private static void Configure(IServiceCollection services, SecuritySettings settings, ECDsaSecurityKey publicKey)
         {
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();

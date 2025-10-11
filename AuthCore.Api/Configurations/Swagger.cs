@@ -1,4 +1,4 @@
-﻿using AuthCore.Domain.Settings;
+﻿using AuthCore.Domain.Commons.Settings;
 using Microsoft.OpenApi.Models;
 
 namespace AuthCore.Api.Configurations

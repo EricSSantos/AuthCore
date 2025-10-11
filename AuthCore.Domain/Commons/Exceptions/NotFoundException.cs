@@ -4,13 +4,24 @@ namespace AuthCore.Domain.Commons.Exceptions
 {
     public class NotFoundException : DomainException
     {
+        public override HttpStatusCode StatusCode
+        {
+            get { return HttpStatusCode.NotFound; }
+        }
+
+        public override string Title
+        {
+            get { return "Recurso não encontrado."; }
+        }
+
         public NotFoundException()
-            : base("O recurso solicitado não foi encontrado.") { }
+            : base("O recurso solicitado não foi encontrado.")
+        {
+        }
 
         public NotFoundException(string message)
-            : base(message) { }
-
-        public override HttpStatusCode StatusCode => HttpStatusCode.NotFound;
-        public override string Title => "Recurso não encontrado";
+            : base(message)
+        {
+        }
     }
 }

@@ -1,5 +1,5 @@
-﻿using AuthCore.Domain.Entities;
-using AuthCore.Domain.Entities.ValueObjects;
+﻿using AuthCore.Domain.Aggregates.SessionAggregate;
+using AuthCore.Domain.Shared;
 using System.Text.Json.Serialization;
 
 namespace AuthCore.Infrastructure.Persistence.Redis.Mappings
@@ -62,7 +62,7 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Mappings
                 Device.Browser
             );
 
-            var session = Domain.Entities.Session.Create(UserId, deviceInfo, Session, RefreshToken);
+            var session = Domain.Aggregates.SessionAggregate.Session.Create(UserId, deviceInfo, Session, RefreshToken);
 
             typeof(Entity).GetProperty("Id")!.SetValue(session, Id);
             typeof(Session).GetProperty("CreatedAt")!.SetValue(session, CreatedAt);

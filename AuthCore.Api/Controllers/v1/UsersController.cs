@@ -1,5 +1,5 @@
 ﻿using AuthCore.Application.Models.Input;
-using AuthCore.Application.UseCases.UserCase.Add;
+using AuthCore.Application.UseCases.UserCase.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthCore.Api.Controllers.v1

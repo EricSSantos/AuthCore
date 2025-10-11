@@ -1,4 +1,4 @@
-﻿namespace AuthCore.Domain.Entities.ValueObjects
+﻿namespace AuthCore.Domain.Shared
 {
     /// <summary>
     /// Classe base simples para todos os Value Objects.

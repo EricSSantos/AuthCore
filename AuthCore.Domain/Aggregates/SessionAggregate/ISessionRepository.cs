@@ -1,6 +1,4 @@
-﻿using AuthCore.Domain.Entities;
-
-namespace AuthCore.Domain.Commons.Interfaces.Repositories
+﻿namespace AuthCore.Domain.Aggregates.SessionAggregate
 {
     public interface ISessionRepository
     {
