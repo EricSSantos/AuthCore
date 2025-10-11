@@ -15,11 +15,11 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseSwaggerDocumentation();
+    app.UseHttpsRedirection();
+
 }
 
 app.UseSwaggerDocumentation();
-
 app.UseExceptionHandling();
 app.UseHttpsRedirection();
 app.UseAuthentication();
