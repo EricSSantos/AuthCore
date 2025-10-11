@@ -17,18 +17,29 @@ namespace AuthCore.Api.Configurations
             if (settings is null)
                 throw new InvalidOperationException("As configurações de segurança não foram definidas.");
 
-            var publicKey = PublicKey(settings);
+            var publicKey = LoadPublicKey(settings);
 
-            Configure(services, settings, publicKey);
+            ConfigureAuthentication(services, settings, publicKey);
         }
 
-        private static ECDsaSecurityKey PublicKey(SecuritySettings securitySettings)
+        private static ECDsaSecurityKey LoadPublicKey(SecuritySettings securitySettings)
         {
-            var publicKeyPath = securitySettings.Keys.Asymmetric.PublicKeyPath;
-            if (string.IsNullOrWhiteSpace(publicKeyPath) || !File.Exists(publicKeyPath))
-                throw new FileNotFoundException("Chave pública não encontrada");
+            string? publicKeyPem = null;
 
-            var publicKeyPem = File.ReadAllText(publicKeyPath);
+            var publicKey = securitySettings.Keys.Asymmetric.PublicKeyPath;
+            if (!string.IsNullOrWhiteSpace(publicKey))
+            {
+                publicKeyPem = Environment.GetEnvironmentVariable(publicKey);
+            }
+
+            if (string.IsNullOrWhiteSpace(publicKeyPem))
+            {
+                var publicKeyPath = securitySettings.Keys.Asymmetric.PublicKeyPath;
+                if (string.IsNullOrWhiteSpace(publicKeyPath) || !File.Exists(publicKeyPath))
+                    throw new FileNotFoundException("Chave pública não encontrada (nem no ambiente nem em arquivo).");
+
+                publicKeyPem = File.ReadAllText(publicKeyPath);
+            }
 
             var ecdsa = ECDsa.Create();
             ecdsa.ImportFromPem(publicKeyPem);
@@ -36,7 +47,7 @@ namespace AuthCore.Api.Configurations
             return new ECDsaSecurityKey(ecdsa);
         }
 
-        private static void Configure(IServiceCollection services, SecuritySettings settings, ECDsaSecurityKey publicKey)
+        private static void ConfigureAuthentication(IServiceCollection services, SecuritySettings settings, ECDsaSecurityKey publicKey)
         {
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
