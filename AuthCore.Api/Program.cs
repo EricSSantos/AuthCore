@@ -18,6 +18,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerDocumentation();
 }
 
+app.UseSwaggerDocumentation();
+
 app.UseExceptionHandling();
 app.UseHttpsRedirection();
 app.UseAuthentication();
