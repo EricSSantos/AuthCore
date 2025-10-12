@@ -17,7 +17,7 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Retorna todas as sessões ativas de usuário autenticado.
+        /// Retorna todas as sessões ativas de usuário autenticado
         /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetAll()

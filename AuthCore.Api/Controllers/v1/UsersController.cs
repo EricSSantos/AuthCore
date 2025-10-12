@@ -16,7 +16,7 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Cria um novo usuário no sistema.
+        /// Cria um novo usuário no sistema
         /// </summary>
         [HttpPost()]
         public async Task<IActionResult> Add([FromBody] AddUserInputModel input)

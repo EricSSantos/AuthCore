@@ -24,7 +24,7 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Autentica o usuário e inicia uma nova sessão.
+        /// Autentica o usuário e inicia uma nova sessão
         /// </summary>
         [HttpPost("sign-in")]
         public async Task<IActionResult> SignIn(SignInInputModel input)
@@ -34,7 +34,7 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Encerra a sessão do usuário autenticado.
+        /// Encerra a sessão do usuário autenticado
         /// </summary>
         [Authorize]
         [HttpPost("sign-out")]
@@ -45,7 +45,7 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Renova o token de acesso do usuário.
+        /// Renova o token de acesso do usuário
         /// </summary>
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken()
