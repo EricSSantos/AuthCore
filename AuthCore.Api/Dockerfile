@@ -10,6 +10,7 @@ EXPOSE 8081
 # Build
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
+ARG CACHE_BUST=1
 WORKDIR /src
 
 COPY ["AuthCore.Api/AuthCore.Api.csproj", "AuthCore.Api/"]
@@ -21,12 +22,12 @@ RUN dotnet restore "./AuthCore.Api/AuthCore.Api.csproj"
 
 COPY . .
 WORKDIR "/src/AuthCore.Api"
-RUN dotnet build "./AuthCore.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./AuthCore.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build --no-restore
 
 # Publish
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./AuthCore.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./AuthCore.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false --no-restore
 
 # Final
 FROM base AS final
