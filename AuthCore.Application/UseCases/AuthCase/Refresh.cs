@@ -14,22 +14,19 @@ namespace AuthCore.Application.UseCases.AuthCase
         private readonly ISessionRepository _sessionRepository;
         private readonly IUserRepository _userRepository;
         private readonly ICookie _cookie;
-        private readonly IDevice _device;
 
         public Refresh(
             IAccessToken accessToken,
             IEntropy entropy,
             ISessionRepository sessionRepository,
             IUserRepository userRepository,
-            ICookie cookie,
-            IDevice device)
+            ICookie cookie)
         {
             _accessToken = accessToken;
             _entropy = entropy;
             _sessionRepository = sessionRepository;
             _userRepository = userRepository;
             _cookie = cookie;
-            _device = device;
         }
 
         public async Task OnExecute()

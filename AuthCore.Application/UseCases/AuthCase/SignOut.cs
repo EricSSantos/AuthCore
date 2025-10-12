@@ -27,27 +27,24 @@ namespace AuthCore.Application.UseCases.AuthCase
 
         public async Task OnExecute()
         {
-            var rawSession = _cookie.Session;
             var userId = _accessToken.Sub;
+            var rawSession = _cookie.Session;
             var hashedSession = _entropy.Hash(rawSession);
 
             var session = await _sessionRepository.Get(hashedSession);
-            if (session is null)
-            {
-                _cookie.RemoveAuthCookies();
-                return;
-            }
 
-            var sessionMatches = _entropy.Verify(rawSession, session.SessionHash) && session.UserId == userId;
-            if (!sessionMatches || session.IsExpired())
+            var matching = session != null && _entropy.Verify(rawSession, session.SessionHash) && session.UserId == userId;
+
+            if (!matching || session!.IsExpired())
             {
-                await _sessionRepository.Delete(session.SessionHash);
+                if (session != null)
+                    await _sessionRepository.Delete(session.SessionHash);
+
                 _cookie.RemoveAuthCookies();
                 throw new UnauthorizedException("Sessão inválida ou expirada.");
             }
 
             await _sessionRepository.Delete(hashedSession);
-
             _cookie.RemoveAuthCookies();
         }
     }

@@ -50,6 +50,7 @@ namespace AuthCore.Application.UseCases.AuthCase
             var (rawRefresh, hashedRefresh) = _entropy.GeneratePair(64);
 
             var device = _device.Device;
+
             var session = Session.Create(user.Id, device, hashedSession, hashedRefresh);
             await _sessionRepository.Set(session);
 

@@ -6,7 +6,7 @@ namespace AuthCore.Api.Controllers.v1
 {
     [ApiController]
     [Route("api/v1/users")]
-    public class UsersController : Controller
+    public sealed class UsersController : Controller
     {
         private readonly IAddUser _addUser;
 
@@ -15,6 +15,9 @@ namespace AuthCore.Api.Controllers.v1
             _addUser = addUser;
         }
 
+        /// <summary>
+        /// Cria um novo usuário no sistema.
+        /// </summary>
         [HttpPost()]
         public async Task<IActionResult> Add([FromBody] AddUserInputModel input)
         {

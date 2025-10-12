@@ -1,5 +1,7 @@
 ﻿using AuthCore.Application.UseCases.AuthCase;
 using AuthCore.Application.UseCases.AuthCase.Interfaces;
+using AuthCore.Application.UseCases.SessionCase;
+using AuthCore.Application.UseCases.SessionCase.Interfaces;
 using AuthCore.Application.UseCases.UserCase;
 using AuthCore.Application.UseCases.UserCase.Interfaces;
 using AuthCore.Domain.Aggregates.SessionAggregate;
@@ -55,6 +57,8 @@ namespace AuthCore.Api.Configurations
             services.AddScoped<ISignOut, SignOut>();
             services.AddScoped<IRefresh, Refresh>();
             services.AddScoped<IAddUser, AddUser>();
+
+            services.AddScoped<IGetUserSessions, GetUserSessions>();
 
             return services;
         }

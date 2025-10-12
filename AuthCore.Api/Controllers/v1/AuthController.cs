@@ -14,15 +14,18 @@ namespace AuthCore.Api.Controllers.v1
         private readonly IRefresh _refresh;
 
         public AuthController(
-            ISignIn sigIn,
+            ISignIn signIn,
             ISignOut signOut,
             IRefresh refresh)
         {
-            _signIn = sigIn;
+            _signIn = signIn;
             _signOut = signOut;
             _refresh = refresh;
         }
 
+        /// <summary>
+        /// Autentica o usuário e inicia uma nova sessão.
+        /// </summary>
         [HttpPost("sign-in")]
         public async Task<IActionResult> SignIn(SignInInputModel input)
         {
@@ -30,6 +33,9 @@ namespace AuthCore.Api.Controllers.v1
             return NoContent();
         }
 
+        /// <summary>
+        /// Encerra a sessão do usuário autenticado.
+        /// </summary>
         [Authorize]
         [HttpPost("sign-out")]
         public async Task<IActionResult> SignOut()
@@ -38,6 +44,9 @@ namespace AuthCore.Api.Controllers.v1
             return NoContent();
         }
 
+        /// <summary>
+        /// Renova o token de acesso do usuário.
+        /// </summary>
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken()
         {
