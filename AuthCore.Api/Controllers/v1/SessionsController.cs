@@ -7,7 +7,7 @@ namespace AuthCore.Api.Controllers.v1
     [Authorize]
     [ApiController]
     [Route("api/v1/sessions")]
-    public sealed class SessionsController : ControllerBase
+    public sealed class SessionsController : Controller
     {
         private readonly IGetUserSessions _getUserSessions;
 
