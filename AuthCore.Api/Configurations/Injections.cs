@@ -63,6 +63,7 @@ namespace AuthCore.Api.Configurations
             services.AddScoped<IGetSessions, GetSessions>();
             services.AddScoped<IRevokeSession, RevokeSessions>();
             services.AddScoped<IAddUser, AddUser>();
+            services.AddScoped<IGetCurrentUser, GetCurrentUser>();
 
             return services;
         }

@@ -1,5 +1,4 @@
-﻿using AuthCore.Domain.Aggregates.UserAggregate;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace AuthCore.Application.Models.Output
 {
@@ -13,6 +12,9 @@ namespace AuthCore.Application.Models.Output
 
         [JsonPropertyName("name")]
         public string Name { get; init; } = string.Empty;
+
+        [JsonPropertyName("role")]
+        public string Role { get; init; } = string.Empty;
 
         [JsonPropertyName("created_at")]
         public DateTimeOffset CreatedAt { get; init; }

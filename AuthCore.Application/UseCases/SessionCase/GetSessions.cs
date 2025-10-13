@@ -1,5 +1,4 @@
 ﻿using AuthCore.Application.Models.Output;
-using AuthCore.Application.Services.Interfaces;
 using AuthCore.Application.UseCases.SessionCase.Interfaces;
 using AuthCore.Domain.Aggregates.SessionAggregate;
 using AuthCore.Domain.Commons.Exceptions;
@@ -14,20 +13,17 @@ namespace AuthCore.Application.UseCases.SessionCase
         private readonly IAccessToken _accessToken;
         private readonly ICookie _cookie;
         private readonly IEntropy _entropy;
-        private readonly IOwnership _ownership;
 
         public GetSessions(
             ISessionRepository sessionRepository,
             IAccessToken accessToken,
             ICookie cookie,
-            IEntropy entropy,
-            IOwnership ownership)
+            IEntropy entropy)
         {
             _sessionRepository = sessionRepository;
             _accessToken = accessToken;
             _cookie = cookie;
             _entropy = entropy;
-            _ownership = ownership;
         }
 
         public async Task<IEnumerable<SessionViewModel>> OnExecute()
@@ -37,9 +33,7 @@ namespace AuthCore.Application.UseCases.SessionCase
 
             var sessions = (await _sessionRepository.GetByUserId(userId)).ToList();
             if (sessions.Count == 0)
-                throw new NotFoundException();
-
-            _ownership.EnsureAll(sessions.Select(s => s.UserId));
+                throw new NotFoundException("Nenhuma sessão encontrada.");
 
             return sessions.Select(s => new SessionViewModel
             {

@@ -40,12 +40,14 @@ namespace AuthCore.Application.UseCases.SessionCase
                 .Where(s => s != null)
                 .ToList()!;
 
-            if (sessions.Count == 0)
-                throw new NotFoundException();
+            if (sessions.Count <= 0)
+                throw new NotFoundException("Nenhuma sessão válida foi encontrada para os identificadores informados.");
 
+            // Garante que todas as sessões informadas pertencem ao usuário autenticado, 
+            // evitando que ele revogue sessões de outros usuários.
             _ownership.EnsureAll(sessions.Select(s => s.UserId));
 
-            return sessions;
+            return sessions!;
         }
 
         #endregion

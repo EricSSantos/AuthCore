@@ -1,6 +1,8 @@
 ﻿using AuthCore.Application.Models;
 using AuthCore.Application.Models.Input;
+using AuthCore.Application.Models.Output;
 using AuthCore.Application.UseCases.UserCase.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -32,6 +34,23 @@ namespace AuthCore.Api.Controllers.v1
             );
 
             return StatusCode((int)HttpStatusCode.Created, response);
+        }
+
+        /// <summary>
+        /// Retorna as informações do usuário autenticado.
+        /// </summary>
+        [Authorize]
+        [HttpGet("current")]
+        public async Task<ActionResult<Response<UserViewModel>>> Me([FromServices] IGetCurrentUser getUser)
+        {
+            var user = await getUser.OnExecute();
+
+            var response = Response<UserViewModel>.Success(
+                user,
+                "Usuário obtido com sucesso.",
+                HttpStatusCode.OK
+            );
+            return Ok(response);
         }
     }
 }

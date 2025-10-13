@@ -74,7 +74,7 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
 
         public string FullName
         {
-            get { return FirstName + LastName; }
+            get { return $"{FirstName} {LastName}"; }
         }
 
         public bool IsActive()

@@ -43,6 +43,8 @@ namespace AuthCore.Application.UseCases.AuthCase
                 throw new UnauthorizedException();
             }
 
+            // Garante que a sessão pertence ao usuário autenticado
+            // evitando exclusão indevida.
             _ownership.Ensure(session.UserId);
 
             await _sessionRepository.Delete(hashedSession);
