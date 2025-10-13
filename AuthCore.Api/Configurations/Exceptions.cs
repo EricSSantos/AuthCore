@@ -1,4 +1,5 @@
 ﻿using AuthCore.Application.Models;
+using AuthCore.Domain.Commons.Exceptions;
 using System.Net;
 using System.Text.Json;
 
@@ -34,21 +35,33 @@ namespace AuthCore.Api.Configurations
                 {
                     _logger.LogError(ex, "Erro não tratado: {Message}", ex.Message);
 
-                    var errors = new List<string> { "Ocorreu um erro interno no servidor." };
-                    var title = "Erro interno no servidor";
-                    var status = HttpStatusCode.InternalServerError;
-                    object? details = null;
+                    HttpStatusCode status;
+                    string title;
+                    IReadOnlyCollection<string> errors;
 
-                    // Em ambiente de desenvolvimento exibe detalhes da exceção
-                    if (_env.IsDevelopment())
+                    // Se for exceção de domínio, usa as propriedades dela
+                    if (ex is DomainException domainEx)
                     {
-                        details = new
+                        status = domainEx.StatusCode;
+                        title = domainEx.Title;
+                        errors = domainEx.Errors;
+                    }
+                    else
+                    {
+                        // Fallback genérico
+                        status = HttpStatusCode.InternalServerError;
+                        title = "Erro interno no servidor";
+                        errors = new[] { "Ocorreu um erro interno no servidor." };
+                    }
+
+                    object? details = _env.IsDevelopment()
+                        ? new
                         {
                             ex.Message,
                             ex.StackTrace,
                             Inner = ex.InnerException?.Message
-                        };
-                    }
+                        }
+                        : null;
 
                     var response = Response<object>.Error(errors, title, status);
 
@@ -58,8 +71,7 @@ namespace AuthCore.Api.Configurations
                         response.Title,
                         response.Errors,
                         Details = details
-                    },
-                    new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+                    }, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
 
                     context.Response.ContentType = "application/json";
                     context.Response.StatusCode = (int)status;
