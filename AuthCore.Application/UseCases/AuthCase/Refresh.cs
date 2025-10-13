@@ -15,7 +15,6 @@ namespace AuthCore.Application.UseCases.AuthCase
         private readonly ISessionRepository _sessionRepository;
         private readonly IUserRepository _userRepository;
         private readonly ICookie _cookie;
-        private readonly IOwnership _ownership;
 
         public Refresh(
             IAccessToken accessToken,
@@ -30,7 +29,6 @@ namespace AuthCore.Application.UseCases.AuthCase
             _sessionRepository = sessionRepository;
             _userRepository = userRepository;
             _cookie = cookie;
-            _ownership = ownership;
         }
 
         public async Task OnExecute()
@@ -38,8 +36,6 @@ namespace AuthCore.Application.UseCases.AuthCase
             var rawSession = _cookie.Session;
             var rawRefresh = _cookie.RefreshToken;
             var oldSession = await ValidateSession(rawSession, rawRefresh);
-
-            _ownership.Ensure(oldSession.UserId);
 
             var user = await _userRepository.GetById(oldSession.UserId)
                 ?? throw new NotFoundException();
