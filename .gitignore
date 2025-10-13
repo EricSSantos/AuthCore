@@ -20,3 +20,4 @@ obj/
 
 # Configurações de editor
 .editorconfig
+.idea/

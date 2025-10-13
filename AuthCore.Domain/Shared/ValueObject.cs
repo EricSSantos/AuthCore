@@ -1,7 +1,8 @@
 ﻿namespace AuthCore.Domain.Shared
 {
     /// <summary>
-    /// Classe base simples para todos os Value Objects.
+    /// Classe base para todos os Value Objects do domínio.
+    /// Define regras de igualdade baseadas em seus valores internos.
     /// </summary>
     public abstract class ValueObject
     {
@@ -10,6 +11,9 @@
         /// </summary>
         protected abstract IEnumerable<object?> GetValues();
 
+        /// <summary>
+        /// Compara dois Value Objects com base em seus componentes.
+        /// </summary>
         public override bool Equals(object? obj)
         {
             if (obj is null || GetType() != obj.GetType())
@@ -34,6 +38,9 @@
             return !thisComponents.MoveNext() && !otherComponents.MoveNext();
         }
 
+        /// <summary>
+        /// Gera um código de hash com base nos componentes do Value Object.
+        /// </summary>
         public override int GetHashCode()
         {
             unchecked
@@ -45,6 +52,9 @@
             }
         }
 
+        /// <summary>
+        /// Compara dois Value Objects para verificar se são iguais.
+        /// </summary>
         public static bool operator ==(ValueObject? a, ValueObject? b)
         {
             if (ReferenceEquals(a, b))
@@ -56,6 +66,9 @@
             return a.Equals(b);
         }
 
+        /// <summary>
+        /// Compara dois Value Objects para verificar se são diferentes.
+        /// </summary>
         public static bool operator !=(ValueObject? a, ValueObject? b)
             => !(a == b);
     }
