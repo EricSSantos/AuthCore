@@ -19,7 +19,7 @@ var app = builder.Build();
 
 #region Middleware
 
-app.UseSwaggerDocumentation();
+app.UseSwaggerDoc();
 app.UseExceptionHandling();
 app.UseAuthentication();
 app.UseAuthorization();

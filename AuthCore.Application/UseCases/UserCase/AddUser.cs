@@ -1,10 +1,10 @@
 ﻿using AuthCore.Application.Models.Input;
 using AuthCore.Application.Models.Output;
-using AuthCore.Domain.Commons.Exceptions;
-using System.Text.RegularExpressions;
 using AuthCore.Application.UseCases.UserCase.Interfaces;
 using AuthCore.Domain.Aggregates.UserAggregate;
+using AuthCore.Domain.Commons.Exceptions;
 using AuthCore.Domain.Commons.Interfaces.Security;
+using System.Text.RegularExpressions;
 
 namespace AuthCore.Application.UseCases.UserCase
 {
@@ -21,7 +21,7 @@ namespace AuthCore.Application.UseCases.UserCase
             _bcrypt = bcrypt;
         }
 
-        public async Task<UserViewModel> OnExecute(AddUserInputModel input)
+        public async Task OnExecute(AddUserInputModel input)
         {
             if (await _userRepository.Exists(u => u.Email == input.Email))
                 throw new ConflictException("Endereço de e-mail já existe.");
@@ -33,12 +33,16 @@ namespace AuthCore.Application.UseCases.UserCase
                 throw new DomainException("A confirmação da senha não corresponde.");
 
             var password = _bcrypt.Hash(input.Password);
-            var user = input.ToEntity(password);
+
+            var user = User.Create(
+                firstName:  input.FirstName,
+                lastName:   input.LastName,
+                email:      input.Email,
+                password:   password
+            );
 
             await _userRepository.Add(user);
             await _userRepository.SaveChanges();
-
-            return UserViewModel.ToViewModel(user);
         }
 
         #region Private Methods

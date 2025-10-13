@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using AuthCore.Application.Models;
+using System.Net;
 using System.Text.Json;
 
 namespace AuthCore.Api.Configurations
@@ -13,10 +14,14 @@ namespace AuthCore.Api.Configurations
         private sealed class ExceptionMiddleware
         {
             private readonly RequestDelegate _next;
+            private readonly ILogger<ExceptionMiddleware> _logger;
+            private readonly IHostEnvironment _env;
 
-            public ExceptionMiddleware(RequestDelegate next)
+            public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IHostEnvironment env)
             {
                 _next = next;
+                _logger = logger;
+                _env = env;
             }
 
             public async Task InvokeAsync(HttpContext context)
@@ -25,38 +30,41 @@ namespace AuthCore.Api.Configurations
                 {
                     await _next(context);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    await WriteErrors(
-                        context,
-                        new[] { "Ocorreu um erro interno." },
-                        HttpStatusCode.InternalServerError,
-                        "Erro interno no servidor");
+                    _logger.LogError(ex, "Erro não tratado: {Message}", ex.Message);
+
+                    var errors = new List<string> { "Ocorreu um erro interno no servidor." };
+                    var title = "Erro interno no servidor";
+                    var status = HttpStatusCode.InternalServerError;
+                    object? details = null;
+
+                    // Em ambiente de desenvolvimento exibe detalhes da exceção
+                    if (_env.IsDevelopment())
+                    {
+                        details = new
+                        {
+                            ex.Message,
+                            ex.StackTrace,
+                            Inner = ex.InnerException?.Message
+                        };
+                    }
+
+                    var response = Response<object>.Error(errors, title, status);
+
+                    var json = JsonSerializer.Serialize(new
+                    {
+                        response.StatusCode,
+                        response.Title,
+                        response.Errors,
+                        Details = details
+                    },
+                    new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+
+                    context.Response.ContentType = "application/json";
+                    context.Response.StatusCode = (int)status;
+                    await context.Response.WriteAsync(json);
                 }
-            }
-
-            private static async Task WriteErrors(
-                HttpContext context,
-                IReadOnlyCollection<string> errors,
-                HttpStatusCode status,
-                string title)
-            {
-                context.Response.ContentType = "application/json";
-                context.Response.StatusCode = (int)status;
-
-                var response = new
-                {
-                    statusCode = (int)status,
-                    title,
-                    errors
-                };
-
-                var json = JsonSerializer.Serialize(response, new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                });
-
-                await context.Response.WriteAsync(json);
             }
         }
     }

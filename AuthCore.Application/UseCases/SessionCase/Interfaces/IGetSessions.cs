@@ -2,7 +2,7 @@
 
 namespace AuthCore.Application.UseCases.SessionCase.Interfaces
 {
-    public interface IGetUserSessions
+    public interface IGetSessions
     {
         Task<IEnumerable<SessionViewModel>> OnExecute();
     }

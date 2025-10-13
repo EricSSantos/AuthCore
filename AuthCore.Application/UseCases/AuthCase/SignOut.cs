@@ -34,13 +34,13 @@ namespace AuthCore.Application.UseCases.AuthCase
             var session = await _sessionRepository.Get(hashedSession);
 
             var matching = session != null && _entropy.Verify(rawSession, session.SessionHash) && session.UserId == userId;
-
             if (!matching || session!.IsExpired())
             {
                 if (session != null)
                     await _sessionRepository.Delete(session.SessionHash);
 
                 _cookie.RemoveAuthCookies();
+
                 throw new UnauthorizedException("Sessão inválida ou expirada.");
             }
 

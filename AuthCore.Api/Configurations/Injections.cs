@@ -56,9 +56,9 @@ namespace AuthCore.Api.Configurations
             services.AddScoped<ISignIn, SignIn>();
             services.AddScoped<ISignOut, SignOut>();
             services.AddScoped<IRefresh, Refresh>();
+            services.AddScoped<IGetSessions, GetSessions>();
+            services.AddScoped<IRevokeSession, RevokeSessions>();
             services.AddScoped<IAddUser, AddUser>();
-
-            services.AddScoped<IGetUserSessions, GetUserSessions>();
 
             return services;
         }
@@ -69,14 +69,12 @@ namespace AuthCore.Api.Configurations
         {
             services.AddScoped<ICookie, CookieService>();
             services.AddScoped<IDevice, DeviceService>();
-
             services.AddScoped<IBCrypt, BCryptService>();
             services.AddScoped<IHmac, HmacService>();
             services.AddScoped<IEcdsaSigner, EcdsaService>();
             services.AddScoped<IEcdsaProvider, EcdsaService>();
             services.AddScoped<IEntropy, EntropyService>();
             services.AddScoped<IAccessToken, JwtService>();
-
             services.AddScoped<IJsonSerializer, JsonSerializer>();
 
             return services;
@@ -89,6 +87,7 @@ namespace AuthCore.Api.Configurations
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ISessionRepository, SessionRepository>();
+            
             return services;
         }
         #endregion

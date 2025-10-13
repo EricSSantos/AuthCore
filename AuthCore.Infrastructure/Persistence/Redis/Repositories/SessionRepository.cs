@@ -75,7 +75,7 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
                     sessions.Add(document.ToEntity());
             }
 
-            return sessions;
+            return sessions.OrderByDescending(s => s.CreatedAt);
         }
 
         public async Task Set(Session session)

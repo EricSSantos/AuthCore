@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using AuthCore.Domain.Aggregates.UserAggregate;
 
 namespace AuthCore.Application.Models.Input
 {
@@ -19,15 +18,5 @@ namespace AuthCore.Application.Models.Input
 
         [JsonPropertyName("confirm_password")]
         public string ConfirmPassword { get; init; } = string.Empty;
-
-        public User ToEntity(string hashedPassword)
-        {
-            return User.Create(
-                firstName: FirstName,
-                lastName: LastName,
-                email: Email,
-                password: hashedPassword
-            );
-        }
     }
 }

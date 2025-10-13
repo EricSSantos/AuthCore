@@ -1,23 +1,25 @@
-﻿namespace AuthCore.Application.Models.Output
+﻿using System.Text.Json.Serialization;
+
+namespace AuthCore.Application.Models.Output
 {
     public sealed record class SessionViewModel
     {
+        [JsonPropertyName("id")]
         public Guid Id { get; init; }
-        public string Ip { get; init; } = string.Empty;
+
+        [JsonPropertyName("ip_address")]
+        public string IpAddress { get; init; } = string.Empty;
+
+        [JsonPropertyName("platform")]
         public string Platform { get; init; } = string.Empty;
+
+        [JsonPropertyName("browser")]
         public string Browser { get; init; } = string.Empty;
+
+        [JsonPropertyName("created_at")]
         public DateTimeOffset CreatedAt { get; init; }
 
-        public static SessionViewModel FromEntity(Domain.Aggregates.SessionAggregate.Session session)
-        {
-            return new SessionViewModel
-            {
-                Id = session.Id,
-                Ip = session.DeviceInfo.Ip,
-                Platform = session.DeviceInfo.Platform,
-                Browser = session.DeviceInfo.Browser,
-                CreatedAt = session.CreatedAt
-            };
-        }
+        [JsonPropertyName("is_current")]
+        public bool IsCurrent { get; init; }
     }
 }

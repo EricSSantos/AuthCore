@@ -24,31 +24,31 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Autentica o usuário e inicia uma nova sessão
+        /// Autentica e inicia uma nova sessão.
         /// </summary>
         [HttpPost("sign-in")]
-        public async Task<IActionResult> SignIn(SignInInputModel input)
+        public async Task<ActionResult> SignIn(SignInInputModel input)
         {
             await _signIn.OnExecute(input);
             return NoContent();
         }
 
         /// <summary>
-        /// Encerra a sessão do usuário autenticado
+        /// Encerra a sessão.
         /// </summary>
         [Authorize]
         [HttpPost("sign-out")]
-        public async Task<IActionResult> SignOut()
+        public async Task<ActionResult> SignOut()
         {
             await _signOut.OnExecute();
             return NoContent();
         }
 
         /// <summary>
-        /// Renova o token de acesso do usuário
+        /// Renova o token de acesso.
         /// </summary>
         [HttpPost("refresh-token")]
-        public async Task<IActionResult> RefreshToken()
+        public async Task<ActionResult> RefreshToken()
         {
             await _refresh.OnExecute();
             return NoContent();

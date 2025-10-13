@@ -10,6 +10,8 @@ namespace AuthCore.Application.UseCases.AuthCase
 {
     public sealed class SignIn : ISignIn
     {
+        private const int MAX_ACTIVE_SESSIONS = 4;
+
         private readonly IUserRepository _userRepository;
         private readonly ISessionRepository _sessionRepository;
         private readonly IAccessToken _accessToken;
@@ -38,13 +40,8 @@ namespace AuthCore.Application.UseCases.AuthCase
 
         public async Task OnExecute(SignInInputModel input)
         {
-            var user = await _userRepository.GetByEmail(input.Email)
-                ?? throw new UnauthorizedException();
-
-            user.ValidateSignIn(_bCrypt.isValid(input.Password, user.Password));
-
-            _userRepository.Update(user);
-            await _userRepository.SaveChanges();
+            var user = await EnsureCredentials(input);
+            await EnsureSessionLimit(user.Id);
 
             var (rawSession, hashedSession) = _entropy.GeneratePair(32);
             var (rawRefresh, hashedRefresh) = _entropy.GeneratePair(64);
@@ -58,5 +55,33 @@ namespace AuthCore.Application.UseCases.AuthCase
 
             _cookie.SetAuthCookies(rawSession, accessToken, rawRefresh);
         }
+
+        #region Private Methods
+
+        private async Task<User> EnsureCredentials(SignInInputModel input)
+        {
+            var user = await _userRepository.GetByEmail(input.Email)
+                ?? throw new UnauthorizedException();
+
+            user.SignIn(_bCrypt.isValid(input.Password, user.Password));
+
+            _userRepository.Update(user);
+            await _userRepository.SaveChanges();
+
+            return user;
+        }
+
+        private async Task EnsureSessionLimit(Guid userId)
+        {
+            var sessions = (await _sessionRepository.GetByUserId(userId)).ToList();
+
+            if (sessions.Count < MAX_ACTIVE_SESSIONS)
+                return;
+
+            var oldestSession = sessions.Last();
+            await _sessionRepository.DeleteById(oldestSession.Id);
+        }
+
+        #endregion
     }
 }

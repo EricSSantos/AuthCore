@@ -72,6 +72,11 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
 
         #region Behavior
 
+        public string FullName
+        {
+            get { return FirstName + LastName; }
+        }
+
         public void Activate()
         {
             if (!Active)
@@ -90,39 +95,20 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
             }
         }
 
-        #region Security
-
-        public void EnsureCanSignIn()
+        public void SignIn(bool passwordIsValid)
         {
             if (LoginAttempts.IsLocked())
                 throw new UnauthorizedException(LoginAttempts.GetLockMessage()!);
-        }
-
-        public void RegisterFailedLogin()
-        {
-            LoginAttempts = LoginAttempts.RegisterFailure();
-        }
-
-        public void RegisterSuccessfulLogin()
-        {
-            if (LoginAttempts.FailedAttempts > 0)
-                LoginAttempts = LoginAttempts.Reset();
-        }
-
-        public void ValidateSignIn(bool passwordIsValid)
-        {
-            EnsureCanSignIn();
 
             if (!passwordIsValid)
             {
-                RegisterFailedLogin();
+                LoginAttempts = LoginAttempts.RegisterFailure();
                 throw new UnauthorizedException();
             }
 
-            RegisterSuccessfulLogin();
+            if (LoginAttempts.FailedAttempts > 0)
+                LoginAttempts = LoginAttempts.Reset();
         }
-
-        #endregion
 
         #endregion
     }

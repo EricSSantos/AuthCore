@@ -16,16 +16,5 @@ namespace AuthCore.Application.Models.Output
 
         [JsonPropertyName("created_at")]
         public DateTimeOffset CreatedAt { get; init; }
-
-        public static UserViewModel ToViewModel(User user)
-        {
-            return new UserViewModel
-            {
-                Id = user.Id,
-                Email = user.Email,
-                Name = $"{user.FirstName} {user.LastName}",
-                CreatedAt = user.CreatedAt
-            };
-        }
     }
 }

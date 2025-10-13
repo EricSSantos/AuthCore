@@ -17,27 +17,22 @@ namespace AuthCore.Api.Configurations
             if (settings is null)
                 throw new InvalidOperationException("As configurações de segurança não foram definidas.");
 
-            var publicKey = LoadPublicKey(settings);
+            var key = GetKey(settings);
 
-            ConfigureAuthentication(services, settings, publicKey);
+            Configure(services, settings, key);
         }
 
-        private static ECDsaSecurityKey LoadPublicKey(SecuritySettings securitySettings)
+        #region Private Methods
+
+        private static ECDsaSecurityKey GetKey(SecuritySettings securitySettings)
         {
-            var publicKeyValue = securitySettings.Keys.Asymmetric.PublicKeyPath;
+            var keyPath = securitySettings.Keys.Asymmetric.PublicKeyPath
+                ?? throw new FileNotFoundException("Caminho ou variável de chave pública não definido.");
 
-            if (string.IsNullOrWhiteSpace(publicKeyValue))
-                throw new FileNotFoundException("Caminho ou variável de chave pública não definido.");
-
-            string? publicKeyPem;
-            var envValue = Environment.GetEnvironmentVariable(publicKeyValue);
-
-            if (!string.IsNullOrWhiteSpace(envValue))
-                publicKeyPem = envValue;
-            else if (File.Exists(publicKeyValue))
-                publicKeyPem = File.ReadAllText(publicKeyValue);
-            else
-                throw new FileNotFoundException($"Chave pública não encontrada. Nem variável '{publicKeyValue}' nem arquivo físico existente.");
+            var publicKeyPem =
+                Environment.GetEnvironmentVariable(keyPath)
+                ?? (File.Exists(keyPath) ? File.ReadAllText(keyPath) : null)
+                ?? throw new FileNotFoundException("Chave pública não encontrada. Nenhuma variável de ambiente ou arquivo físico foi localizado.");
 
             var ecdsa = ECDsa.Create();
             ecdsa.ImportFromPem(publicKeyPem);
@@ -45,11 +40,10 @@ namespace AuthCore.Api.Configurations
             return new ECDsaSecurityKey(ecdsa);
         }
 
-        private static void ConfigureAuthentication(IServiceCollection services, SecuritySettings settings, ECDsaSecurityKey publicKey)
+        private static void Configure(IServiceCollection services, SecuritySettings settings, ECDsaSecurityKey publicKey)
         {
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
-
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -61,19 +55,10 @@ namespace AuthCore.Api.Configurations
                 {
                     OnMessageReceived = context =>
                     {
-                        if (context.Request.Cookies.TryGetValue("access_token", out var cookieToken))
-                            context.Token = cookieToken;
-                        else if (!string.IsNullOrWhiteSpace(context.Request.Headers.Authorization))
-                        {
-                            var header = context.Request.Headers.Authorization.ToString();
-                            if (header.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-                                context.Token = header["Bearer ".Length..];
-                        }
-
+                        context.Token = context.Request.Cookies["access_token"];
                         return Task.CompletedTask;
                     }
                 };
-
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
@@ -87,5 +72,7 @@ namespace AuthCore.Api.Configurations
                 };
             });
         }
+
+        #endregion
     }
 }

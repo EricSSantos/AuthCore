@@ -7,13 +7,13 @@ namespace AuthCore.Api.Configurations
     {
         public static void AddSwaggerService(this WebApplicationBuilder builder)
         {
-            var apiSettings = builder.Services
-                .BuildServiceProvider()
-                .GetRequiredService<ApiSettings>();
+            var settings = builder.Services.BuildServiceProvider().GetRequiredService<ApiSettings>();
+            if (settings is null || settings.Versions is null || settings.Versions.Count == 0)
+                throw new InvalidOperationException("As configurações da API não foram definidas.");
 
             builder.Services.AddSwaggerGen(c =>
             {
-                foreach (var (versionKey, versionInfo) in apiSettings.Versions)
+                foreach (var (versionKey, versionInfo) in settings.Versions)
                 {
                     c.SwaggerDoc(versionKey, new OpenApiInfo
                     {
@@ -25,14 +25,16 @@ namespace AuthCore.Api.Configurations
             });
         }
 
-        public static void UseSwaggerDocumentation(this WebApplication app)
+        public static void UseSwaggerDoc(this WebApplication app)
         {
-            var appSettings = app.Services.GetRequiredService<ApiSettings>();
+            var settings = app.Services.GetRequiredService<ApiSettings>();
+            if (settings is null || settings.Versions is null || settings.Versions.Count == 0)
+                throw new InvalidOperationException("As configurações de API não foram definidas.");
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                foreach (var (versionKey, versionInfo) in appSettings.Versions)
+                foreach (var (versionKey, versionInfo) in settings.Versions)
                 {
                     c.SwaggerEndpoint($"/swagger/{versionKey}/swagger.json", versionInfo.Name);
                 }

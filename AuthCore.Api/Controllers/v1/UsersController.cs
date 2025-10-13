@@ -1,6 +1,8 @@
-﻿using AuthCore.Application.Models.Input;
+﻿using AuthCore.Application.Models;
+using AuthCore.Application.Models.Input;
 using AuthCore.Application.UseCases.UserCase.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace AuthCore.Api.Controllers.v1
 {
@@ -16,13 +18,20 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Cria um novo usuário no sistema
+        /// Cria um novo usuário.
         /// </summary>
-        [HttpPost()]
-        public async Task<IActionResult> Add([FromBody] AddUserInputModel input)
+        [HttpPost]
+        public async Task<ActionResult> Add([FromBody] AddUserInputModel input)
         {
             await _addUser.OnExecute(input);
-            return Ok(new { Message = "Usuário criado com sucesso." });
+
+            var response = Response<object>.Success(
+                null!,
+                "Usuário criado com sucesso.",
+                HttpStatusCode.Created
+            );
+
+            return StatusCode((int)HttpStatusCode.Created, response);
         }
     }
 }
