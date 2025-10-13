@@ -1,4 +1,5 @@
 ﻿using AuthCore.Application.Models.Output;
+using AuthCore.Application.Services.Interfaces;
 using AuthCore.Application.UseCases.SessionCase.Interfaces;
 using AuthCore.Domain.Aggregates.SessionAggregate;
 using AuthCore.Domain.Commons.Exceptions;
@@ -13,17 +14,20 @@ namespace AuthCore.Application.UseCases.SessionCase
         private readonly IAccessToken _accessToken;
         private readonly ICookie _cookie;
         private readonly IEntropy _entropy;
+        private readonly IOwnership _ownership;
 
         public GetSessions(
             ISessionRepository sessionRepository,
             IAccessToken accessToken,
             ICookie cookie,
-            IEntropy entropy)
+            IEntropy entropy,
+            IOwnership ownership)
         {
             _sessionRepository = sessionRepository;
             _accessToken = accessToken;
             _cookie = cookie;
             _entropy = entropy;
+            _ownership = ownership;
         }
 
         public async Task<IEnumerable<SessionViewModel>> OnExecute()
@@ -31,9 +35,11 @@ namespace AuthCore.Application.UseCases.SessionCase
             var userId = _accessToken.Sub;
             var hashedSession = _entropy.Hash(_cookie.Session);
 
-            var sessions = await _sessionRepository.GetByUserId(userId);
-            if (!sessions.Any())
-                throw new NotFoundException("Nenhuma sessão ativa encontrada para o usuário.");
+            var sessions = (await _sessionRepository.GetByUserId(userId)).ToList();
+            if (sessions.Count == 0)
+                throw new NotFoundException();
+
+            _ownership.EnsureAll(sessions.Select(s => s.UserId));
 
             return sessions.Select(s => new SessionViewModel
             {

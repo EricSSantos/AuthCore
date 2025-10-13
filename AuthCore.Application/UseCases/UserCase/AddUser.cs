@@ -21,6 +21,8 @@ namespace AuthCore.Application.UseCases.UserCase
             _bcrypt = bcrypt;
         }
 
+        // TODO: Avaliar a criação de ValueObjects para Email e Password,
+        // garantindo as validaçõpes e encapsulamento das regras no domínio.
         public async Task OnExecute(AddUserInputModel input)
         {
             if (await _userRepository.Exists(u => u.Email == input.Email))

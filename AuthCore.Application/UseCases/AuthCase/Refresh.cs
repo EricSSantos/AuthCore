@@ -1,4 +1,5 @@
-﻿using AuthCore.Application.UseCases.AuthCase.Interfaces;
+﻿using AuthCore.Application.Services.Interfaces;
+using AuthCore.Application.UseCases.AuthCase.Interfaces;
 using AuthCore.Domain.Aggregates.SessionAggregate;
 using AuthCore.Domain.Aggregates.UserAggregate;
 using AuthCore.Domain.Commons.Exceptions;
@@ -14,19 +15,22 @@ namespace AuthCore.Application.UseCases.AuthCase
         private readonly ISessionRepository _sessionRepository;
         private readonly IUserRepository _userRepository;
         private readonly ICookie _cookie;
+        private readonly IOwnership _ownership;
 
         public Refresh(
             IAccessToken accessToken,
             IEntropy entropy,
             ISessionRepository sessionRepository,
             IUserRepository userRepository,
-            ICookie cookie)
+            ICookie cookie,
+            IOwnership ownership)
         {
             _accessToken = accessToken;
             _entropy = entropy;
             _sessionRepository = sessionRepository;
             _userRepository = userRepository;
             _cookie = cookie;
+            _ownership = ownership;
         }
 
         public async Task OnExecute()
@@ -35,8 +39,13 @@ namespace AuthCore.Application.UseCases.AuthCase
             var rawRefresh = _cookie.RefreshToken;
             var oldSession = await ValidateSession(rawSession, rawRefresh);
 
+            _ownership.Ensure(oldSession.UserId);
+
             var user = await _userRepository.GetById(oldSession.UserId)
-                ?? throw new UnauthorizedException("Usuário associado à sessão não encontrado.");
+                ?? throw new NotFoundException();
+            
+            if (!user.IsActive())
+                throw new ForbiddenException();
 
             var (newRawSession, newHashedSession) = _entropy.GeneratePair(32);
             var (newRawRefresh, newHashedRefresh) = _entropy.GeneratePair(64);
@@ -47,7 +56,6 @@ namespace AuthCore.Application.UseCases.AuthCase
             await _sessionRepository.Delete(oldSession.SessionHash);
 
             var newAccessToken = _accessToken.Generate(user.Id, user.Role);
-
             _cookie.SetAuthCookies(newRawSession, newAccessToken, newRawRefresh);
         }
 
@@ -56,9 +64,8 @@ namespace AuthCore.Application.UseCases.AuthCase
         private async Task<Session> ValidateSession(string rawSession, string rawRefresh)
         {
             var hashedSession = _entropy.Hash(rawSession);
-
             var session = await _sessionRepository.Get(hashedSession)
-                ?? throw new UnauthorizedException("Sessão não encontrada.");
+                ?? throw new NotFoundException();
 
             var sessionMatches = _entropy.Verify(rawSession, session.SessionHash);
             var refreshMatches = _entropy.Verify(rawRefresh, session.RefreshTokenHash);
@@ -67,7 +74,7 @@ namespace AuthCore.Application.UseCases.AuthCase
             {
                 await _sessionRepository.Delete(session.SessionHash);
                 _cookie.RemoveAuthCookies();
-                throw new UnauthorizedException("Sessão ou token inválidos ou expirados.");
+                throw new ForbiddenException();
             }
 
             return session;

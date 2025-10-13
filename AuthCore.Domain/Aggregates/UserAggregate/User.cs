@@ -77,6 +77,14 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
             get { return FirstName + LastName; }
         }
 
+        public bool IsActive()
+        {
+            if (LoginAttempts.IsLocked())
+                return false;
+
+            return Active;
+        }
+
         public void Activate()
         {
             if (!Active)

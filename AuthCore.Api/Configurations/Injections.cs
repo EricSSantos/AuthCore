@@ -1,4 +1,6 @@
-﻿using AuthCore.Application.UseCases.AuthCase;
+﻿using AuthCore.Application.Services;
+using AuthCore.Application.Services.Interfaces;
+using AuthCore.Application.UseCases.AuthCase;
 using AuthCore.Application.UseCases.AuthCase.Interfaces;
 using AuthCore.Application.UseCases.SessionCase;
 using AuthCore.Application.UseCases.SessionCase.Interfaces;
@@ -27,8 +29,8 @@ namespace AuthCore.Api.Configurations
         {
             var services = builder.Services;
             services.AddSettings(builder.Configuration);
-            services.AddUseCases();
-            services.AddInfrastructureServices();
+            services.AddApplication();
+            services.AddInfrastructure();
             services.AddRepositories();
             services.AddHttpContextAccessor();
         }
@@ -50,9 +52,11 @@ namespace AuthCore.Api.Configurations
         }
         #endregion
 
-        #region UseCases
-        private static IServiceCollection AddUseCases(this IServiceCollection services)
+        #region Application
+        private static IServiceCollection AddApplication(this IServiceCollection services)
         {
+            services.AddScoped<IOwnership, Ownership>();
+
             services.AddScoped<ISignIn, SignIn>();
             services.AddScoped<ISignOut, SignOut>();
             services.AddScoped<IRefresh, Refresh>();
@@ -64,8 +68,8 @@ namespace AuthCore.Api.Configurations
         }
         #endregion
 
-        #region Infras Services
-        private static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
+        #region Infrastructure
+        private static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
             services.AddScoped<ICookie, CookieService>();
             services.AddScoped<IDevice, DeviceService>();
