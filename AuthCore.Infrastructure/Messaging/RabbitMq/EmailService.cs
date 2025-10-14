@@ -34,6 +34,7 @@ namespace AuthCore.Infrastructure.Messaging.RabbitMq
 
             var document = new EmailDocument
             {
+                Id = email.Id,
                 To = email.To,
                 FullName = email.FullName,
                 Type = email.Type,
@@ -42,7 +43,8 @@ namespace AuthCore.Infrastructure.Messaging.RabbitMq
             };
 
             _client.Publish(_settings.EmailQueue, document);
-            _logger.LogInformation("E-mail {Type} enfileirado para {To}", type, to);
+
+            _logger.LogInformation("E-mail {Type} enfileirado com ID {EmailId}", type, email.Id);
 
             return Task.CompletedTask;
         }

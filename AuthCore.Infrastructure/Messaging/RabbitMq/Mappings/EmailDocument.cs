@@ -5,6 +5,9 @@ namespace AuthCore.Infrastructure.Messaging.RabbitMq.Documents
 {
     public sealed class EmailDocument
     {
+        [JsonPropertyName("id")]
+        public Guid Id { get; init; }
+
         [JsonPropertyName("to")]
         public string To { get; init; } = string.Empty;
 
