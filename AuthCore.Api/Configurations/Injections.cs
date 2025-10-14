@@ -15,6 +15,7 @@ using AuthCore.Domain.Commons.Interfaces.Security;
 using AuthCore.Domain.Commons.Settings;
 using AuthCore.Infrastructure.Helpers;
 using AuthCore.Infrastructure.Http;
+using AuthCore.Infrastructure.Messaging.RabbitMq;
 using AuthCore.Infrastructure.Persistence.Database.Repositories;
 using AuthCore.Infrastructure.Persistence.Redis.Repositories;
 using AuthCore.Infrastructure.Security.Cryptography;
@@ -28,10 +29,12 @@ namespace AuthCore.Api.Configurations
         public static void AddInjections(this WebApplicationBuilder builder)
         {
             var services = builder.Services;
+
             services.AddSettings(builder.Configuration);
             services.AddApplication();
             services.AddInfrastructure();
             services.AddRepositories();
+
             services.AddHttpContextAccessor();
         }
 
@@ -42,11 +45,13 @@ namespace AuthCore.Api.Configurations
             services.Configure<DatabaseSettings>(config.GetSection("Database"));
             services.Configure<SecuritySettings>(config.GetSection("Security"));
             services.Configure<RedisSettings>(config.GetSection("Redis"));
+            services.Configure<RabbitMqSettings>(config.GetSection("RabbitMQ"));
 
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<ApiSettings>>().Value);
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<DatabaseSettings>>().Value);
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<SecuritySettings>>().Value);
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<RedisSettings>>().Value);
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<RabbitMqSettings>>().Value);
 
             return services;
         }
@@ -56,7 +61,6 @@ namespace AuthCore.Api.Configurations
         private static IServiceCollection AddApplication(this IServiceCollection services)
         {
             services.AddScoped<IOwnership, Ownership>();
-
             services.AddScoped<ISignIn, SignIn>();
             services.AddScoped<ISignOut, SignOut>();
             services.AddScoped<IRefresh, Refresh>();
@@ -81,6 +85,7 @@ namespace AuthCore.Api.Configurations
             services.AddScoped<IEntropy, EntropyService>();
             services.AddScoped<IAccessToken, JwtService>();
             services.AddScoped<IJsonSerializer, JsonSerializer>();
+            services.AddSingleton<IEmailService, EmailService>();
 
             return services;
         }
@@ -92,7 +97,7 @@ namespace AuthCore.Api.Configurations
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ISessionRepository, SessionRepository>();
-            
+
             return services;
         }
         #endregion

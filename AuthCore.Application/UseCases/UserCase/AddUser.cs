@@ -1,6 +1,7 @@
 ﻿using AuthCore.Application.Models.Input;
-using AuthCore.Application.Models.Output;
+using AuthCore.Application.Services.Interfaces;
 using AuthCore.Application.UseCases.UserCase.Interfaces;
+using AuthCore.Domain.Aggregates.EmailAggregate;
 using AuthCore.Domain.Aggregates.UserAggregate;
 using AuthCore.Domain.Commons.Exceptions;
 using AuthCore.Domain.Commons.Interfaces.Security;
@@ -12,17 +13,20 @@ namespace AuthCore.Application.UseCases.UserCase
     {
         private readonly IUserRepository _userRepository;
         private readonly IBCrypt _bcrypt;
+        private readonly IEmailService _emailService;
 
         public AddUser(
             IUserRepository userRepository,
-            IBCrypt bcrypt)
+            IBCrypt bcrypt,
+            IEmailService emailService)
         {
             _userRepository = userRepository;
             _bcrypt = bcrypt;
+            _emailService = emailService;
         }
 
         // TODO: Avaliar a criação de ValueObjects para Email e Password,
-        // garantindo as validaçõpes e encapsulamento das regras no domínio.
+        // garantindo as validações e encapsulamento das regras no domínio.
         public async Task OnExecute(AddUserInputModel input)
         {
             if (await _userRepository.Exists(u => u.Email == input.Email))
@@ -45,6 +49,16 @@ namespace AuthCore.Application.UseCases.UserCase
 
             await _userRepository.Add(user);
             await _userRepository.SaveChanges();
+
+            // TESTE: Enfileira um e-mail de boas-vindas
+            await _emailService.SendAsync(
+                to: user.Email,
+                type: EmailType.Welcome,
+                data: new
+                {
+                    Name = user.FullName
+                }
+            );
         }
 
         #region Private Methods
