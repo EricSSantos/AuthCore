@@ -6,10 +6,12 @@ using AuthCore.Application.UseCases.SessionCase;
 using AuthCore.Application.UseCases.SessionCase.Interfaces;
 using AuthCore.Application.UseCases.UserCase;
 using AuthCore.Application.UseCases.UserCase.Interfaces;
+using AuthCore.Domain.Aggregates.EmailAggregate;
 using AuthCore.Domain.Aggregates.SessionAggregate;
 using AuthCore.Domain.Aggregates.UserAggregate;
 using AuthCore.Domain.Commons.Interfaces.Helpers;
 using AuthCore.Domain.Commons.Interfaces.Http;
+using AuthCore.Domain.Commons.Interfaces.Messaging;
 using AuthCore.Domain.Commons.Interfaces.Repositories;
 using AuthCore.Domain.Commons.Interfaces.Security;
 using AuthCore.Domain.Commons.Settings;
@@ -85,8 +87,9 @@ namespace AuthCore.Api.Configurations
             services.AddScoped<IEntropy, EntropyService>();
             services.AddScoped<IAccessToken, JwtService>();
             services.AddScoped<IJsonSerializer, JsonSerializer>();
+            services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
             services.AddSingleton<IEmailService, EmailService>();
-
+            
             return services;
         }
         #endregion

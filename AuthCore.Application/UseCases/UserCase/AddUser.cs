@@ -1,5 +1,4 @@
 ﻿using AuthCore.Application.Models.Input;
-using AuthCore.Application.Services.Interfaces;
 using AuthCore.Application.UseCases.UserCase.Interfaces;
 using AuthCore.Domain.Aggregates.EmailAggregate;
 using AuthCore.Domain.Aggregates.UserAggregate;
@@ -30,7 +29,7 @@ namespace AuthCore.Application.UseCases.UserCase
         public async Task OnExecute(AddUserInputModel input)
         {
             if (await _userRepository.Exists(u => u.Email == input.Email))
-                throw new ConflictException("Endereço de e-mail já existe.");
+                throw new ConflictException("Endereço de e-mail já cadastrado.");
 
             if (!IsStrong(input.Password))
                 throw new DomainException("A senha não atende aos critérios de segurança.");
@@ -41,31 +40,28 @@ namespace AuthCore.Application.UseCases.UserCase
             var password = _bcrypt.Hash(input.Password);
 
             var user = User.Create(
-                firstName:  input.FirstName,
-                lastName:   input.LastName,
-                email:      input.Email,
-                password:   password
+                firstName: input.FirstName,
+                lastName: input.LastName,
+                email: input.Email,
+                password: password
             );
 
             await _userRepository.Add(user);
             await _userRepository.SaveChanges();
 
-            // TESTE: Enfileira um e-mail de boas-vindas
-            await _emailService.SendAsync(
+            // TESTE: Dispara e-mail de boas-vindas.
+            await _emailService.Send(
                 to: user.Email,
-                type: EmailType.Welcome,
-                data: new
-                {
-                    Name = user.FullName
-                }
+                fullName: user.FullName,
+                type: EmailType.Welcome
             );
         }
 
         #region Private Methods
 
-        private bool IsStrong(string password)
+        private static bool IsStrong(string password)
         {
-            // 8 caracteres, 1 minúscula e 1 maiúscula
+            // Pelo menos 8 caracteres, contendo letras minúsculas e maiúsculas
             var regex = new Regex(@"^(?=.*[a-z])(?=.*[A-Z]).{8,}$");
             return regex.IsMatch(password);
         }

@@ -1,66 +1,50 @@
-﻿using AuthCore.Application.Services.Interfaces;
-using AuthCore.Domain.Aggregates.EmailAggregate;
+﻿using AuthCore.Domain.Aggregates.EmailAggregate;
+using AuthCore.Domain.Commons.Interfaces.Messaging;
 using AuthCore.Domain.Commons.Settings;
+using AuthCore.Infrastructure.Messaging.RabbitMq.Documents;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RabbitMQ.Client;
-using System.Text;
 
 namespace AuthCore.Infrastructure.Messaging.RabbitMq
 {
-    public sealed class EmailService : IEmailService, IDisposable
+    public sealed class EmailService : IEmailService
     {
+        private readonly IRabbitMqClient _client;
         private readonly RabbitMqSettings _settings;
         private readonly ILogger<EmailService> _logger;
-        private readonly IConnection _connection;
-        private readonly IModel _channel;
 
-        public EmailService(IOptions<RabbitMqSettings> options, ILogger<EmailService> logger)
+        public EmailService(
+            IRabbitMqClient client,
+            IOptions<RabbitMqSettings> options,
+            ILogger<EmailService> logger)
         {
+            _client = client;
             _settings = options.Value;
             _logger = logger;
+        }
 
-            var factory = new ConnectionFactory
+        public Task Send(string to, string fullName, EmailType type, object? data = null)
+        {
+            var email = Email.Create(
+                to,
+                fullName,
+                type,
+                data ?? new { }
+            );
+
+            var document = new EmailDocument
             {
-                HostName = _settings.Host,
-                Port = _settings.Port,
-                UserName = _settings.User,
-                Password = _settings.Password
+                To = email.To,
+                FullName = email.FullName,
+                Type = email.Type,
+                Content = email.Content,
+                CreatedAt = email.CreatedAt.UtcDateTime
             };
 
-            _connection = factory.CreateConnection();
-            _channel = _connection.CreateModel();
-
-            _logger.LogInformation("RabbitMQ conectado em {Host}:{Port}", _settings.Host, _settings.Port);
-        }
-
-        public Task SendAsync(string to, EmailType type, object? data = null)
-        {
-            var email = new Email(to, type, data ?? new { });
-            var bytes = Encoding.UTF8.GetBytes(email.ToJson());
-
-            _channel.QueueDeclare(
-                queue: _settings.EmailQueue,
-                durable: true,
-                exclusive: false,
-                autoDelete: false
-            );
-
-            _channel.BasicPublish(
-                exchange: "",
-                routingKey: _settings.EmailQueue,
-                basicProperties: null,
-                body: bytes
-            );
-
+            _client.Publish(_settings.EmailQueue, document);
             _logger.LogInformation("E-mail {Type} enfileirado para {To}", type, to);
-            return Task.CompletedTask;
-        }
 
-        public void Dispose()
-        {
-            _channel?.Dispose();
-            _connection?.Dispose();
+            return Task.CompletedTask;
         }
     }
 }
