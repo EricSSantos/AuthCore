@@ -2,7 +2,7 @@
 using AuthCore.Application.UseCases.UserCase.Interfaces;
 using AuthCore.Domain.Aggregates.UserAggregate;
 using AuthCore.Domain.Commons.Exceptions;
-using AuthCore.Domain.Commons.Interfaces.Security;
+using AuthCore.Domain.Commons.Interfaces.Security.Jwt;
 
 namespace AuthCore.Application.UseCases.UserCase
 {

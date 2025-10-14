@@ -1,9 +1,9 @@
 ﻿using AuthCore.Domain.Shared;
 using System.Linq.Expressions;
 
-namespace AuthCore.Domain.Commons.Interfaces.Repositories
+namespace AuthCore.Domain.Commons.Interfaces.Persistence
 {
-    public interface IRepository<T> : IReadRepository<T>, IWriteRepository<T> where T : Entity
+    public interface IBaseRepository<T> : IReadRepository<T>, IWriteRepository<T> where T : Entity
     { }
 
     public interface IReadRepository<T> where T : Entity

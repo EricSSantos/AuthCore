@@ -3,7 +3,7 @@ using AuthCore.Application.UseCases.UserCase.Interfaces;
 using AuthCore.Domain.Aggregates.EmailAggregate;
 using AuthCore.Domain.Aggregates.UserAggregate;
 using AuthCore.Domain.Commons.Exceptions;
-using AuthCore.Domain.Commons.Interfaces.Security;
+using AuthCore.Domain.Commons.Interfaces.Security.Hashing;
 using System.Text.RegularExpressions;
 
 namespace AuthCore.Application.UseCases.UserCase

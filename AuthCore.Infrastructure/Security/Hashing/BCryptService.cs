@@ -1,6 +1,6 @@
-﻿using AuthCore.Domain.Commons.Interfaces.Security;
+﻿using AuthCore.Domain.Commons.Interfaces.Security.Hashing;
 
-namespace AuthCore.Infrastructure.Security.Cryptography
+namespace AuthCore.Infrastructure.Security.Hashing
 {
     public sealed class BCryptService : IBCrypt
     {

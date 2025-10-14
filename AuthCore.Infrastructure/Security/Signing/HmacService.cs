@@ -1,11 +1,11 @@
-﻿using AuthCore.Domain.Commons.Interfaces.Security;
+﻿using AuthCore.Domain.Commons.Interfaces.Security.Signing;
 using AuthCore.Domain.Commons.Settings;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace AuthCore.Infrastructure.Security.Cryptography
+namespace AuthCore.Infrastructure.Security.Signing
 {
     public sealed class HmacService : IHmac
     {

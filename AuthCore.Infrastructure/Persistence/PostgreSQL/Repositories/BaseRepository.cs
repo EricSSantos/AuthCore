@@ -1,16 +1,16 @@
-﻿using AuthCore.Domain.Commons.Interfaces.Repositories;
+﻿using AuthCore.Domain.Commons.Interfaces.Persistence;
 using AuthCore.Domain.Shared;
-using AuthCore.Infrastructure.Persistence.Database.Context;
+using AuthCore.Infrastructure.Persistence.PostgreSQL.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace AuthCore.Infrastructure.Persistence.Database.Repositories
+namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Repositories
 {
-    public class Repository<T> : IRepository<T> where T : Entity
+    public class BaseRepository<T> : IBaseRepository<T> where T : Entity
     {
         protected readonly AppDbContext _context;
 
-        public Repository(AppDbContext context)
+        public BaseRepository(AppDbContext context)
         {
             _context = context;
         }

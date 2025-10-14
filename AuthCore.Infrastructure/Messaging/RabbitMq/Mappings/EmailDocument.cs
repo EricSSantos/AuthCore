@@ -1,7 +1,7 @@
 ﻿using AuthCore.Domain.Aggregates.EmailAggregate;
 using System.Text.Json.Serialization;
 
-namespace AuthCore.Infrastructure.Messaging.RabbitMq.Documents
+namespace AuthCore.Infrastructure.Messaging.RabbitMq.Mappings
 {
     public sealed class EmailDocument
     {

@@ -1,6 +1,7 @@
 ﻿using AuthCore.Domain.Aggregates.UserAggregate;
 using AuthCore.Domain.Commons.Exceptions;
-using AuthCore.Domain.Commons.Interfaces.Security;
+using AuthCore.Domain.Commons.Interfaces.Security.Jwt;
+using AuthCore.Domain.Commons.Interfaces.Security.Signing;
 using AuthCore.Domain.Commons.Settings;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
@@ -9,7 +10,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 
-namespace AuthCore.Infrastructure.Security.Tokens
+namespace AuthCore.Infrastructure.Security.Jwt
 {
     public sealed class JwtService : IAccessToken
     {

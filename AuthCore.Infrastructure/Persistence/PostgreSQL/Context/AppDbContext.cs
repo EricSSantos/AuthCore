@@ -1,7 +1,7 @@
 ﻿using AuthCore.Domain.Aggregates.UserAggregate;
 using Microsoft.EntityFrameworkCore;
 
-namespace AuthCore.Infrastructure.Persistence.Database.Context
+namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Context
 {
     public partial class AppDbContext : DbContext
     {

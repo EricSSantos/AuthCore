@@ -1,7 +1,7 @@
 ﻿using AuthCore.Domain.Aggregates.EmailAggregate;
 using AuthCore.Domain.Commons.Interfaces.Messaging;
 using AuthCore.Domain.Commons.Settings;
-using AuthCore.Infrastructure.Messaging.RabbitMq.Documents;
+using AuthCore.Infrastructure.Messaging.RabbitMq.Mappings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 

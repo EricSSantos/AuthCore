@@ -6,8 +6,6 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Mappings
 {
     internal sealed class SessionDocument
     {
-        #region Properties
-
         [JsonPropertyName("id")]
         public Guid Id { get; set; }
 
@@ -28,8 +26,6 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Mappings
 
         [JsonPropertyName("device")]
         public DeviceDocument Device { get; set; } = default!;
-
-        #endregion
 
         #region Conversion
 

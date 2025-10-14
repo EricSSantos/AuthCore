@@ -33,7 +33,7 @@ namespace AuthCore.Application.UseCases.SessionCase
 
         private async Task<List<Session>> ValidateSessions(IEnumerable<Guid> ids)
         {
-            var tasks = ids.Select(id => _sessionRepository.GetById(id));
+            var tasks = ids.Select(id => _sessionRepository.GetBySessionId(id));
             var results = await Task.WhenAll(tasks);
 
             var sessions = results

@@ -9,19 +9,21 @@ using AuthCore.Application.UseCases.UserCase.Interfaces;
 using AuthCore.Domain.Aggregates.EmailAggregate;
 using AuthCore.Domain.Aggregates.SessionAggregate;
 using AuthCore.Domain.Aggregates.UserAggregate;
-using AuthCore.Domain.Commons.Interfaces.Helpers;
 using AuthCore.Domain.Commons.Interfaces.Http;
 using AuthCore.Domain.Commons.Interfaces.Messaging;
-using AuthCore.Domain.Commons.Interfaces.Repositories;
-using AuthCore.Domain.Commons.Interfaces.Security;
+using AuthCore.Domain.Commons.Interfaces.Persistence;
+using AuthCore.Domain.Commons.Interfaces.Security.Hashing;
+using AuthCore.Domain.Commons.Interfaces.Security.Jwt;
+using AuthCore.Domain.Commons.Interfaces.Security.Signing;
 using AuthCore.Domain.Commons.Settings;
-using AuthCore.Infrastructure.Helpers;
 using AuthCore.Infrastructure.Http;
 using AuthCore.Infrastructure.Messaging.RabbitMq;
-using AuthCore.Infrastructure.Persistence.Database.Repositories;
+using AuthCore.Infrastructure.Persistence.PostgreSQL.Repositories;
+using AuthCore.Infrastructure.Persistence.Redis.Context;
 using AuthCore.Infrastructure.Persistence.Redis.Repositories;
-using AuthCore.Infrastructure.Security.Cryptography;
-using AuthCore.Infrastructure.Security.Tokens;
+using AuthCore.Infrastructure.Security.Hashing;
+using AuthCore.Infrastructure.Security.Jwt;
+using AuthCore.Infrastructure.Security.Signing;
 using Microsoft.Extensions.Options;
 
 namespace AuthCore.Api.Configurations
@@ -78,18 +80,20 @@ namespace AuthCore.Api.Configurations
         #region Infrastructure
         private static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
+            // Http
             services.AddScoped<ICookie, CookieService>();
             services.AddScoped<IDevice, DeviceService>();
+            // Security
             services.AddScoped<IBCrypt, BCryptService>();
             services.AddScoped<IHmac, HmacService>();
             services.AddScoped<IEcdsaSigner, EcdsaService>();
             services.AddScoped<IEcdsaProvider, EcdsaService>();
             services.AddScoped<IEntropy, EntropyService>();
             services.AddScoped<IAccessToken, JwtService>();
-            services.AddScoped<IJsonSerializer, JsonSerializer>();
+            // Messaging
             services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
             services.AddSingleton<IEmailService, EmailService>();
-            
+
             return services;
         }
         #endregion
@@ -97,8 +101,11 @@ namespace AuthCore.Api.Configurations
         #region Repositories
         private static IServiceCollection AddRepositories(this IServiceCollection services)
         {
-            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            // PostgreSQL Repositories
+            services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             services.AddScoped<IUserRepository, UserRepository>();
+            // Redis Repositories
+            services.AddScoped<IRedisContext, RedisContext>();
             services.AddScoped<ISessionRepository, SessionRepository>();
 
             return services;

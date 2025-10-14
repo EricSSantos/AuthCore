@@ -1,8 +1,9 @@
-﻿using AuthCore.Domain.Commons.Interfaces.Security;
+﻿using AuthCore.Domain.Commons.Interfaces.Security.Hashing;
+using AuthCore.Domain.Commons.Interfaces.Security.Signing;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
 
-namespace AuthCore.Infrastructure.Security.Cryptography
+namespace AuthCore.Infrastructure.Security.Hashing
 {
     public sealed class EntropyService : IEntropy
     {

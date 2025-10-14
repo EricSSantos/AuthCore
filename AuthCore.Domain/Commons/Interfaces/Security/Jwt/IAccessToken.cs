@@ -1,6 +1,6 @@
 ﻿using AuthCore.Domain.Aggregates.UserAggregate;
 
-namespace AuthCore.Domain.Commons.Interfaces.Security
+namespace AuthCore.Domain.Commons.Interfaces.Security.Jwt
 {
     public interface IAccessToken
     {

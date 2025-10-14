@@ -1,6 +1,6 @@
 ﻿using AuthCore.Application.Services.Interfaces;
 using AuthCore.Domain.Commons.Exceptions;
-using AuthCore.Domain.Commons.Interfaces.Security;
+using AuthCore.Domain.Commons.Interfaces.Security.Jwt;
 
 namespace AuthCore.Application.Services
 {

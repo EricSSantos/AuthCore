@@ -3,7 +3,7 @@ using AuthCore.Application.UseCases.AuthCase.Interfaces;
 using AuthCore.Domain.Aggregates.SessionAggregate;
 using AuthCore.Domain.Commons.Exceptions;
 using AuthCore.Domain.Commons.Interfaces.Http;
-using AuthCore.Domain.Commons.Interfaces.Security;
+using AuthCore.Domain.Commons.Interfaces.Security.Hashing;
 
 namespace AuthCore.Application.UseCases.AuthCase
 {

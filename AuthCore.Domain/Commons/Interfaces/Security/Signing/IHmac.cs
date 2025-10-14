@@ -1,4 +1,4 @@
-﻿namespace AuthCore.Domain.Commons.Interfaces.Security
+﻿namespace AuthCore.Domain.Commons.Interfaces.Security.Signing
 {
     public interface IHmac
     {

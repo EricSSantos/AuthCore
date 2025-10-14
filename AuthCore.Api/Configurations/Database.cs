@@ -1,5 +1,5 @@
 ﻿using AuthCore.Domain.Commons.Settings;
-using AuthCore.Infrastructure.Persistence.Database.Context;
+using AuthCore.Infrastructure.Persistence.PostgreSQL.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 

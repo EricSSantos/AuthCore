@@ -1,8 +1,8 @@
-﻿using AuthCore.Domain.Commons.Interfaces.Repositories;
+﻿using AuthCore.Domain.Commons.Interfaces.Persistence;
 
 namespace AuthCore.Domain.Aggregates.UserAggregate
 {
-    public interface IUserRepository : IRepository<User>
+    public interface IUserRepository : IBaseRepository<User>
     {
         /// <summary>
         /// Obtém um usuário pelo endereço de e-mail.

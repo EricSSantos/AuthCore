@@ -10,7 +10,7 @@
         /// <summary>
         /// Obtém uma sessão a partir do identificador único.
         /// </summary>
-        Task<Session?> GetById(Guid id);
+        Task<Session?> GetBySessionId(Guid id);
 
         /// <summary>
         /// Retorna todas as sessões associadas a um usuário.

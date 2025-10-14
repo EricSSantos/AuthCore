@@ -1,8 +1,6 @@
 ﻿using AuthCore.Domain.Aggregates.SessionAggregate;
-using AuthCore.Domain.Commons.Interfaces.Helpers;
+using AuthCore.Domain.Commons.Interfaces.Persistence;
 using AuthCore.Infrastructure.Persistence.Redis.Mappings;
-using Microsoft.Extensions.Caching.Distributed;
-using StackExchange.Redis;
 
 namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
 {
@@ -10,45 +8,37 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
     {
         #region Constants
 
-        private const string ROOT = "sessions:";
-        private const string SESSION_DOCUMENT = ROOT + "data:";
-        private const string SESSION_ID_IDX = ROOT + "id:";
-        private const string USER_ID_IDX = "user:";
+        private const string SESSION_NAMESPACE = "sessions:";
+        private const string SESSION_DATA_PREFIX = SESSION_NAMESPACE + "data:";
+        private const string SESSION_ID_INDEX = SESSION_NAMESPACE + "id:";
+        private const string USER_ID_INDEX = SESSION_NAMESPACE + "user:";
 
         private static readonly TimeSpan DEFAULT_TTL = TimeSpan.FromDays(7);
 
         #endregion
 
-        private readonly IDistributedCache _cache;
-        private readonly IJsonSerializer _serializer;
-        private readonly IDatabase _redis;
+        private readonly IRedisContext _redisClient;
 
-        public SessionRepository(
-            IDistributedCache cache,
-            IJsonSerializer serializer,
-            IConnectionMultiplexer connection)
+        public SessionRepository(IRedisContext redisClient)
         {
-            _cache = cache;
-            _serializer = serializer;
-            _redis = connection.GetDatabase();
+            _redisClient = redisClient;
         }
 
         public async Task<Session?> Get(string sessionHash)
         {
-            var key = BuildKey(sessionHash);
-            var json = await _cache.GetStringAsync(key);
+            var sessionKey = BuildSessionDataKey(sessionHash);
+            var sessionDocument = await _redisClient.ReadObject<SessionDocument>(sessionKey);
 
-            if (string.IsNullOrWhiteSpace(json))
+            if (sessionDocument is null)
                 return null;
 
-            var document = _serializer.Deserialize<SessionDocument>(json);
-            return document?.ToEntity();
+            return sessionDocument.ToEntity();
         }
 
-        public async Task<Session?> GetById(Guid sessionId)
+        public async Task<Session?> GetBySessionId(Guid sessionId)
         {
-            var mapKey = BuildSessionIdIndexKey(sessionId);
-            var sessionHash = await _cache.GetStringAsync(mapKey);
+            var sessionIdKey = BuildSessionIdIndexKey(sessionId);
+            var sessionHash = await _redisClient.ReadObject<string>(sessionIdKey);
 
             if (string.IsNullOrWhiteSpace(sessionHash))
                 return null;
@@ -58,20 +48,17 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
 
         public async Task<IEnumerable<Session>> GetByUserId(Guid userId)
         {
-            var indexKey = BuildUserIndexKey(userId);
-            var hashes = await _redis.SetMembersAsync(indexKey);
+            var userIndexKey = BuildSessionUserIdIndexKey(userId);
+            var sessionHashes = await _redisClient.GetIndexMembers(userIndexKey);
+
             var sessions = new List<Session>();
 
-            foreach (var hash in hashes)
+            foreach (var sessionHash in sessionHashes)
             {
-                var sessionKey = BuildKey(hash!);
-                var json = await _cache.GetStringAsync(sessionKey);
+                var sessionKey = BuildSessionDataKey(sessionHash);
+                var document = await _redisClient.ReadObject<SessionDocument>(sessionKey);
 
-                if (string.IsNullOrWhiteSpace(json))
-                    continue;
-
-                var document = _serializer.Deserialize<SessionDocument>(json);
-                if (document != null)
+                if (document is not null)
                     sessions.Add(document.ToEntity());
             }
 
@@ -80,52 +67,37 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
 
         public async Task Set(Session session)
         {
-            var document = SessionDocument.ToDocument(session);
-            var json = _serializer.Serialize(document);
+            var sessionDocument = SessionDocument.ToDocument(session);
 
-            var sessionKey = BuildKey(session.SessionHash);
+            var sessionKey = BuildSessionDataKey(session.SessionHash);
             var sessionIdKey = BuildSessionIdIndexKey(session.Id);
-            var userIndexKey = BuildUserIndexKey(session.UserId);
+            var userIndexKey = BuildSessionUserIdIndexKey(session.UserId);
 
-            var options = new DistributedCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = DEFAULT_TTL
-            };
-
-            await _cache.SetStringAsync(sessionKey, json, options);
-
-            await _redis.SetAddAsync(userIndexKey, session.SessionHash);
-            await _redis.KeyExpireAsync(userIndexKey, DEFAULT_TTL);
-
-            await _cache.SetStringAsync(sessionIdKey, session.SessionHash, options);
+            await _redisClient.WriteObject(sessionKey, sessionDocument, DEFAULT_TTL);
+            await _redisClient.AddIndex(userIndexKey, session.SessionHash, DEFAULT_TTL);
+            await _redisClient.WriteObject(sessionIdKey, session.SessionHash, DEFAULT_TTL);
         }
 
         public async Task Delete(string sessionHash)
         {
-            var sessionKey = BuildKey(sessionHash);
-            var json = await _cache.GetStringAsync(sessionKey);
-
-            if (!string.IsNullOrWhiteSpace(json))
+            var sessionKey = BuildSessionDataKey(sessionHash);
+            var sessionDocument = await _redisClient.ReadObject<SessionDocument>(sessionKey);
+            if (sessionDocument is not null)
             {
-                var document = _serializer.Deserialize<SessionDocument>(json);
-                if (document != null)
-                {
-                    var userIndexKey = BuildUserIndexKey(document.UserId);
-                    var sessionIdKey = BuildSessionIdIndexKey(document.Id);
+                var userIndexKey = BuildSessionUserIdIndexKey(sessionDocument.UserId);
+                var sessionIdKey = BuildSessionIdIndexKey(sessionDocument.Id);
 
-                    await _redis.SetRemoveAsync(userIndexKey, sessionHash);
-                    await _cache.RemoveAsync(sessionIdKey);
-                }
+                await _redisClient.RemoveIndex(userIndexKey, sessionHash);
+                await _redisClient.DeleteKey(sessionIdKey);
             }
 
-            await _cache.RemoveAsync(sessionKey);
+            await _redisClient.DeleteKey(sessionKey);
         }
 
         public async Task DeleteById(Guid sessionId)
         {
             var sessionIdKey = BuildSessionIdIndexKey(sessionId);
-            var sessionHash = await _cache.GetStringAsync(sessionIdKey);
-
+            var sessionHash = await _redisClient.ReadObject<string>(sessionIdKey);
             if (string.IsNullOrWhiteSpace(sessionHash))
                 return;
 
@@ -134,14 +106,20 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
 
         #region Private Methods
 
-        private static string BuildKey(string hash)
-            => $"{SESSION_DOCUMENT}{hash}";
+        private static string BuildSessionDataKey(string sessionHash)
+        {
+            return $"{SESSION_DATA_PREFIX}{sessionHash}";
+        }
 
         private static string BuildSessionIdIndexKey(Guid sessionId)
-            => $"{SESSION_ID_IDX}{sessionId}";
+        {
+            return $"{SESSION_ID_INDEX}{sessionId}";
+        }
 
-        private static string BuildUserIndexKey(Guid userId)
-            => $"{USER_ID_IDX}{userId}";
+        private static string BuildSessionUserIdIndexKey(Guid userId)
+        {
+            return $"{USER_ID_INDEX}{userId}";
+        }
 
         #endregion
     }

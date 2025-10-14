@@ -1,10 +1,10 @@
 ﻿using AuthCore.Domain.Aggregates.UserAggregate;
-using AuthCore.Infrastructure.Persistence.Database.Context;
+using AuthCore.Infrastructure.Persistence.PostgreSQL.Context;
 using Microsoft.EntityFrameworkCore;
 
-namespace AuthCore.Infrastructure.Persistence.Database.Repositories
+namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Repositories
 {
-    public sealed class UserRepository : Repository<User>, IUserRepository
+    public sealed class UserRepository : BaseRepository<User>, IUserRepository
     {
         public UserRepository(AppDbContext context)
             : base(context) { }

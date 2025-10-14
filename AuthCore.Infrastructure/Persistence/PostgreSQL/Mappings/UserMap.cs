@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace AuthCore.Infrastructure.Persistence.Database.Mappings
+namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Mappings
 {
     internal class UserMap : IEntityTypeConfiguration<User>
     {
