@@ -1,4 +1,4 @@
-﻿namespace AuthCore.Domain.Aggregates.EmailAggregate.Strategy
+﻿namespace AuthCore.Domain.Aggregates.EmailAggregate.Strategies
 {
     /// <summary>
     /// Representa um e-mail de boas-vindas enviado a novos usuários.

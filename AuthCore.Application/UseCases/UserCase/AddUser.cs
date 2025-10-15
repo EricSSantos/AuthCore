@@ -1,7 +1,7 @@
 ﻿using AuthCore.Application.Models.Input;
 using AuthCore.Application.UseCases.UserCase.Interfaces;
 using AuthCore.Domain.Aggregates.EmailAggregate;
-using AuthCore.Domain.Aggregates.EmailAggregate.Strategy;
+using AuthCore.Domain.Aggregates.EmailAggregate.Strategies;
 using AuthCore.Domain.Aggregates.UserAggregate;
 using AuthCore.Domain.Commons.Exceptions;
 using AuthCore.Domain.Commons.Interfaces.Security.Hashing;

@@ -1,4 +1,5 @@
-﻿using AuthCore.Domain.Commons.Exceptions;
+﻿using AuthCore.Domain.Aggregates.EmailAggregate.Payloads;
+using AuthCore.Domain.Commons.Exceptions;
 using AuthCore.Domain.Shared;
 
 namespace AuthCore.Domain.Aggregates.EmailAggregate
@@ -30,11 +31,4 @@ namespace AuthCore.Domain.Aggregates.EmailAggregate
             CreatedAt = DateTimeOffset.UtcNow;
         }
     }
-
-    /// <summary>
-    /// Estrutura base para dados adicionais que um e-mail pode transportar,
-    /// permitindo que cada tipo de e-mail defina seu próprio conteúdo.
-    /// </summary>
-    public abstract class EmailPayload
-    { }
 }
