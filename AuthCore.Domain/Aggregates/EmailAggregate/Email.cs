@@ -1,54 +1,40 @@
-﻿using AuthCore.Domain.Shared;
-using System.Text.Json;
+﻿using AuthCore.Domain.Commons.Exceptions;
+using AuthCore.Domain.Shared;
 
 namespace AuthCore.Domain.Aggregates.EmailAggregate
 {
-    public sealed class Email : Entity
+    /// <summary>
+    /// Representa a estrutura base para qualquer e-mail gerado no domínio,
+    /// contendo informações comuns como destinatário, tipo, payload e data de criação.
+    /// Implementações concretas devem definir o tipo e o conteúdo específico do e-mail.
+    /// </summary>
+    public abstract class Email : Entity
     {
-        #region Properties
-
-        public string To { get; private set; } = string.Empty;
-        public string FullName { get; private set; } = string.Empty;
+        public string To { get; private set; }
+        public string FullName { get; private set; }
         public EmailType Type { get; private set; }
-        public string Content { get; private set; } = string.Empty;
-        public DateTimeOffset CreatedAt { get; private set; } = DateTimeOffset.UtcNow;
+        public EmailPayload? Payload { get; private set; }
+        public DateTimeOffset CreatedAt { get; private set; }
 
-        #endregion
-
-        #region Constructors
-
-        private Email() { }
-
-        private Email(string to, string fullName, EmailType type, string content)
-        {
-            To = to;
-            FullName = fullName;
-            Type = type;
-            Content = content;
-        }
-
-        #endregion
-
-        #region Factory
-
-        public static Email Create(string to, string fullName, EmailType type, object data)
+        protected Email(string to, string fullName, EmailType type, EmailPayload? payload = null)
         {
             if (string.IsNullOrWhiteSpace(to))
-                throw new ArgumentException("O email do destinatário não pode ser vazio.");
-
+                throw new DomainException("O email do destinatário não pode ser vazio.");
             if (string.IsNullOrWhiteSpace(fullName))
-                throw new ArgumentException("O nome destinatário não pode ser vazio.");
+                throw new DomainException("O nome do destinatário não pode ser vazio.");
 
-            var serializedData = JsonSerializer.Serialize(data ?? new { });
-
-            return new Email(
-                to: to.Trim(),
-                fullName: fullName.Trim(),
-                type: type,
-                content: serializedData
-            );
+            To = to.Trim();
+            FullName = fullName.Trim();
+            Type = type;
+            Payload = payload;
+            CreatedAt = DateTimeOffset.UtcNow;
         }
-
-        #endregion
     }
+
+    /// <summary>
+    /// Estrutura base para dados adicionais que um e-mail pode transportar,
+    /// permitindo que cada tipo de e-mail defina seu próprio conteúdo.
+    /// </summary>
+    public abstract class EmailPayload
+    { }
 }

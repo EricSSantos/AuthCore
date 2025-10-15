@@ -23,30 +23,24 @@ namespace AuthCore.Infrastructure.Messaging.RabbitMq
             _logger = logger;
         }
 
-        public Task Send(string to, string fullName, EmailType type, object? data = null)
+        public Task Send(Email email)
         {
-            var email = Email.Create(
-                to,
-                fullName,
-                type,
-                data ?? new { }
-            );
-
             var document = new EmailDocument
             {
                 Id = email.Id,
                 To = email.To,
                 FullName = email.FullName,
                 Type = email.Type,
-                Content = email.Content,
-                CreatedAt = email.CreatedAt.UtcDateTime
+                Payload = email.Payload,
+                CreatedAt = email.CreatedAt
             };
 
             _client.Publish(_settings.EmailQueue, document);
 
-            _logger.LogInformation("E-mail {Type} enfileirado com ID {EmailId}", type, email.Id);
+            _logger.LogInformation("E-mail {EmailId} enfileirado.", email.Id);
 
             return Task.CompletedTask;
         }
+
     }
 }

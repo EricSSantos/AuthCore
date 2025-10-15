@@ -1,6 +1,7 @@
 ﻿using AuthCore.Application.Models.Input;
 using AuthCore.Application.UseCases.UserCase.Interfaces;
 using AuthCore.Domain.Aggregates.EmailAggregate;
+using AuthCore.Domain.Aggregates.EmailAggregate.Strategy;
 using AuthCore.Domain.Aggregates.UserAggregate;
 using AuthCore.Domain.Commons.Exceptions;
 using AuthCore.Domain.Commons.Interfaces.Security.Hashing;
@@ -40,21 +41,21 @@ namespace AuthCore.Application.UseCases.UserCase
             var password = _bcrypt.Hash(input.Password);
 
             var user = User.Create(
-                firstName: input.FirstName,
-                lastName: input.LastName,
-                email: input.Email,
-                password: password
+                firstName:  input.FirstName,
+                lastName:   input.LastName,
+                email:      input.Email,
+                password:   password
             );
 
             await _userRepository.Add(user);
             await _userRepository.SaveChanges();
 
-            // TESTE: Dispara e-mail de boas-vindas.
-            await _emailService.Send(
-                to: user.Email,
-                fullName: user.FullName,
-                type: EmailType.Welcome
+            var welcomeEmail = WelcomeEmail.Create(
+                to:         user.Email,
+                fullName:   user.FullName
             );
+
+            await _emailService.Send(welcomeEmail);
         }
 
         #region Private Methods

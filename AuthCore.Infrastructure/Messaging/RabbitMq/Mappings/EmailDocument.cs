@@ -17,10 +17,10 @@ namespace AuthCore.Infrastructure.Messaging.RabbitMq.Mappings
         [JsonPropertyName("type")]
         public EmailType Type { get; init; }
 
-        [JsonPropertyName("content")]
-        public string Content { get; init; } = string.Empty;
+        [JsonPropertyName("payload")]
+        public EmailPayload? Payload { get; init; }
 
         [JsonPropertyName("created_at")]
-        public DateTimeOffset CreatedAt { get; init; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset CreatedAt { get; init; }
     }
 }
