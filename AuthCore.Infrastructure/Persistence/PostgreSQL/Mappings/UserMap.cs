@@ -30,9 +30,15 @@ namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Mappings
                    .HasMaxLength(255)
                    .IsRequired();
 
-            builder.Property(u => u.Password)
-                   .HasColumnName("password")
-                   .IsRequired();
+            builder.OwnsOne(u => u.Password, vo =>
+            {
+                vo.Property(p => p.Value)
+                  .HasColumnName("password")
+                  .HasMaxLength(255)
+                  .IsRequired();
+
+                vo.WithOwner();
+            });
 
             builder.Property(u => u.Role)
                    .HasConversion<int>()

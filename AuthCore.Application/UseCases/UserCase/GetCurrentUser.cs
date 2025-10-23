@@ -22,15 +22,14 @@ namespace AuthCore.Application.UseCases.UserCase
         public async Task<UserViewModel> OnExecute()
         {
             var user = await _userRepository.GetById(_accessToken.Sub)
-                ?? throw new NotFoundException();
+                ?? throw new NotFoundException("O usuário associado a este acesso não foi encontrado.");
 
             return new UserViewModel
             {
                 Id = user.Id,
                 Email = user.Email,
-                Name = user.FullName,
-                Role = user.Role.ToString(),
-                CreatedAt = user.CreatedAt
+                FullName = user.FullName,
+                Role = user.Role.ToString()
             };
         }
     }

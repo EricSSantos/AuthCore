@@ -62,9 +62,12 @@ namespace AuthCore.Application.UseCases.AuthCase
         private async Task<User> EnsureCredentials(SignInInputModel input)
         {
             var user = await _userRepository.GetByEmail(input.Email)
-                ?? throw new UnauthorizedException();
+                ?? throw new UnauthorizedException("E-mail ou senha inválidos.");
 
-            user.SignIn(_bCrypt.isValid(input.Password, user.Password));
+            // Verifica se a senha informada corresponde ao hash armazenado
+            var passwordIsValid = _bCrypt.isValid(input.Password, user.Password.Value);
+
+            user.SignIn(passwordIsValid);
 
             _userRepository.Update(user);
             await _userRepository.SaveChanges();

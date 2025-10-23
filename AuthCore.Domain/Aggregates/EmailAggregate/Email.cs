@@ -1,21 +1,30 @@
 ﻿using AuthCore.Domain.Aggregates.EmailAggregate.Payloads;
+using AuthCore.Domain.Aggregates.EmailAggregate.Strategies;
 using AuthCore.Domain.Commons.Exceptions;
 using AuthCore.Domain.Shared;
 
 namespace AuthCore.Domain.Aggregates.EmailAggregate
 {
     /// <summary>
-    /// Representa a estrutura base para qualquer e-mail gerado no domínio,
+    /// Estrutura base para qualquer e-mail,
     /// contendo informações comuns como destinatário, tipo, payload e data de criação.
-    /// Implementações concretas devem definir o tipo e o conteúdo específico do e-mail.
     /// </summary>
     public abstract class Email : Entity
     {
+        #region Properties
+
         public string To { get; private set; }
         public string FullName { get; private set; }
         public EmailType Type { get; private set; }
         public EmailPayload? Payload { get; private set; }
         public DateTimeOffset CreatedAt { get; private set; }
+
+        #endregion
+
+        #region Constructors
+
+        private Email()
+        { }
 
         protected Email(string to, string fullName, EmailType type, EmailPayload? payload = null)
         {
@@ -30,5 +39,21 @@ namespace AuthCore.Domain.Aggregates.EmailAggregate
             Payload = payload;
             CreatedAt = DateTimeOffset.UtcNow;
         }
+
+        #endregion
+
+        #region Factory
+
+        public static Email Create(string to, string fullName, EmailType type, EmailPayload? payload = null)
+        {
+            return type switch
+            {
+                EmailType.Welcome => WelcomeEmail.Create(to, fullName),
+                EmailType.ForgotPassword => ForgotPasswordEmail.Create(to, fullName),
+                _ => throw new DomainException("Tipo de email desconhecido.")
+            };
+        }
+
+        #endregion
     }
 }

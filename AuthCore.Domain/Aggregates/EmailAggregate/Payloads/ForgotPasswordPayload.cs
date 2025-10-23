@@ -3,27 +3,24 @@
 namespace AuthCore.Domain.Aggregates.EmailAggregate.Payloads
 {
     /// <summary>
-    /// Payload específico para e-mails de recuperação de senha,
-    /// contendo o código OTP que será validado pelo usuário.
+    /// Payload para e-mails de recuperação de senha,
+    /// contendo o código numérico que será validado pelo usuário.
     /// </summary>
     public sealed class ForgotPasswordPayload : EmailPayload
     {
-        private const int OTP_LENGTH = 6;
+        private const int CODE_MIN = 100_000;
+        private const int CODE_MAX = 1_000_000;
 
-        public string Code { get; init; }
+        public int Code { get; init; }
 
         public ForgotPasswordPayload()
         {
-            Code = GenerateOtp();
+            Code = GenerateCode();
         }
 
-        /// <summary>
-        /// Gera um código numérico aleatório OTP de 6 dígitos.
-        /// </summary>
-        private static string GenerateOtp()
+        private static int GenerateCode()
         {
-            int value = RandomNumberGenerator.GetInt32(0, 1_000_000);
-            return value.ToString().PadLeft(OTP_LENGTH, '0');
+            return RandomNumberGenerator.GetInt32(CODE_MIN, CODE_MAX);
         }
     }
 }

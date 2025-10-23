@@ -10,13 +10,10 @@ namespace AuthCore.Application.Models.Output
         [JsonPropertyName("email")]
         public string Email { get; init; } = string.Empty;
 
-        [JsonPropertyName("name")]
-        public string Name { get; init; } = string.Empty;
+        [JsonPropertyName("full_name")]
+        public string FullName { get; init; } = string.Empty;
 
         [JsonPropertyName("role")]
         public string Role { get; init; } = string.Empty;
-
-        [JsonPropertyName("created_at")]
-        public DateTimeOffset CreatedAt { get; init; }
     }
 }

@@ -21,7 +21,8 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
 
         #region Constructors
 
-        protected LoginAttempts() { }
+        protected LoginAttempts()
+        { }
 
         private LoginAttempts(
             int failedAttempts,

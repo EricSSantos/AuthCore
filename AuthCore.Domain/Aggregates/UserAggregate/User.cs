@@ -10,34 +10,44 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         public string FirstName { get; private set; }
         public string LastName { get; private set; }
         public string Email { get; private set; }
-        public string Password { get; private set; }
-        public Role Role { get; private set; }
+        public Password Password { get; private set; }
+        public RoleType Role { get; private set; }
         public bool Active { get; private set; }
-        public DateTimeOffset CreatedAt { get; private set; }
-        public DateTimeOffset? InactivatedAt { get; private set; }
+        public DateTime CreatedAt { get; private set; }
+        public DateTime? InactivatedAt { get; private set; }
         public LoginAttempts LoginAttempts { get; private set; }
 
         #endregion
 
         #region Constructors
 
-        protected User() { }
+        protected User() 
+        { }
 
         private User(
             string firstName,
             string lastName,
             string email,
-            string password,
-            Role role,
+            string hashedPassword,
+            RoleType role,
             bool active)
         {
+            if (string.IsNullOrWhiteSpace(firstName))
+                throw new DomainException("O nome é obrigatório.");
+            if (string.IsNullOrWhiteSpace(lastName))
+                throw new DomainException("O sobrenome é obrigatório.");
+            if (string.IsNullOrWhiteSpace(email))
+                throw new DomainException("O e-mail é obrigatório.");
+            if (string.IsNullOrWhiteSpace(hashedPassword))
+                throw new DomainException("A senha é obrigatória.");
+
             FirstName = firstName;
             LastName = lastName;
             Email = email.ToLowerInvariant();
-            Password = password;
+            Password = Password.Create(hashedPassword);
             Role = role;
             Active = active;
-            CreatedAt = DateTimeOffset.UtcNow;
+            CreatedAt = DateTime.UtcNow;
             LoginAttempts = LoginAttempts.Create();
         }
 
@@ -50,21 +60,9 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
             string lastName,
             string email,
             string password,
-            Role role = Role.User,
+            RoleType role = RoleType.User,
             bool active = true)
         {
-            if (string.IsNullOrWhiteSpace(firstName))
-                throw new DomainException("O nome é obrigatório.");
-
-            if (string.IsNullOrWhiteSpace(lastName))
-                throw new DomainException("O sobrenome é obrigatório.");
-
-            if (string.IsNullOrWhiteSpace(email))
-                throw new DomainException("O email é obrigatório.");
-
-            if (string.IsNullOrWhiteSpace(password))
-                throw new DomainException("A senha é obrigatória.");
-
             return new User(firstName, lastName, email, password, role, active);
         }
 
@@ -99,7 +97,7 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
             if (Active)
             {
                 Active = false;
-                InactivatedAt = DateTimeOffset.UtcNow;
+                InactivatedAt = DateTime.UtcNow;
             }
         }
 
@@ -111,7 +109,7 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
             if (!passwordIsValid)
             {
                 LoginAttempts = LoginAttempts.RegisterFailure();
-                throw new UnauthorizedException();
+                throw new UnauthorizedException("E-mail ou senha inválidos.");
             }
 
             if (LoginAttempts.FailedAttempts > 0)

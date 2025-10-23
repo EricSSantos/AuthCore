@@ -2,7 +2,7 @@
 
 namespace AuthCore.Domain.Aggregates.UserAggregate
 {
-    public enum Role
+    public enum RoleType
     {
         [Description("Usuário")]
         User,
