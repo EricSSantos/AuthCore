@@ -41,15 +41,17 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
 
         #region Behavior
 
-        public static void EnsureIsValid(string plainPassword)
+        public static void EnsureIsValid(string password, string? confirmPassword = "")
         {
-            if (string.IsNullOrWhiteSpace(plainPassword))
+            if (string.IsNullOrWhiteSpace(password))
                 throw new DomainException("A senha não pode ser vazia.");
-            if (plainPassword.Length < MIN_LENGTH)
+            if (!string.IsNullOrEmpty(confirmPassword) && password != confirmPassword)
+                throw new DomainException("A confirmação da senha não corresponde.");
+            if (password.Length < MIN_LENGTH)
                 throw new DomainException($"A senha deve ter pelo menos {MIN_LENGTH} caracteres.");
-            if (plainPassword.Length > MAX_LENGTH)
+            if (password.Length > MAX_LENGTH)
                 throw new DomainException($"A senha não pode exceder {MAX_LENGTH} caracteres.");
-            if (!IsStrong(plainPassword))
+            if (!IsStrong(password))
                 throw new DomainException("A senha deve conter letras maiúsculas e minúsculas.");
         }
 

@@ -65,16 +65,20 @@ namespace AuthCore.Api.Configurations
         #region Application
         private static IServiceCollection AddApplication(this IServiceCollection services)
         {
+            // Auth
             services.AddScoped<IOwnership, Ownership>();
             services.AddScoped<ISignIn, SignIn>();
             services.AddScoped<ISignOut, SignOut>();
             services.AddScoped<IRefresh, Refresh>();
+            // Session
             services.AddScoped<IGetSessions, GetSessions>();
             services.AddScoped<IRevokeSession, RevokeSessions>();
             // User
             services.AddScoped<IAddUser, AddUser>();
             services.AddScoped<IGetCurrentUser, GetCurrentUser>();
             services.AddScoped<IForgotPassword, ForgotPassword>();
+            services.AddScoped<IResetPassword, ResetPassword>();
+            services.AddScoped<IChangePassword, ChangePassword>();
 
             return services;
         }
@@ -96,9 +100,7 @@ namespace AuthCore.Api.Configurations
             // Messaging
             services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
             services.AddSingleton<IEmailService, EmailService>();
-
-            services.AddScoped<IConfirmCodeRepository, ConfirmCodeRepository>();
-
+            
             return services;
         }
         #endregion
@@ -112,6 +114,7 @@ namespace AuthCore.Api.Configurations
             // Redis Repositories
             services.AddScoped<IRedisContext, RedisContext>();
             services.AddScoped<ISessionRepository, SessionRepository>();
+            services.AddScoped<IConfirmCodeRepository, ConfirmCodeRepository>();
 
             return services;
         }

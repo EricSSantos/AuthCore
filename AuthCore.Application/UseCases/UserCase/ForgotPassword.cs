@@ -23,6 +23,9 @@ public sealed class ForgotPassword : IForgotPassword
 
     public async Task OnExecute(ForgotPasswordInputModel input)
     {
+        // Se o e-mail já estiver cadastrado, interrompe o processo silenciosamente.
+        // Isso evita expor informações sobre contas existentes e protege contra
+        // ataques de enumeração de e-mails válidos.
         var user = await _userRepository.GetByEmail(input.Email);
         if (user is null)
             return;
@@ -36,10 +39,10 @@ public sealed class ForgotPassword : IForgotPassword
         if (email.Payload is ForgotPasswordPayload payload)
         {
             var code = ConfirmCode.Create(
-                payload.Code, 
+                payload.Code,
                 CodeType.ForgotPassword
             );
-            
+
             await _confirmCodeRepository.Set(user.Id, code);
             await _emailService.Send(email);
         }

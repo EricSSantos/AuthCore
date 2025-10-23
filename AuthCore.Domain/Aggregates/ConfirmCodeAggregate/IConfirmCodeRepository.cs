@@ -3,6 +3,6 @@
     public interface IConfirmCodeRepository
     {
         Task Set(Guid userId, ConfirmCode verificationCode);
-        Task<object?> Get(Guid userId, CodeType type);
+        Task<ConfirmCode?> Get(Guid userId, CodeType type);
     }
 }

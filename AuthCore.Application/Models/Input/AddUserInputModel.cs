@@ -5,18 +5,18 @@ namespace AuthCore.Application.Models.Input
     public sealed record AddUserInputModel
     {
         [JsonPropertyName("first_name")]
-        public string FirstName { get; init; } = string.Empty;
+        public required string FirstName { get; init; }
 
         [JsonPropertyName("last_name")]
-        public string LastName { get; init; } = string.Empty;
+        public required string LastName { get; init; }
 
         [JsonPropertyName("email")]
-        public string Email { get; init; } = string.Empty;
+        public required string Email { get; init; }
 
         [JsonPropertyName("password")]
-        public string Password { get; init; } = string.Empty;
+        public required string Password { get; init; }
 
         [JsonPropertyName("confirm_password")]
-        public string ConfirmPassword { get; init; } = string.Empty;
+        public required string ConfirmPassword { get; init; }
     }
 }

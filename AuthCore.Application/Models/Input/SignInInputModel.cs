@@ -5,9 +5,9 @@ namespace AuthCore.Application.Models.Input
     public sealed record SignInInputModel
     {
         [JsonPropertyName("email")]
-        public string Email { get; init; } = string.Empty;
+        public required string Email { get; init; }
 
         [JsonPropertyName("password")]
-        public string Password { get; init; } = string.Empty;
+        public required string Password { get; init; }
     }
 }

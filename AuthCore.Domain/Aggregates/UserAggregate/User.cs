@@ -116,6 +116,12 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
                 LoginAttempts = LoginAttempts.Reset();
         }
 
+        public void ChangePassword(string hashedPassword, string password, string? confirmPassword = "")
+        {
+            Password.EnsureIsValid(password, confirmPassword);
+            Password = Password.Create(hashedPassword);
+        }
+
         #endregion
     }
 }
