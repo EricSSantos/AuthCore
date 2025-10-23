@@ -6,6 +6,7 @@ using AuthCore.Application.UseCases.SessionCase;
 using AuthCore.Application.UseCases.SessionCase.Interfaces;
 using AuthCore.Application.UseCases.UserCase;
 using AuthCore.Application.UseCases.UserCase.Interfaces;
+using AuthCore.Domain.Aggregates.ConfirmCodeAggregate;
 using AuthCore.Domain.Aggregates.EmailAggregate;
 using AuthCore.Domain.Aggregates.SessionAggregate;
 using AuthCore.Domain.Aggregates.UserAggregate;
@@ -70,8 +71,10 @@ namespace AuthCore.Api.Configurations
             services.AddScoped<IRefresh, Refresh>();
             services.AddScoped<IGetSessions, GetSessions>();
             services.AddScoped<IRevokeSession, RevokeSessions>();
+            // User
             services.AddScoped<IAddUser, AddUser>();
             services.AddScoped<IGetCurrentUser, GetCurrentUser>();
+            services.AddScoped<IForgotPassword, ForgotPassword>();
 
             return services;
         }
@@ -93,6 +96,8 @@ namespace AuthCore.Api.Configurations
             // Messaging
             services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
             services.AddSingleton<IEmailService, EmailService>();
+
+            services.AddScoped<IConfirmCodeRepository, ConfirmCodeRepository>();
 
             return services;
         }

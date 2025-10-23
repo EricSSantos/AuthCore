@@ -12,11 +12,11 @@ namespace AuthCore.Domain.Commons.Interfaces.Security.Jwt
         /// <summary>
         /// Obtém a função (role) do usuário associada ao token.
         /// </summary>
-        Role Role { get; }
+        RoleType Role { get; }
 
         /// <summary>
         /// Gera um novo token de acesso para o usuário especificado.
         /// </summary>
-        string Generate(Guid userId, Role role);
+        string Generate(Guid userId, RoleType role);
     }
 }

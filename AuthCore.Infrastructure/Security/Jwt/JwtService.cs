@@ -53,7 +53,7 @@ namespace AuthCore.Infrastructure.Security.Jwt
             }
         }
 
-        public Role Role
+        public RoleType Role
         {
             get
             {
@@ -62,14 +62,14 @@ namespace AuthCore.Infrastructure.Security.Jwt
                 if (string.IsNullOrWhiteSpace(claimValue))
                     throw new UnauthorizedException("Claim 'role' ausente no token.");
 
-                if (!Enum.TryParse<Role>(claimValue, out var role))
+                if (!Enum.TryParse<RoleType>(claimValue, out var role))
                     throw new UnauthorizedException("Claim 'role' inválida no token.");
 
                 return role;
             }
         }
 
-        public string Generate(Guid userId, Role role)
+        public string Generate(Guid userId, RoleType role)
         {
             var claims = new List<Claim>
             {
