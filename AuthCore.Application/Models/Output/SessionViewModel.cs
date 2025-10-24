@@ -17,7 +17,7 @@ namespace AuthCore.Application.Models.Output
         public string Browser { get; init; } = string.Empty;
 
         [JsonPropertyName("created_at")]
-        public DateTimeOffset CreatedAt { get; init; }
+        public DateTime CreatedAt { get; init; }
 
         [JsonPropertyName("is_current")]
         public bool IsCurrent { get; init; }

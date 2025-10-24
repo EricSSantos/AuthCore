@@ -22,7 +22,10 @@ namespace AuthCore.Application.UseCases.UserCase
         public async Task<UserViewModel> OnExecute()
         {
             var user = await _userRepository.GetById(_accessToken.Sub)
-                ?? throw new NotFoundException("O usuário associado a este acesso não foi encontrado.");
+                ?? throw new NotFoundException("Usuário não encontrado.");
+
+            if (!user.IsActive())
+                throw new ForbiddenException("Usuário inativo ou bloqueado.");
 
             return new UserViewModel
             {

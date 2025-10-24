@@ -1,5 +1,5 @@
 ﻿using AuthCore.Application.Models;
-using AuthCore.Domain.Commons.Exceptions;
+using AuthCore.Domain.Shared;
 using System.Net;
 using System.Text.Json;
 
@@ -50,7 +50,7 @@ namespace AuthCore.Api.Configurations
                     {
                         // Fallback genérico
                         status = HttpStatusCode.InternalServerError;
-                        title = "Erro interno no servidor";
+                        title = "Erro interno do servidor";
                         errors = new[] { "Ocorreu um erro interno no servidor." };
                     }
 

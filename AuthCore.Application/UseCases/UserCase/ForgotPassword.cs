@@ -4,43 +4,45 @@ using AuthCore.Domain.Aggregates.ConfirmCodeAggregate;
 using AuthCore.Domain.Aggregates.EmailAggregate;
 using AuthCore.Domain.Aggregates.EmailAggregate.Payloads;
 using AuthCore.Domain.Aggregates.UserAggregate;
+using AuthCore.Domain.Commons.Exceptions;
 
-public sealed class ForgotPassword : IForgotPassword
+namespace AuthCore.Application.UseCases.UserCase
 {
-    private readonly IUserRepository _userRepository;
-    private readonly IEmailService _emailService;
-    private readonly IConfirmCodeRepository _confirmCodeRepository;
-
-    public ForgotPassword(
-        IUserRepository userRepository,
-        IEmailService emailService,
-        IConfirmCodeRepository confirmCodeRepository)
+    public sealed class ForgotPassword : IForgotPassword
     {
-        _userRepository = userRepository;
-        _emailService = emailService;
-        _confirmCodeRepository = confirmCodeRepository;
-    }
+        private readonly IUserRepository _userRepository;
+        private readonly IEmailService _emailService;
+        private readonly IConfirmCodeRepository _confirmCodeRepository;
 
-    public async Task OnExecute(ForgotPasswordInputModel input)
-    {
-        // Se o e-mail já estiver cadastrado, interrompe o processo silenciosamente.
-        // Isso evita expor informações sobre contas existentes e protege contra
-        // ataques de enumeração de e-mails válidos.
-        var user = await _userRepository.GetByEmail(input.Email);
-        if (user is null)
-            return;
-
-        var email = Email.Create(
-            to: user.Email,
-            fullName: user.FullName,
-            type: EmailType.ForgotPassword
-        );
-
-        if (email.Payload is ForgotPasswordPayload payload)
+        public ForgotPassword(
+            IUserRepository userRepository,
+            IEmailService emailService,
+            IConfirmCodeRepository confirmCodeRepository)
         {
+            _userRepository = userRepository;
+            _emailService = emailService;
+            _confirmCodeRepository = confirmCodeRepository;
+        }
+
+        public async Task OnExecute(ForgotPasswordInputModel input)
+        {
+            // Busca silenciosa, não revela se o e-mail existe
+            var user = await _userRepository.GetByEmail(input.Email);
+            if (user is null || !user.IsActive())
+                return;
+
+            var email = Email.Create(
+                to:         user.Email,
+                fullName:   user.FullName,
+                type:       EmailType.ForgotPassword
+            );
+
+            if (email.Payload is not ForgotPasswordPayload payload)
+                throw new BadRequestException("Falha ao gerar o código de recuperação de senha.");
+
             var code = ConfirmCode.Create(
-                payload.Code,
-                CodeType.ForgotPassword
+                code:   payload.Code,
+                type:   CodeType.ForgotPassword
             );
 
             await _confirmCodeRepository.Set(user.Id, code);

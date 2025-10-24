@@ -23,9 +23,6 @@ namespace AuthCore.Api.Controllers.v1
             _refresh = refresh;
         }
 
-        /// <summary>
-        /// Autentica e inicia uma nova sessão.
-        /// </summary>
         [HttpPost("sign-in")]
         public async Task<ActionResult> SignIn(SignInInputModel input)
         {
@@ -33,9 +30,6 @@ namespace AuthCore.Api.Controllers.v1
             return NoContent();
         }
 
-        /// <summary>
-        /// Encerra a sessão.
-        /// </summary>
         [Authorize]
         [HttpPost("sign-out")]
         public async Task<ActionResult> SignOut()
@@ -44,9 +38,6 @@ namespace AuthCore.Api.Controllers.v1
             return NoContent();
         }
 
-        /// <summary>
-        /// Renova o token de acesso.
-        /// </summary>
         [HttpPost("refresh-token")]
         public async Task<ActionResult> RefreshToken()
         {

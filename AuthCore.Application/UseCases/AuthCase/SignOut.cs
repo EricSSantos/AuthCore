@@ -32,7 +32,7 @@ namespace AuthCore.Application.UseCases.AuthCase
             var hashedSession = _entropy.Hash(rawSession);
 
             var session = await _sessionRepository.Get(hashedSession)
-                ?? throw new NotFoundException();
+                ?? throw new NotFoundException("Sessão não encontrada");
 
             var sessionMatches = _entropy.Verify(rawSession, session.SessionHash);
 
@@ -40,11 +40,9 @@ namespace AuthCore.Application.UseCases.AuthCase
             {
                 await _sessionRepository.Delete(session.SessionHash);
                 _cookie.RemoveAuthCookies();
-                throw new UnauthorizedException();
+                throw new UnauthorizedException("Sessão inválida. Faça login novamente.");
             }
 
-            // Garante que a sessão pertence ao usuário autenticado
-            // evitando exclusão indevida.
             _ownership.Ensure(session.UserId);
 
             await _sessionRepository.Delete(hashedSession);

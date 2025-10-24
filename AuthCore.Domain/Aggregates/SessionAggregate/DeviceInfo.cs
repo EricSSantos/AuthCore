@@ -1,4 +1,6 @@
-﻿using AuthCore.Domain.Shared;
+﻿using AuthCore.Domain.Commons.Exceptions;
+using AuthCore.Domain.Shared;
+using System.Net;
 
 namespace AuthCore.Domain.Aggregates.SessionAggregate
 {
@@ -16,10 +18,7 @@ namespace AuthCore.Domain.Aggregates.SessionAggregate
 
         protected DeviceInfo() { }
 
-        private DeviceInfo(
-            string ip,
-            string platform,
-            string browser)
+        private DeviceInfo(string ip, string platform, string browser)
         {
             Ip = ip;
             Platform = platform;
@@ -30,35 +29,41 @@ namespace AuthCore.Domain.Aggregates.SessionAggregate
 
         #region Factory
 
-        public static DeviceInfo Create(
-            string ip,
-            string platform,
-            string browser)
+        public static DeviceInfo Create(string ip, string? platform, string? browser)
         {
+            var errors = new List<string>();
+
             if (string.IsNullOrWhiteSpace(ip))
-                throw new ArgumentException("IP é obrigatório.", nameof(ip));
+                errors.Add("O endereço IP é obrigatório.");
+            else if (!IsValidIp(ip))
+                errors.Add("O endereço IP informado é inválido.");
 
-            platform ??= "Unknown";
-            browser ??= "Unknown";
+            platform = string.IsNullOrWhiteSpace(platform) ? "Desconhecido" : platform.Trim();
+            browser = string.IsNullOrWhiteSpace(browser) ? "Desconhecido" : browser.Trim();
 
-            return new DeviceInfo(ip, platform, browser);
+            if (errors.Any())
+                throw new BadRequestException(errors);
+
+            return new DeviceInfo(ip.Trim(), platform.Trim(), browser.Trim());
         }
 
         #endregion
 
         #region Behavior
 
+        /// <summary>
+        /// Verifica se o endereço IP informado é válido.
+        /// </summary>
+        private static bool IsValidIp(string ip)
+        {
+            return IPAddress.TryParse(ip, out _);
+        }
+
         protected override IEnumerable<object> GetValues()
         {
             yield return Ip;
             yield return Platform;
             yield return Browser;
-        }
-
-        public override string ToString()
-        {
-            return $"{Platform} : {Browser} ";
-            return $"{Platform} : {Browser} ";
         }
 
         #endregion

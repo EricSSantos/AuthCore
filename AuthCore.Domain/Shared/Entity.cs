@@ -1,7 +1,7 @@
 ﻿namespace AuthCore.Domain.Shared
 {
     /// <summary>
-    /// Representa a classe base para todas as entidades do domínio.
+    /// Classe base para todas as entidades do domínio.
     /// </summary>
     public abstract class Entity
     {
@@ -16,6 +16,23 @@
         protected Entity()
         {
             Id = Guid.NewGuid();
+        }
+
+        /// <summary>
+        /// Inicializa uma nova instância da entidade com um identificador existente.
+        /// Usado principalmente na reidratação a partir do banco de dados.
+        /// </summary>
+        protected Entity(Guid id)
+        {
+            Id = id;
+        }
+
+        /// <summary>
+        /// Cria uma nova instância de um validador de domínio.
+        /// </summary>
+        protected DomainValidator Validator()
+        {
+            return new DomainValidator();
         }
     }
 }

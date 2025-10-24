@@ -25,20 +25,19 @@ namespace AuthCore.Application.UseCases.UserCase
 
         public async Task OnExecute(ResetPasswordInputModel input)
         {
-            var user = await _userRepository.GetByEmail(input.Email);
-            if (user is null)
-                return;
+            var user = await _userRepository.GetByEmail(input.Email)
+                ?? throw new NotFoundException("Usuário não encontrado.");
 
             var confirmCode = await _confirmCodeRepository.Get(user.Id, CodeType.ForgotPassword)
-                ?? throw new DomainException("Código de confirmação inválido ou expirado.");
+                ?? throw new NotFoundException("Código nãod encontrado.");
 
-            if (confirmCode.Code != input.Code)
-                throw new DomainException("O código informado é inválido.");
+            if (confirmCode.IsMatching(input.Code) || !user.IsActive())
+                throw new BadRequestException("Código de verificação inválido.");
 
             user.ChangePassword(
-                _bcrypt.Hash(input.NewPassword),
-                input.NewPassword,
-                input.ConfirmNewPassword
+                hashedPassword:     _bcrypt.Hash(input.NewPassword),
+                password:           input.NewPassword,
+                confirmPassword:    input.ConfirmNewPassword
             );
 
             _userRepository.Update(user);

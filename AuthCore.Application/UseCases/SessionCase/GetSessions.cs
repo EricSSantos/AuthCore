@@ -29,11 +29,8 @@ namespace AuthCore.Application.UseCases.SessionCase
 
         public async Task<IEnumerable<SessionViewModel>> OnExecute()
         {
-            var userId = _accessToken.Sub;
-            var hashedSession = _entropy.Hash(_cookie.Session);
-
-            var sessions = (await _sessionRepository.GetByUserId(userId)).ToList();
-            if (sessions.Count == 0)
+            var sessions = (await _sessionRepository.GetByUserId(_accessToken.Sub)).ToList();
+            if (sessions.Count <= 0)
                 throw new NotFoundException("Nenhuma sessão encontrada.");
 
             return sessions.Select(s => new SessionViewModel
@@ -43,7 +40,7 @@ namespace AuthCore.Application.UseCases.SessionCase
                 Platform = s.DeviceInfo.Platform,
                 Browser = s.DeviceInfo.Browser,
                 CreatedAt = s.CreatedAt,
-                IsCurrent = s.SessionHash == hashedSession
+                IsCurrent = s.SessionHash == _entropy.Hash(_cookie.Session)
             });
         }
     }

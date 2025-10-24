@@ -1,25 +1,14 @@
-﻿using AuthCore.Domain.Commons.Exceptions;
-using AuthCore.Domain.Shared;
+﻿using AuthCore.Domain.Shared;
 using System.Text.RegularExpressions;
 
 namespace AuthCore.Domain.Aggregates.UserAggregate
 {
     public sealed class Password : ValueObject
     {
-        #region Constants
-
         private const int MIN_LENGTH = 8;
-        private const int MAX_LENGTH = 64;
-
-        #endregion
-
-        #region Properties
+        private const int MAX_LENGTH = 24;
 
         public string Value { get; }
-
-        #endregion
-
-        #region Constructors
 
         protected Password() { }
 
@@ -28,49 +17,37 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
             Value = hashedPassword;
         }
 
-        #endregion
-
-        #region Factory
-
         public static Password Create(string hashedPassword)
         {
             return new Password(hashedPassword);
         }
 
-        #endregion
-
-        #region Behavior
-
-        public static void EnsureIsValid(string password, string? confirmPassword = "")
+        /// <summary>
+        /// Valida se a senha atende aos critérios de segurança e correspondência com a confirmação.
+        /// </summary>
+        public static void Validate(string password, string? confirmPassword = "")
         {
+            var validate = new DomainValidator();
+
             if (string.IsNullOrWhiteSpace(password))
-                throw new DomainException("A senha não pode ser vazia.");
-            if (!string.IsNullOrEmpty(confirmPassword) && password != confirmPassword)
-                throw new DomainException("A confirmação da senha não corresponde.");
-            if (password.Length < MIN_LENGTH)
-                throw new DomainException($"A senha deve ter pelo menos {MIN_LENGTH} caracteres.");
-            if (password.Length > MAX_LENGTH)
-                throw new DomainException($"A senha não pode exceder {MAX_LENGTH} caracteres.");
-            if (!IsStrong(password))
-                throw new DomainException("A senha deve conter letras maiúsculas e minúsculas.");
-        }
+                validate.AddError("A senha não pode estar vazia.");
 
-        private static bool IsStrong(string password)
-        {
-            // - Pelo menos 1 letra minúscula
-            // - Pelo menos 1 letra maiúscula
-            // - Pelo menos 1 número
-            // - Pelo menos 1 caractere especial
-            // - Mínimo de 8 caracteres
-            var regex = new Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$");
-            return regex.IsMatch(password);
+            if (!string.IsNullOrEmpty(confirmPassword) && password != confirmPassword)
+                validate.AddError("As senhas não correspondem.");
+
+            if (password.Length < MIN_LENGTH || password.Length > MAX_LENGTH)
+                validate.AddError($"A senha deve conter entre {MIN_LENGTH} e {MAX_LENGTH} caracteres.");
+
+            var regex = new Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,24}$");
+            if (!regex.IsMatch(password))
+                validate.AddError("A senha deve conter letras maiúsculas, minúsculas, números e caracteres especiais.");
+
+            validate.ThrowIfInvalid();
         }
 
         protected override IEnumerable<object?> GetValues()
         {
             yield return Value;
         }
-
-        #endregion
     }
 }

@@ -5,17 +5,17 @@
         /// <summary>
         /// Armazena um objeto no Redis com tempo de expiração.
         /// </summary>
-        Task WriteObject<T>(string key, T value, TimeSpan ttl);
+        Task Set<T>(string key, T value, TimeSpan ttl);
 
         /// <summary>
         /// Lê um objeto armazenado no Redis.
         /// </summary>
-        Task<T?> ReadObject<T>(string key);
+        Task<T?> Get<T>(string key);
 
         /// <summary>
         /// Remove uma chave do Redis.
         /// </summary>
-        Task DeleteKey(string key);
+        Task Delete(string key);
 
         /// <summary>
         /// Adiciona um valor em um índice do tipo Set.

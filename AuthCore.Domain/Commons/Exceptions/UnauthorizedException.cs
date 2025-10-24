@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using AuthCore.Domain.Shared;
+using System.Net;
 
 namespace AuthCore.Domain.Commons.Exceptions
 {
@@ -15,13 +16,11 @@ namespace AuthCore.Domain.Commons.Exceptions
         }
 
         public UnauthorizedException()
-            : base("O acesso não foi autorizado.")
-        {
-        }
+            : base("Você não tem autorização para acessar este recurso.")
+        { }
 
         public UnauthorizedException(string message)
             : base(message)
-        {
-        }
+        { }
     }
 }

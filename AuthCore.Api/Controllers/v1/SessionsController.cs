@@ -23,9 +23,6 @@ namespace AuthCore.Api.Controllers.v1
             _revokeSessions = revokeSessions;
         }
 
-        /// <summary>
-        /// Retorna todas as sessões ativas.
-        /// </summary>
         [HttpGet]
         public async Task<ActionResult<Response<IEnumerable<SessionViewModel>>>> GetAll()
         {
@@ -40,9 +37,6 @@ namespace AuthCore.Api.Controllers.v1
             return Ok(response);
         }
 
-        /// <summary>
-        /// Revoga uma ou mais sessões.
-        /// </summary>
         [HttpDelete]
         public async Task<ActionResult<Response<object>>> Revoke([FromBody] List<Guid> ids)
         {

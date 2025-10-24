@@ -1,5 +1,4 @@
 ﻿using AuthCore.Domain.Aggregates.UserAggregate;
-using AuthCore.Domain.Commons.Exceptions;
 using AuthCore.Domain.Shared;
 
 namespace AuthCore.Domain.Aggregates.SessionAggregate
@@ -9,12 +8,12 @@ namespace AuthCore.Domain.Aggregates.SessionAggregate
         #region Properties
 
         public Guid UserId { get; private set; }
-        public User User { get; private set; } = null!;
-        public string SessionHash { get; private set; } = string.Empty;
-        public string RefreshTokenHash { get; private set; } = string.Empty;
-        public DeviceInfo DeviceInfo { get; private set; } = null!;
-        public DateTimeOffset CreatedAt { get; private set; }
-        public DateTimeOffset ExpiresAt { get; private set; }
+        public User User { get; private set; }
+        public string SessionHash { get; private set; }
+        public string RefreshTokenHash { get; private set; }
+        public DeviceInfo DeviceInfo { get; private set; }
+        public DateTime CreatedAt { get; private set; }
+        public DateTime ExpiresAt { get; private set; }
 
         #endregion
 
@@ -25,15 +24,16 @@ namespace AuthCore.Domain.Aggregates.SessionAggregate
         private Session(
             Guid userId,
             DeviceInfo deviceInfo,
-            string sessionHash, string
-            refreshToken)
+            string sessionHash,
+            string refreshToken)
         {
             UserId = userId;
             DeviceInfo = deviceInfo;
             SessionHash = sessionHash;
             RefreshTokenHash = refreshToken;
-            CreatedAt = DateTimeOffset.UtcNow;
-            ExpiresAt = CreatedAt.Add(TimeSpan.FromDays(7));
+            CreatedAt = DateTime.UtcNow;
+            ExpiresAt = CreatedAt.AddDays(7);
+            Validate();
         }
 
         #endregion
@@ -46,30 +46,39 @@ namespace AuthCore.Domain.Aggregates.SessionAggregate
             string sessionHash,
             string refreshToken)
         {
-            if (userId == Guid.Empty)
-                throw new DomainException("O user_id é obrigatório.");
-            if (string.IsNullOrWhiteSpace(sessionHash))
-                throw new DomainException("O session_hash é obrigatório.");
-            if (string.IsNullOrWhiteSpace(refreshToken))
-                throw new DomainException("O refresh_token é obrigatório.");
-            if (deviceInfo is null)
-                throw new DomainException("O device_info é obrigatório.");
-
-            return new Session(
-                userId,
-                deviceInfo,
-                sessionHash,
-                refreshToken
-            );
+            return new Session(userId, deviceInfo, sessionHash, refreshToken);
         }
 
         #endregion
 
         #region Behavior
 
+        /// <summary>
+        /// Indica se a sessão está expirada.
+        /// </summary>
         public bool IsExpired()
         {
-            return DateTimeOffset.UtcNow > ExpiresAt;
+            return DateTime.UtcNow > ExpiresAt;
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void Validate()
+        {
+            var validate = Validator();
+
+            if (UserId == Guid.Empty)
+                validate.AddError("O identificador do usuário é obrigatório.");
+            if (DeviceInfo is null)
+                validate.AddError("As informações do dispositivo são obrigatórias.");
+            if (string.IsNullOrWhiteSpace(SessionHash))
+                validate.AddError("O a sessão é obrigatório.");
+            if (string.IsNullOrWhiteSpace(RefreshTokenHash))
+                validate.AddError("O token de atualização é obrigatório.");
+
+            validate.ThrowIfInvalid();
         }
 
         #endregion

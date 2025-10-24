@@ -85,7 +85,7 @@ namespace AuthCore.Infrastructure.Http
                 Secure = secure,
                 SameSite = SameSiteMode.Strict,
                 Expires = expires.HasValue
-                    ? DateTimeOffset.UtcNow.Add(expires.Value)
+                    ? DateTime.UtcNow.Add(expires.Value)
                     : null
             };
 

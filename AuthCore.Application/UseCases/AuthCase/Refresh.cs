@@ -34,20 +34,23 @@ namespace AuthCore.Application.UseCases.AuthCase
 
         public async Task OnExecute()
         {
-            var rawSession = _cookie.Session;
-            var rawRefresh = _cookie.RefreshToken;
-            var oldSession = await ValidateSession(rawSession, rawRefresh);
+            var oldSession = await ValidateSession(_cookie.Session, _cookie.RefreshToken);
 
             var user = await _userRepository.GetById(oldSession.UserId)
-                ?? throw new NotFoundException();
-            
+                ?? throw new NotFoundException("Usuário não encontrado.");
+
             if (!user.IsActive())
-                throw new ForbiddenException();
+                throw new ForbiddenException("Usuário inativo ou bloqueado.");
 
             var (newRawSession, newHashedSession) = _entropy.GeneratePair(32);
             var (newRawRefresh, newHashedRefresh) = _entropy.GeneratePair(64);
 
-            var newSession = Session.Create(user.Id, oldSession.DeviceInfo, newHashedSession, newHashedRefresh);
+            var newSession = Session.Create(
+                user.Id,
+                oldSession.DeviceInfo,
+                newHashedSession,
+                newHashedRefresh
+            );
 
             await _sessionRepository.Set(newSession);
             await _sessionRepository.Delete(oldSession.SessionHash);
@@ -61,17 +64,25 @@ namespace AuthCore.Application.UseCases.AuthCase
         private async Task<Session> ValidateSession(string rawSession, string rawRefresh)
         {
             var hashedSession = _entropy.Hash(rawSession);
+
             var session = await _sessionRepository.Get(hashedSession)
-                ?? throw new NotFoundException();
+                ?? throw new NotFoundException("Sessão não encontrada.");
 
             var sessionMatches = _entropy.Verify(rawSession, session.SessionHash);
             var refreshMatches = _entropy.Verify(rawRefresh, session.RefreshTokenHash);
 
-            if (!sessionMatches || !refreshMatches || session.IsExpired())
+            if (!sessionMatches || !refreshMatches)
             {
                 await _sessionRepository.Delete(session.SessionHash);
                 _cookie.RemoveAuthCookies();
-                throw new ForbiddenException();
+                throw new ForbiddenException("Tokens inválidos.");
+            }
+
+            if (session.IsExpired())
+            {
+                await _sessionRepository.Delete(session.SessionHash);
+                _cookie.RemoveAuthCookies();
+                throw new ForbiddenException("Sessão expirada. Faça login novamente.");
             }
 
             return session;

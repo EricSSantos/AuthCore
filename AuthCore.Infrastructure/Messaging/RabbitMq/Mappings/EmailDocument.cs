@@ -21,6 +21,6 @@ namespace AuthCore.Infrastructure.Messaging.RabbitMq.Mappings
         public object? Payload { get; init; }
 
         [JsonPropertyName("created_at")]
-        public DateTimeOffset CreatedAt { get; init; }
+        public DateTime CreatedAt { get; init; }
     }
 }

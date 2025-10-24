@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using AuthCore.Domain.Shared;
+using System.Net;
 
 namespace AuthCore.Domain.Commons.Exceptions
 {
@@ -16,12 +17,10 @@ namespace AuthCore.Domain.Commons.Exceptions
 
         public ConflictException()
             : base("O recurso já existe.")
-        {
-        }
+        { }
 
         public ConflictException(string message)
             : base(message)
-        {
-        }
+        { }
     }
 }

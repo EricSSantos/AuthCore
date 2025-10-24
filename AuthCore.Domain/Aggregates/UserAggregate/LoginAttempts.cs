@@ -14,20 +14,19 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         #region Properties
 
         public int FailedAttempts { get; }
-        public DateTimeOffset? LastFailedAt { get; }
-        public DateTimeOffset? LockedUntil { get; }
+        public DateTime? LastFailedAt { get; }
+        public DateTime? LockedUntil { get; }
 
         #endregion
 
         #region Constructors
 
-        protected LoginAttempts()
-        { }
+        protected LoginAttempts() { }
 
         private LoginAttempts(
             int failedAttempts,
-            DateTimeOffset? lastFailedAt,
-            DateTimeOffset? lockedUntil)
+            DateTime? lastFailedAt,
+            DateTime? lockedUntil)
         {
             FailedAttempts = failedAttempts;
             LastFailedAt = lastFailedAt;
@@ -47,10 +46,16 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
 
         #region Behavior
 
+        /// <summary>
+        /// Registra uma tentativa de login mal sucedida.
+        /// Ao atingir o número máximo permitido, bloqueia temporariamente a conta.
+        /// </summary>
         public LoginAttempts RegisterFailure()
         {
-            var now = DateTimeOffset.UtcNow;
+            var now = DateTime.UtcNow;
             var failedAttempts = FailedAttempts + 1;
+
+            // Se atingiu o limite, bloqueia até X minutos no futuro
             var lockedUntil = failedAttempts >= MAX_ATTEMPTS
                 ? now.Add(LockDuration)
                 : LockedUntil;
@@ -58,20 +63,37 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
             return new LoginAttempts(failedAttempts, now, lockedUntil);
         }
 
+        /// <summary>
+        /// Reseta as tentativas de login, liberando o usuário.
+        /// </summary>
         public LoginAttempts Reset()
         {
             return new LoginAttempts(0, null, null);
         }
 
+        /// <summary>
+        /// Indica se o usuário está bloqueado por excesso de tentativas.
+        /// </summary>
         public bool IsLocked()
         {
-            return LockedUntil.HasValue && LockedUntil > DateTimeOffset.UtcNow;
+            return LockedUntil.HasValue && LockedUntil > DateTime.UtcNow;
         }
 
+        /// <summary>
+        /// Retorna a mensagem de bloqueio.
+        /// </summary>
         public string? GetLockMessage()
         {
             if (IsLocked())
-                return $"Conta bloqueada até {LockedUntil:HH:mm:ss}.";
+            {
+                var remaining = LockedUntil!.Value - DateTime.UtcNow;
+
+                // Se faltar menos de 60 segundos, exibe em segundos, senão, em minutos
+                if (remaining.TotalSeconds < 60)
+                    return $"A conta está temporariamente bloqueada. Tente novamente em {Math.Ceiling(remaining.TotalSeconds)} segundos.";
+
+                return $"A conta está temporariamente bloqueada. Tente novamente em {Math.Ceiling(remaining.TotalMinutes)} minutos.";
+            }
 
             return null;
         }
@@ -79,8 +101,8 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         protected override IEnumerable<object> GetValues()
         {
             yield return FailedAttempts;
-            yield return LastFailedAt ?? DateTimeOffset.MinValue;
-            yield return LockedUntil ?? DateTimeOffset.MinValue;
+            yield return LastFailedAt ?? DateTime.MinValue;
+            yield return LockedUntil ?? DateTime.MinValue;
         }
 
         #endregion

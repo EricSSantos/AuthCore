@@ -19,10 +19,10 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Mappings
         public string RefreshToken { get; set; } = string.Empty;
 
         [JsonPropertyName("created_at")]
-        public DateTimeOffset CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         [JsonPropertyName("expires_at")]
-        public DateTimeOffset ExpiresAt { get; set; }
+        public DateTime ExpiresAt { get; set; }
 
         [JsonPropertyName("device")]
         public DeviceDocument Device { get; set; } = default!;

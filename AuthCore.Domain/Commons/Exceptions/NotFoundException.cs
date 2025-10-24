@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using AuthCore.Domain.Shared;
+using System.Net;
 
 namespace AuthCore.Domain.Commons.Exceptions
 {
@@ -16,12 +17,10 @@ namespace AuthCore.Domain.Commons.Exceptions
 
         public NotFoundException()
             : base("O recurso solicitado não foi encontrado.")
-        {
-        }
+        { }
 
         public NotFoundException(string message)
             : base(message)
-        {
-        }
+        { }
     }
 }

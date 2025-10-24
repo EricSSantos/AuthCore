@@ -1,6 +1,7 @@
 ﻿using AuthCore.Application.Models.Input;
 using AuthCore.Application.UseCases.UserCase.Interfaces;
 using AuthCore.Domain.Aggregates.UserAggregate;
+using AuthCore.Domain.Commons.Exceptions;
 using AuthCore.Domain.Commons.Interfaces.Security.Hashing;
 using AuthCore.Domain.Commons.Interfaces.Security.Jwt;
 
@@ -9,30 +10,31 @@ namespace AuthCore.Application.UseCases.UserCase
     public sealed class ChangePassword : IChangePassword
     {
         private readonly IUserRepository _userRepository;
-        private readonly IBCrypt _bCrypt;
         private readonly IAccessToken _accessToken;
-
+        private readonly IBCrypt _bCrypt;
+        
         public ChangePassword(
             IUserRepository userRepository,
-            IBCrypt bCrypt,
-            IAccessToken accessToken)
+            IAccessToken accessToken,
+            IBCrypt bCrypt)
         {
             _userRepository = userRepository;
-            _bCrypt = bCrypt;
             _accessToken = accessToken;
+            _bCrypt = bCrypt;
         }
 
         public async Task OnExecute(ChangePasswordInputModel input)
         {
-            var user = await _userRepository.GetById(_accessToken.Sub);
-            if (user is null)
-                return;
+            var user = await _userRepository.GetById(_accessToken.Sub)
+                ?? throw new NotFoundException("Usuário não encontrado.");
 
-            _bCrypt.isValid(input.CurrentPassword, user.Password.Value);
+            if (!_bCrypt.isValid(input.CurrentPassword, user.Password.Value) || !user.IsActive())
+                throw new UnauthorizedException("A senha atual está incorreta.");
 
             user.ChangePassword(
-                _bCrypt.Hash(input.NewPassword),
-                input.NewPassword
+                hashedPassword:     _bCrypt.Hash(input.NewPassword),
+                password:           input.NewPassword,
+                confirmPassword:    input.ConfirmNewPassword
             );
 
             _userRepository.Update(user);

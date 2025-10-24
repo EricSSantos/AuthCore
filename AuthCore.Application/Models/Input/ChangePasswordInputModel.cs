@@ -9,5 +9,8 @@ namespace AuthCore.Application.Models.Input
 
         [JsonPropertyName("new_password")]
         public required string NewPassword { get; init; }
+
+        [JsonPropertyName("confirm_new_password")]
+        public required string ConfirmNewPassword { get; init; }
     }
 }

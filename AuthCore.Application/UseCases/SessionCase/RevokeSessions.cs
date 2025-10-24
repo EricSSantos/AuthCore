@@ -21,7 +21,7 @@ namespace AuthCore.Application.UseCases.SessionCase
         public async Task OnExecute(List<Guid> ids)
         {
             if (ids is null || ids.Count == 0)
-                throw new DomainException("Nenhuma sessão foi informada para revogação.");
+                throw new BadRequestException("Nenhuma sessão foi informada.");
 
             var sessions = await ValidateSessions(ids);
 
@@ -41,11 +41,9 @@ namespace AuthCore.Application.UseCases.SessionCase
                 .ToList()!;
 
             if (sessions.Count <= 0)
-                throw new NotFoundException("Nenhuma sessão válida foi encontrada para os identificadores informados.");
+                throw new NotFoundException("Nenhuma sessão encontrada com os identificadores informados.");
 
-            // Garante que todas as sessões informadas pertencem ao usuário autenticado, 
-            // evitando que ele revogue sessões de outros usuários.
-            _ownership.EnsureAll(sessions.Select(s => s.UserId));
+            _ownership.EnsureAll(sessions.Select(s => s!.UserId));
 
             return sessions!;
         }

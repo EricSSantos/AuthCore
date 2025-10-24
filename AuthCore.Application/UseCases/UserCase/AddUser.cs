@@ -25,36 +25,40 @@ namespace AuthCore.Application.UseCases.UserCase
 
         public async Task OnExecute(AddUserInputModel input)
         {
-            // Se o e-mail já estiver cadastrado, interrompe o processo silenciosamente.
-            // Isso evita expor informações sobre contas existentes e protege contra
-            // ataques de enumeração de e-mails válidos.
             if (await _userRepository.Exists(u => u.Email == input.Email))
-                return;
+                throw new ConflictException("Já existe um usuário associado a este e-mail.");
 
-            if (input.Password != input.ConfirmPassword)
-                throw new DomainException("A confirmação da senha não corresponde.");
+            if (string.IsNullOrEmpty(input.ConfirmPassword))
+                throw new BadRequestException("A confirmação de senha é obrigatória.");
 
-            Password.EnsureIsValid(input.Password);
-
-            var hashedPwd = _bcrypt.Hash(input.Password);
+            Password.Validate(input.Password, input.ConfirmPassword);
 
             var user = User.Create(
-                firstName: input.FirstName,
-                lastName: input.LastName,
-                email: input.Email,
-                password: hashedPwd
+                firstName:  input.FirstName,
+                lastName:   input.LastName,
+                email:      input.Email,
+                password:   _bcrypt.Hash(input.Password)
             );
 
             await _userRepository.Add(user);
             await _userRepository.SaveChanges();
 
+            await SendWelcomeEmail(user.Email, user.FullName);
+        }
+
+        #region Private Methods
+
+        private async Task SendWelcomeEmail(string to, string name)
+        {
             var email = Email.Create(
-                to: user.Email,
-                fullName: user.FullName,
-                type: EmailType.Welcome
+                to:         to,
+                fullName:   name,
+                type:       EmailType.Welcome
             );
 
             await _emailService.Send(email);
         }
+
+        #endregion
     }
 }

@@ -1,4 +1,6 @@
-﻿using AuthCore.Domain.Commons.Exceptions;
+﻿using AuthCore.Domain.Aggregates.EmailAggregate;
+using AuthCore.Domain.Aggregates.SessionAggregate;
+using AuthCore.Domain.Commons.Exceptions;
 using AuthCore.Domain.Shared;
 using System.Text.RegularExpressions;
 
@@ -22,8 +24,7 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
 
         #region Constructors
 
-        protected User()
-        { }
+        protected User() { }
 
         private User(
             string firstName,
@@ -33,25 +34,15 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
             RoleType role,
             bool active)
         {
-            if (string.IsNullOrWhiteSpace(firstName))
-                throw new DomainException("O nome é obrigatório.");
-            if (string.IsNullOrWhiteSpace(lastName))
-                throw new DomainException("O sobrenome é obrigatório.");
-            if (string.IsNullOrWhiteSpace(email))
-                throw new DomainException("O e-mail é obrigatório.");
-            if (!IsValidEmail(email))
-                throw new DomainException("O e-mail informado é inválido.");
-            if (string.IsNullOrWhiteSpace(hashedPassword))
-                throw new DomainException("A senha é obrigatória.");
-
-            FirstName = firstName;
-            LastName = lastName;
-            Email = email.ToLowerInvariant();
+            FirstName = firstName.Trim();
+            LastName = lastName.Trim();
+            Email = email.Trim().ToLowerInvariant();
             Password = Password.Create(hashedPassword);
             Role = role;
             Active = active;
             CreatedAt = DateTime.UtcNow;
             LoginAttempts = LoginAttempts.Create();
+            Validate();
         }
 
         #endregion
@@ -73,51 +64,40 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
 
         #region Behavior
 
+        /// <summary>
+        /// Retorna o nome completo do usuário.
+        /// </summary>
         public string FullName
         {
             get { return $"{FirstName} {LastName}"; }
         }
 
+        /// <summary>
+        /// Indica se o usuário está ativo.
+        /// </summary>
         public bool IsActive()
         {
             if (LoginAttempts.IsLocked())
+            {
                 return false;
+            }
 
             return Active;
         }
 
-        public bool IsValidEmail(string email)
-        {
-            var regex = new Regex(
-                @"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$",
-                RegexOptions.Compiled | RegexOptions.IgnoreCase
-            );
-
-            return regex.IsMatch(email);
-        }
-
-        public void Activate()
-        {
-            if (!Active)
-            {
-                Active = true;
-                InactivatedAt = null;
-            }
-        }
-
-        public void Inactivate()
-        {
-            if (Active)
-            {
-                Active = false;
-                InactivatedAt = DateTime.UtcNow;
-            }
-        }
-
+        /// <summary>
+        /// Realiza o processo de autenticação do usuário.
+        /// </summary>
+        /// <param name="passwordIsValid">Indica se a senha informada é válida.</param>
+        /// <exception cref="UnauthorizedException">
+        /// Lançada quando o usuário está bloqueado ou a senha é inválida.
+        /// </exception>
         public void SignIn(bool passwordIsValid)
         {
             if (LoginAttempts.IsLocked())
+            {
                 throw new UnauthorizedException(LoginAttempts.GetLockMessage()!);
+            }
 
             if (!passwordIsValid)
             {
@@ -126,13 +106,51 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
             }
 
             if (LoginAttempts.FailedAttempts > 0)
+            {
                 LoginAttempts = LoginAttempts.Reset();
+            }
         }
 
+        /// <summary>
+        /// Altera a senha do usuário.
+        /// </summary>
+        /// <param name="hashedPassword">Nova senha já criptografada.</param>
+        /// <param name="password">Senha em texto puro para validação.</param>
+        /// <param name="confirmPassword">Confirmação da nova senha.</param>
         public void ChangePassword(string hashedPassword, string password, string? confirmPassword = "")
         {
-            Password.EnsureIsValid(password, confirmPassword);
+            Password.Validate(password, confirmPassword);
             Password = Password.Create(hashedPassword);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void Validate()
+        {
+            var validate = Validator();
+            
+            if (string.IsNullOrWhiteSpace(FirstName))
+                validate.AddError("O nome é obrigatório.");
+            if (string.IsNullOrWhiteSpace(LastName))
+                validate.AddError("O sobrenome é obrigatório.");
+            if (string.IsNullOrWhiteSpace(Email))
+                validate.AddError("O e-mail é obrigatório.");
+            else if (!IsValidEmail(Email))
+                validate.AddError("O e-mail informado é inválido.");
+            
+            validate.ThrowIfInvalid();
+        }
+
+        private bool IsValidEmail(string email)
+        {
+            var regex = new Regex(
+                @"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$",
+                RegexOptions.Compiled | RegexOptions.IgnoreCase
+            );
+
+            return regex.IsMatch(email);
         }
 
         #endregion
