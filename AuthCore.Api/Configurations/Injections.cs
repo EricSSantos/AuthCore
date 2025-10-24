@@ -20,7 +20,6 @@ using AuthCore.Domain.Commons.Settings;
 using AuthCore.Infrastructure.Http;
 using AuthCore.Infrastructure.Messaging.RabbitMq;
 using AuthCore.Infrastructure.Persistence.PostgreSQL.Repositories;
-using AuthCore.Infrastructure.Persistence.Redis.Context;
 using AuthCore.Infrastructure.Persistence.Redis.Repositories;
 using AuthCore.Infrastructure.Security.Hashing;
 using AuthCore.Infrastructure.Security.Jwt;
@@ -100,7 +99,7 @@ namespace AuthCore.Api.Configurations
             // Messaging
             services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
             services.AddSingleton<IEmailService, EmailService>();
-            
+
             return services;
         }
         #endregion
@@ -112,7 +111,6 @@ namespace AuthCore.Api.Configurations
             services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             services.AddScoped<IUserRepository, UserRepository>();
             // Redis Repositories
-            services.AddScoped<IRedisContext, RedisContext>();
             services.AddScoped<ISessionRepository, SessionRepository>();
             services.AddScoped<IConfirmCodeRepository, ConfirmCodeRepository>();
 

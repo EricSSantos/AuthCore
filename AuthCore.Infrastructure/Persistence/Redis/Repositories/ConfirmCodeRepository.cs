@@ -21,20 +21,6 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
             _redis = connection.GetDatabase();
         }
 
-        public async Task Set(Guid userId, ConfirmCode verificationCode)
-        {
-            var key = BuildKey(userId, verificationCode.Type);
-
-            var document = new ConfirmCodeDocument
-            {
-                Code = verificationCode.Code,
-                Type = verificationCode.Type,
-                CreatedAt = verificationCode.CreatedAt
-            };
-
-            await _redis.StringSetAsync(key, JsonSerializer.Serialize(document), DEFAULT_TTL);
-        }
-
         public async Task<ConfirmCode?> Get(Guid userId, CodeType type)
         {
             var key = BuildKey(userId, type);
@@ -46,10 +32,25 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
             var document = JsonSerializer.Deserialize<ConfirmCodeDocument>(value!);
 
             return ConfirmCode.FromPersistence(
-                document!.Code, 
-                document.Type, 
+                document!.Code,
+                document.Type,
                 document.CreatedAt
             );
+        }
+
+        public async Task Set(Guid userId, ConfirmCode verificationCode)
+        {
+            var key = BuildKey(userId, verificationCode.Type);
+
+            var document = new ConfirmCodeDocument
+            {
+                Code = verificationCode.Code,
+                Type = verificationCode.Type,
+                UserId = userId,
+                CreatedAt = verificationCode.CreatedAt
+            };
+
+            await _redis.StringSetAsync(key, JsonSerializer.Serialize(document), DEFAULT_TTL);
         }
 
         #region Private Methods

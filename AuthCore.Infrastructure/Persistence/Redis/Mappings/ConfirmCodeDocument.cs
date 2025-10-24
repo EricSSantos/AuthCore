@@ -11,6 +11,9 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Mappings
         [JsonPropertyName("type")]
         public CodeType Type { get; init; } = default!;
 
+        [JsonPropertyName("user_id")]
+        public Guid UserId { get; init; }
+
         [JsonPropertyName("created_at")]
         public DateTime CreatedAt { get; init; }
     }
