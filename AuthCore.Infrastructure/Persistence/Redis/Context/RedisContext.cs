@@ -24,7 +24,7 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Context
             _database = connection.GetDatabase();
         }
 
-        public async Task WriteObject<T>(string key, T value, TimeSpan ttl)
+        public async Task Set<T>(string key, T value, TimeSpan ttl)
         {
             var serializedValue = JsonSerializer.Serialize(value, JsonOptions);
 
@@ -36,17 +36,16 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Context
             await _distributedCache.SetStringAsync(key, serializedValue, cacheOptions);
         }
 
-        public async Task<T?> ReadObject<T>(string key)
+        public async Task<T?> Get<T>(string key)
         {
             var serializedValue = await _distributedCache.GetStringAsync(key);
-
             if (string.IsNullOrWhiteSpace(serializedValue))
                 return default;
 
             return JsonSerializer.Deserialize<T>(serializedValue, JsonOptions);
         }
 
-        public async Task DeleteKey(string key)
+        public async Task Delete(string key)
         {
             await _distributedCache.RemoveAsync(key);
         }

@@ -12,7 +12,6 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
         private const string SESSION_DATA_PREFIX = SESSION_NAMESPACE + "data:";
         private const string SESSION_ID_INDEX = SESSION_NAMESPACE + "id:";
         private const string USER_ID_INDEX = SESSION_NAMESPACE + "user:";
-
         private static readonly TimeSpan DEFAULT_TTL = TimeSpan.FromDays(7);
 
         #endregion
@@ -27,7 +26,7 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
         public async Task<Session?> Get(string sessionHash)
         {
             var sessionKey = BuildSessionDataKey(sessionHash);
-            var sessionDocument = await _redisClient.ReadObject<SessionDocument>(sessionKey);
+            var sessionDocument = await _redisClient.Get<SessionDocument>(sessionKey);
 
             if (sessionDocument is null)
                 return null;
@@ -38,7 +37,7 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
         public async Task<Session?> GetBySessionId(Guid sessionId)
         {
             var sessionIdKey = BuildSessionIdIndexKey(sessionId);
-            var sessionHash = await _redisClient.ReadObject<string>(sessionIdKey);
+            var sessionHash = await _redisClient.Get<string>(sessionIdKey);
 
             if (string.IsNullOrWhiteSpace(sessionHash))
                 return null;
@@ -56,7 +55,7 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
             foreach (var sessionHash in sessionHashes)
             {
                 var sessionKey = BuildSessionDataKey(sessionHash);
-                var document = await _redisClient.ReadObject<SessionDocument>(sessionKey);
+                var document = await _redisClient.Get<SessionDocument>(sessionKey);
 
                 if (document is not null)
                     sessions.Add(document.ToEntity());
@@ -73,31 +72,31 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
             var sessionIdKey = BuildSessionIdIndexKey(session.Id);
             var userIndexKey = BuildSessionUserIdIndexKey(session.UserId);
 
-            await _redisClient.WriteObject(sessionKey, sessionDocument, DEFAULT_TTL);
+            await _redisClient.Set(sessionKey, sessionDocument, DEFAULT_TTL);
             await _redisClient.AddIndex(userIndexKey, session.SessionHash, DEFAULT_TTL);
-            await _redisClient.WriteObject(sessionIdKey, session.SessionHash, DEFAULT_TTL);
+            await _redisClient.Set(sessionIdKey, session.SessionHash, DEFAULT_TTL);
         }
 
         public async Task Delete(string sessionHash)
         {
             var sessionKey = BuildSessionDataKey(sessionHash);
-            var sessionDocument = await _redisClient.ReadObject<SessionDocument>(sessionKey);
+            var sessionDocument = await _redisClient.Get<SessionDocument>(sessionKey);
             if (sessionDocument is not null)
             {
                 var userIndexKey = BuildSessionUserIdIndexKey(sessionDocument.UserId);
                 var sessionIdKey = BuildSessionIdIndexKey(sessionDocument.Id);
 
                 await _redisClient.RemoveIndex(userIndexKey, sessionHash);
-                await _redisClient.DeleteKey(sessionIdKey);
+                await _redisClient.Delete(sessionIdKey);
             }
 
-            await _redisClient.DeleteKey(sessionKey);
+            await _redisClient.Delete(sessionKey);
         }
 
         public async Task DeleteById(Guid sessionId)
         {
             var sessionIdKey = BuildSessionIdIndexKey(sessionId);
-            var sessionHash = await _redisClient.ReadObject<string>(sessionIdKey);
+            var sessionHash = await _redisClient.Get<string>(sessionIdKey);
             if (string.IsNullOrWhiteSpace(sessionHash))
                 return;
 
