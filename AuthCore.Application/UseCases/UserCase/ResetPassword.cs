@@ -31,7 +31,7 @@ namespace AuthCore.Application.UseCases.UserCase
             var confirmCode = await _confirmCodeRepository.Get(user.Id, CodeType.ForgotPassword)
                 ?? throw new NotFoundException("Código nãod encontrado.");
 
-            if (confirmCode.IsMatching(input.Code) || !user.IsActive())
+            if (!confirmCode.IsMatching(input.Code) || !user.IsActive())
                 throw new BadRequestException("Código de verificação inválido.");
 
             user.ChangePassword(
