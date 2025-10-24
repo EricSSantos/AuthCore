@@ -57,7 +57,12 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
 
         private static bool IsStrong(string password)
         {
-            var regex = new Regex(@"^(?=.*[a-z])(?=.*[A-Z]).{8,}$");
+            // - Pelo menos 1 letra minúscula
+            // - Pelo menos 1 letra maiúscula
+            // - Pelo menos 1 número
+            // - Pelo menos 1 caractere especial
+            // - Mínimo de 8 caracteres
+            var regex = new Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$");
             return regex.IsMatch(password);
         }
 

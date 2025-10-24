@@ -1,5 +1,6 @@
 ﻿using AuthCore.Domain.Commons.Exceptions;
 using AuthCore.Domain.Shared;
+using System.Text.RegularExpressions;
 
 namespace AuthCore.Domain.Aggregates.UserAggregate
 {
@@ -21,7 +22,7 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
 
         #region Constructors
 
-        protected User() 
+        protected User()
         { }
 
         private User(
@@ -38,6 +39,8 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
                 throw new DomainException("O sobrenome é obrigatório.");
             if (string.IsNullOrWhiteSpace(email))
                 throw new DomainException("O e-mail é obrigatório.");
+            if (!IsValidEmail(email))
+                throw new DomainException("O e-mail informado é inválido.");
             if (string.IsNullOrWhiteSpace(hashedPassword))
                 throw new DomainException("A senha é obrigatória.");
 
@@ -81,6 +84,16 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
                 return false;
 
             return Active;
+        }
+
+        public bool IsValidEmail(string email)
+        {
+            var regex = new Regex(
+                @"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$",
+                RegexOptions.Compiled | RegexOptions.IgnoreCase
+            );
+
+            return regex.IsMatch(email);
         }
 
         public void Activate()
