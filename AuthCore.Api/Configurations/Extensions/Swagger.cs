@@ -1,10 +1,16 @@
 ﻿using AuthCore.Domain.Commons.Settings;
 using Microsoft.OpenApi.Models;
 
-namespace AuthCore.Api.Configurations
+namespace AuthCore.Api.Configurations.Extensions
 {
-    public static class SwaggerConfig
+    public static class Swagger
     {
+        /// <summary>
+        /// Registra e configura o Swagger no container de serviços da aplicação,
+        /// utilizando as informações de versão definidas em <see cref="ApiSettings"/>.
+        /// </summary>
+        /// <param name="builder">Instância do <see cref="WebApplicationBuilder"/> utilizada para configuração dos serviços.</param>
+        /// <exception cref="InvalidOperationException">Lançada quando as configurações da API não estão definidas ou são inválidas.</exception>
         public static void AddSwaggerService(this WebApplicationBuilder builder)
         {
             var settings = builder.Services.BuildServiceProvider().GetRequiredService<ApiSettings>();
@@ -25,6 +31,12 @@ namespace AuthCore.Api.Configurations
             });
         }
 
+        /// <summary>
+        /// Aplica os middlewares de Swagger e Swagger UI ao pipeline da aplicação,
+        /// gerando a interface de documentação interativa baseada nas versões configuradas.
+        /// </summary>
+        /// <param name="app">Instância do <see cref="WebApplication"/> utilizada para configuração do pipeline HTTP.</param>
+        /// <exception cref="InvalidOperationException">Lançada quando as configurações de API não estão definidas ou são inválidas.</exception>
         public static void UseSwaggerDoc(this WebApplication app)
         {
             var settings = app.Services.GetRequiredService<ApiSettings>();
@@ -39,8 +51,8 @@ namespace AuthCore.Api.Configurations
                     c.SwaggerEndpoint($"/swagger/{versionKey}/swagger.json", versionInfo.Name);
                 }
 
+                // Oculta os modelos de schema e habilita credenciais
                 c.DefaultModelsExpandDepth(-1);
-                c.RoutePrefix = string.Empty;
                 c.ConfigObject.AdditionalItems["withCredentials"] = true;
             });
         }

@@ -1,13 +1,14 @@
-﻿using AuthCore.Api.Configurations;
+﻿using AuthCore.Api.Configurations.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 #region Services
 
 builder.AddDatabases();
-builder.AddInjections();
+builder.AddDependencyInjections();
 builder.AddAuthentication();
 builder.AddSwaggerService();
+builder.AddCorsPolicies();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -20,9 +21,10 @@ var app = builder.Build();
 #region Middleware
 
 app.UseSwaggerDoc();
-app.UseExceptionHandling();
+app.UseExceptionsHandling();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseCorsAndHttps();
 app.MapControllers();
 
 #endregion
