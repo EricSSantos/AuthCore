@@ -1,30 +1,47 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>30baaab0-65b1-4a3e-a2e3-15c7336a0723</UserSecretsId>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>30baaab0-65b1-4a3e-a2e3-15c7336a0723</UserSecretsId>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.9" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.9" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.5" />
-  </ItemGroup>
+		<!-- 
+      Gera o arquivo de documentação XML com os comentários ///.
+      Esse arquivo é utilizado pelo Swagger para exibir descrições detalhadas
+      de endpoints, parâmetros e retornos na interface interativa.
+    -->
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-  <ItemGroup>
-    <ProjectReference Include="..\AuthCore.Application\AuthCore.Application.csproj" />
-    <ProjectReference Include="..\AuthCore.Domain\AuthCore.Domain.csproj" />
-    <ProjectReference Include="..\AuthCore.Infrastructure\AuthCore.Infrastructure.csproj" />
-  </ItemGroup>
+		<!-- 
+      Suprime o aviso CS1591, que é exibido quando algum membro público
+      não possui comentário XML. Isso evita poluição no build.
+    -->
+		<NoWarn>$(NoWarn);1591</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.9" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.5" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\AuthCore.Application\AuthCore.Application.csproj" />
+		<ProjectReference Include="..\AuthCore.Domain\AuthCore.Domain.csproj" />
+		<ProjectReference Include="..\AuthCore.Infrastructure\AuthCore.Infrastructure.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="wwwroot\swagger\SwaggerStyle.css" />
+	</ItemGroup>
 
 </Project>

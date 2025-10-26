@@ -10,45 +10,40 @@ namespace AuthCore.Api.Controllers.v1
     [Authorize]
     [ApiController]
     [Route("api/v1/sessions")]
-    public sealed class SessionsController : Controller
+    public sealed class SessionsController : ControllerBase
     {
-        private readonly IGetSessions _getUserSessions;
-        private readonly IRevokeSession _revokeSessions;
-
-        public SessionsController(
-            IGetSessions getUserSessions,
-            IRevokeSession revokeSessions)
-        {
-            _getUserSessions = getUserSessions;
-            _revokeSessions = revokeSessions;
-        }
-
+        /// <summary>
+        /// Lista outras sessões ativas do usuário.
+        /// </summary>
         [HttpGet]
-        public async Task<ActionResult<Response<IEnumerable<SessionViewModel>>>> GetAll()
+        [ProducesResponseType(typeof(Response<IEnumerable<SessionViewModel>>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<Response<IEnumerable<SessionViewModel>>>> GetAll(
+            [FromServices] IGetSessions getUserSessions)
         {
-            var sessions = await _getUserSessions.OnExecute();
+            var sessions = await getUserSessions.OnExecute();
 
-            var response = Response<IEnumerable<SessionViewModel>>.Success(
+            return Ok(Response<IEnumerable<SessionViewModel>>.Success(
                 sessions,
                 "Sessões recuperadas com sucesso.",
                 HttpStatusCode.OK
-            );
-
-            return Ok(response);
+            ));
         }
 
+        /// <summary>
+        /// Encerra todas as outras sessões e mantém apenas a atual.
+        /// </summary>
         [HttpDelete]
-        public async Task<ActionResult<Response<object>>> Revoke([FromBody] List<Guid> ids)
+        [ProducesResponseType(typeof(Response<object>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<Response<object>>> Revoke(
+            [FromServices] IRevokeSession revokeSessions)
         {
-            await _revokeSessions.OnExecute(ids);
+            await revokeSessions.OnExecute();
 
-            var response = Response<object>.Success(
+            return Ok(Response<object>.Success(
                 null!,
                 "Sessões revogadas com sucesso.",
                 HttpStatusCode.OK
-            );
-
-            return Ok(response);
+            ));
         }
     }
 }

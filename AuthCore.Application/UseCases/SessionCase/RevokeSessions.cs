@@ -1,53 +1,27 @@
-﻿using AuthCore.Application.Services.Interfaces;
-using AuthCore.Application.UseCases.SessionCase.Interfaces;
+﻿using AuthCore.Application.UseCases.SessionCase.Interfaces;
 using AuthCore.Domain.Aggregates.SessionAggregate;
-using AuthCore.Domain.Commons.Exceptions;
+using AuthCore.Domain.Core.Interfaces.Security;
 
 namespace AuthCore.Application.UseCases.SessionCase
 {
     public sealed class RevokeSessions : IRevokeSession
     {
+        private readonly ISessionState _sessionState;
         private readonly ISessionRepository _sessionRepository;
-        private readonly IOwnership _ownership;
 
         public RevokeSessions(
-            ISessionRepository sessionRepository,
-            IOwnership ownership)
+            ISessionState sessionState,
+            ISessionRepository sessionRepository)
         {
+            _sessionState = sessionState;
             _sessionRepository = sessionRepository;
-            _ownership = ownership;
         }
 
-        public async Task OnExecute(List<Guid> ids)
+        public async Task OnExecute()
         {
-            if (ids is null || ids.Count == 0)
-                throw new BadRequestException("Nenhuma sessão foi informada.");
-
-            var sessions = await ValidateSessions(ids);
-
-            var deleteTasks = sessions.Select(s => _sessionRepository.DeleteById(s.Id));
+            var otherSessions = await _sessionState.GetOtherSessions();
+            var deleteTasks = otherSessions.Select(s => _sessionRepository.Delete(s.Id));
             await Task.WhenAll(deleteTasks);
         }
-
-        #region Private Methods
-
-        private async Task<List<Session>> ValidateSessions(IEnumerable<Guid> ids)
-        {
-            var tasks = ids.Select(id => _sessionRepository.GetById(id));
-            var results = await Task.WhenAll(tasks);
-
-            var sessions = results
-                .Where(s => s != null)
-                .ToList()!;
-
-            if (sessions.Count <= 0)
-                throw new NotFoundException("Nenhuma sessão encontrada com os identificadores informados.");
-
-            _ownership.EnsureAll(sessions.Select(s => s!.UserId));
-
-            return sessions!;
-        }
-
-        #endregion
     }
 }

@@ -1,35 +1,28 @@
 ﻿namespace AuthCore.Domain.Aggregates.SessionAggregate
 {
+    /// <summary>
+    /// Define o contrato para operações de persistência e recuperação de sessões de usuário.
+    /// </summary>
     public interface ISessionRepository
     {
         /// <summary>
-        /// Obtém uma sessão a partir do hash da sessão.
+        /// Obtém uma sessão específica pelo seu identificador.
         /// </summary>
-        Task<Session?> Get(string hashedSession);
-
-        /// <summary>
-        /// Obtém uma sessão a partir do identificador único.
-        /// </summary>
-        Task<Session?> GetById(Guid id);
+        Task<Session?> Get(string id);
 
         /// <summary>
         /// Retorna todas as sessões associadas a um usuário.
         /// </summary>
-        Task<IEnumerable<Session>> GetByUserId(Guid userId);
+        Task<IEnumerable<Session>> GetAllByUserId(Guid userId);
 
         /// <summary>
-        /// Persiste uma nova sessão no armazenamento Redis.
+        /// Armazena ou atualiza uma sessão.
         /// </summary>
         Task Set(Session session);
 
         /// <summary>
-        /// Exclui uma sessão a partir do hash da sessão.
+        /// Remove uma sessão pelo seu identificador.
         /// </summary>
-        Task Delete(string hashedSession);
-
-        /// <summary>
-        /// Exclui uma sessão a partir do identificador único.
-        /// </summary>
-        Task DeleteById(Guid id);
+        Task Delete(string id);
     }
 }

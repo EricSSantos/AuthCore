@@ -2,42 +2,39 @@
 using AuthCore.Application.UseCases.UserCase.Interfaces;
 using AuthCore.Domain.Aggregates.EmailAggregate;
 using AuthCore.Domain.Aggregates.UserAggregate;
-using AuthCore.Domain.Commons.Exceptions;
-using AuthCore.Domain.Commons.Interfaces.Security.Hashing;
+using AuthCore.Domain.Core.Exceptions;
+using AuthCore.Domain.Core.Interfaces.Security;
 
 namespace AuthCore.Application.UseCases.UserCase
 {
     public sealed class AddUser : IAddUser
     {
         private readonly IUserRepository _userRepository;
-        private readonly IBCrypt _bcrypt;
-        private readonly IEmailService _emailService;
+        private readonly IPasswordHasher _passwordHasher;
+        private readonly IEmailPublisher _emailPublisher;
 
         public AddUser(
             IUserRepository userRepository,
-            IBCrypt bcrypt,
-            IEmailService emailService)
+            IPasswordHasher passwordHasher,
+            IEmailPublisher emailPublisher)
         {
             _userRepository = userRepository;
-            _bcrypt = bcrypt;
-            _emailService = emailService;
+            _passwordHasher = passwordHasher;
+            _emailPublisher = emailPublisher;
         }
 
         public async Task OnExecute(AddUserInputModel input)
         {
             if (await _userRepository.Exists(u => u.Email == input.Email))
-                throw new ConflictException("Já existe um usuário associado a este e-mail.");
+                throw new ConflictException("E-mail já cadastrado.");
 
-            if (string.IsNullOrEmpty(input.ConfirmPassword))
-                throw new BadRequestException("A confirmação de senha é obrigatória.");
-
-            Password.Validate(input.Password, input.ConfirmPassword);
+            Password.ValidateWithConfirmation(input.Password, input.ConfirmPassword);
 
             var user = User.Create(
-                firstName:  input.FirstName,
-                lastName:   input.LastName,
-                email:      input.Email,
-                password:   _bcrypt.Hash(input.Password)
+                firstName:      input.FirstName,
+                lastName:       input.LastName,
+                email:          input.Email,
+                passwordHash:   _passwordHasher.Hash(input.Password)
             );
 
             await _userRepository.Add(user);
@@ -46,17 +43,17 @@ namespace AuthCore.Application.UseCases.UserCase
             await SendWelcomeEmail(user.Email, user.FullName);
         }
 
-        #region Private Methods
+        #region Helpers
 
-        private async Task SendWelcomeEmail(string to, string name)
+        private async Task SendWelcomeEmail(string to, string fullName)
         {
             var email = Email.Create(
                 to:         to,
-                fullName:   name,
+                fullName:   fullName,
                 type:       EmailType.Welcome
             );
 
-            await _emailService.Send(email);
+            await _emailPublisher.Send(email);
         }
 
         #endregion

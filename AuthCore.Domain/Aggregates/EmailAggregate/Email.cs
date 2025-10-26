@@ -1,25 +1,50 @@
 ﻿using AuthCore.Domain.Aggregates.EmailAggregate.Payloads;
 using AuthCore.Domain.Aggregates.EmailAggregate.Strategies;
-using AuthCore.Domain.Commons.Exceptions;
-using AuthCore.Domain.Shared;
+using AuthCore.Domain.Core.Exceptions;
+using AuthCore.Domain.Core.Interfaces.Base;
 
 namespace AuthCore.Domain.Aggregates.EmailAggregate
 {
-    public abstract class Email : Entity
+    /// <summary>
+    /// Representa um e-mail transacional gerado pela aplicação.
+    /// </summary>
+    public abstract class Email : IAggregateRoot
     {
         #region Properties
 
+        /// <summary>
+        /// Identificador único do e-mail.
+        /// </summary>
+        public Guid Id { get; private set; }
+
+        /// <summary>
+        /// Endereço de e-mail do destinatário.
+        /// </summary>
         public string To { get; private set; }
+
+        /// <summary>
+        /// Nome completo do destinatário.
+        /// </summary>
         public string FullName { get; private set; }
+
+        /// <summary>
+        /// Tipo do e-mail (ex: Boas-vindas, Recuperação de Senha).
+        /// </summary>
         public EmailType Type { get; private set; }
+
+        /// <summary>
+        /// Dados adicionais específicos do tipo de e-mail.
+        /// </summary>
         public EmailPayload? Payload { get; private set; }
+
+        /// <summary>
+        /// Data e hora em que o e-mail foi criado.
+        /// </summary>
         public DateTime CreatedAt { get; private set; }
 
         #endregion
 
         #region Constructors
-
-        protected Email() { }
 
         protected Email(
             string to,
@@ -27,6 +52,7 @@ namespace AuthCore.Domain.Aggregates.EmailAggregate
             EmailType type,
             EmailPayload? payload = null)
         {
+            Id = Guid.NewGuid();
             To = to.Trim();
             FullName = fullName.Trim();
             Type = type;
@@ -40,12 +66,12 @@ namespace AuthCore.Domain.Aggregates.EmailAggregate
         #region Factory
 
         /// <summary>
-        /// Cria uma instância de e-mail de acordo com o tipo.
+        /// Cria uma instância de e-mail de acordo com o tipo especificado.
         /// </summary>
         public static Email Create(
-            string to, 
-            string fullName, 
-            EmailType type, 
+            string to,
+            string fullName,
+            EmailType type,
             EmailPayload? payload = null)
         {
             return type switch
@@ -58,18 +84,14 @@ namespace AuthCore.Domain.Aggregates.EmailAggregate
 
         #endregion
 
-        #region Private Methods
+        #region Validation
 
         private void Validate()
         {
-            var validate = Validator();
-
             if (string.IsNullOrWhiteSpace(To))
-                validate.AddError("O e-mail do destinatário é obrigatório.");
+                throw new BadRequestException("O e-mail do destinatário é obrigatório.");
             if (string.IsNullOrWhiteSpace(FullName))
-                validate.AddError("O nome do destinatário é obrigatório.");
-
-            validate.ThrowIfInvalid();
+                throw new BadRequestException("O nome do destinatário é obrigatório.");
         }
 
         #endregion

@@ -2,19 +2,15 @@
 using AuthCore.Domain.Aggregates.EmailAggregate;
 using AuthCore.Domain.Aggregates.SessionAggregate;
 using AuthCore.Domain.Aggregates.UserAggregate;
-using AuthCore.Domain.Commons.Interfaces.Http;
-using AuthCore.Domain.Commons.Interfaces.Messaging;
-using AuthCore.Domain.Commons.Interfaces.Persistence;
-using AuthCore.Domain.Commons.Interfaces.Security.Hashing;
-using AuthCore.Domain.Commons.Interfaces.Security.Jwt;
-using AuthCore.Domain.Commons.Interfaces.Security.Signing;
+using AuthCore.Domain.Core.Interfaces.Http;
+using AuthCore.Domain.Core.Interfaces.Messaging;
+using AuthCore.Domain.Core.Interfaces.Persistence;
+using AuthCore.Domain.Core.Interfaces.Security;
 using AuthCore.Infrastructure.Http;
 using AuthCore.Infrastructure.Messaging.RabbitMq;
 using AuthCore.Infrastructure.Persistence.PostgreSQL.Repositories;
 using AuthCore.Infrastructure.Persistence.Redis.Repositories;
-using AuthCore.Infrastructure.Security.Hashing;
-using AuthCore.Infrastructure.Security.Jwt;
-using AuthCore.Infrastructure.Security.Signing;
+using AuthCore.Infrastructure.Security;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AuthCore.Infrastructure
@@ -23,14 +19,9 @@ namespace AuthCore.Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
-            services
-                .AddInfrastructureServices()
-                .AddRepositories();
-
-            return services;
+            return services.AddInfrastructureServices()
+                           .AddRepositories();
         }
-
-        #region Infrastructure
 
         private static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
         {
@@ -39,33 +30,31 @@ namespace AuthCore.Infrastructure
             services.AddScoped<IDevice, DeviceService>();
 
             // Security
-            services.AddScoped<IPasswordHash, BCryptService>();
-            services.AddScoped<IHmac, HmacService>();
-            services.AddScoped<IEcdsaSigner, EcdsaService>();
-            services.AddScoped<IEcdsaProvider, EcdsaService>();
-            services.AddScoped<IEntropy, EntropyService>();
-            services.AddScoped<IAccessToken, JwtService>();
+            services.AddScoped<IPasswordHasher, PasswordHasher>();
+            services.AddScoped<ISecureKeyGenerator, SecureKeyGenerator>();
+            services.AddScoped<IEcdsaSigner, EcdsaSigner>();
+            services.AddScoped<IEcdsaProvider, EcdsaSigner>();
+            services.AddScoped<IJwtTokenProvider, JwtTokenProvider>();
+            services.AddScoped<ISessionState, SessionState>();
 
             // Messaging
             services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
-            services.AddSingleton<IEmailService, EmailService>();
+            services.AddSingleton<IEmailPublisher, EmailPublisher>();
 
             return services;
         }
 
         private static IServiceCollection AddRepositories(this IServiceCollection services)
         {
-            // PostgreSQL Repositories
+            // PostgreSQL
             services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             services.AddScoped<IUserRepository, UserRepository>();
 
-            // Redis Repositories
+            // Redis
             services.AddScoped<ISessionRepository, SessionRepository>();
             services.AddScoped<IConfirmCodeRepository, ConfirmCodeRepository>();
 
             return services;
         }
-
-        #endregion
     }
 }

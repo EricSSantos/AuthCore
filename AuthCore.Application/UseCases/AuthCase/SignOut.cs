@@ -1,52 +1,27 @@
-﻿using AuthCore.Application.Services.Interfaces;
-using AuthCore.Application.UseCases.AuthCase.Interfaces;
+﻿using AuthCore.Application.UseCases.AuthCase.Interfaces;
 using AuthCore.Domain.Aggregates.SessionAggregate;
-using AuthCore.Domain.Commons.Exceptions;
-using AuthCore.Domain.Commons.Interfaces.Http;
-using AuthCore.Domain.Commons.Interfaces.Security.Hashing;
+using AuthCore.Domain.Core.Interfaces.Security;
 
 namespace AuthCore.Application.UseCases.AuthCase
 {
     public sealed class SignOut : ISignOut
     {
-        private readonly IEntropy _entropy;
         private readonly ISessionRepository _sessionRepository;
-        private readonly ICookie _cookie;
-        private readonly IOwnership _ownership;
+        private readonly ISessionState _sessionState;
 
         public SignOut(
-            IEntropy entropy,
             ISessionRepository sessionRepository,
-            ICookie cookie,
-            IOwnership ownership)
+            ISessionState sessionState)
         {
-            _entropy = entropy;
             _sessionRepository = sessionRepository;
-            _cookie = cookie;
-            _ownership = ownership;
+            _sessionState = sessionState;
         }
 
         public async Task OnExecute()
         {
-            var rawSession = _cookie.Session;
-            var hashedSession = _entropy.Hash(rawSession);
-
-            var session = await _sessionRepository.Get(hashedSession)
-                ?? throw new NotFoundException("Sessão não encontrada");
-
-            var sessionMatches = _entropy.Verify(rawSession, session.SessionHash);
-
-            if (!sessionMatches || session.IsExpired())
-            {
-                await _sessionRepository.Delete(session.SessionHash);
-                _cookie.RemoveAuthCookies();
-                throw new UnauthorizedException("Sessão inválida. Faça login novamente.");
-            }
-
-            _ownership.Ensure(session.UserId);
-
-            await _sessionRepository.Delete(hashedSession);
-            _cookie.RemoveAuthCookies();
+            var session = await _sessionState.GetCurrentSession();
+            await _sessionRepository.Delete(session.Id);
+            _sessionState.ClearCookies();
         }
     }
 }

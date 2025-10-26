@@ -2,24 +2,21 @@
 
 namespace AuthCore.Application.Models.Output
 {
-    public sealed record class SessionViewModel
+    public sealed class SessionViewModel
     {
         [JsonPropertyName("id")]
-        public Guid Id { get; init; }
+        public string Id { get; set; } = string.Empty;
 
         [JsonPropertyName("ip_address")]
-        public string IpAddress { get; init; } = string.Empty;
+        public string IpAddress { get; set; } = string.Empty;
 
         [JsonPropertyName("platform")]
-        public string Platform { get; init; } = string.Empty;
+        public string Platform { get; set; } = string.Empty;
 
         [JsonPropertyName("browser")]
-        public string Browser { get; init; } = string.Empty;
+        public string Browser { get; set; } = string.Empty;
 
         [JsonPropertyName("created_at")]
-        public DateTime CreatedAt { get; init; }
-
-        [JsonPropertyName("is_current")]
-        public bool IsCurrent { get; init; }
+        public DateTime CreatedAt { get; set; }
     }
 }

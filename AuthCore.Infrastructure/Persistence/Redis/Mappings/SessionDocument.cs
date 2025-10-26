@@ -1,5 +1,4 @@
 ﻿using AuthCore.Domain.Aggregates.SessionAggregate;
-using AuthCore.Domain.Shared;
 using System.Text.Json.Serialization;
 
 namespace AuthCore.Infrastructure.Persistence.Redis.Mappings
@@ -7,22 +6,19 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Mappings
     internal sealed class SessionDocument
     {
         [JsonPropertyName("id")]
-        public Guid Id { get; set; }
+        public string Id { get; set; } = string.Empty;
 
         [JsonPropertyName("user_id")]
         public Guid UserId { get; set; }
 
-        [JsonPropertyName("session")]
-        public string Session { get; set; } = string.Empty;
-
-        [JsonPropertyName("refresh_token")]
-        public string RefreshToken { get; set; } = string.Empty;
-
         [JsonPropertyName("created_at")]
-        public DateTime CreatedAt { get; set; }
+        public long CreatedAt { get; set; }
 
         [JsonPropertyName("expires_at")]
-        public DateTime ExpiresAt { get; set; }
+        public long ExpiresAt { get; set; }
+
+        [JsonPropertyName("max_lifetime")]
+        public long MaxLifetime { get; set; }
 
         [JsonPropertyName("device")]
         public DeviceDocument Device { get; set; } = default!;
@@ -31,14 +27,13 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Mappings
 
         public static SessionDocument ToDocument(Session session)
         {
-            var document = new SessionDocument
+            return new SessionDocument
             {
                 Id = session.Id,
                 UserId = session.UserId,
-                Session = session.SessionHash,
-                RefreshToken = session.RefreshTokenHash,
-                CreatedAt = session.CreatedAt,
-                ExpiresAt = session.ExpiresAt,
+                CreatedAt = ToUnix(session.CreatedAt),
+                ExpiresAt = ToUnix(session.ExpiresAt),
+                MaxLifetime = ToUnix(session.MaxLifetime),
                 Device = new DeviceDocument
                 {
                     Ip = session.DeviceInfo.Ip,
@@ -46,25 +41,34 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Mappings
                     Browser = session.DeviceInfo.Browser
                 }
             };
-
-            return document;
         }
 
         public Session ToEntity()
         {
-            var deviceInfo = DeviceInfo.Create(
-                Device.Ip,
-                Device.Platform,
-                Device.Browser
+            var deviceInfo = DeviceInfo.Create(Device.Ip, Device.Platform, Device.Browser);
+
+            return Session.Restore(
+                id: Id,
+                userId: UserId,
+                deviceInfo: deviceInfo,
+                createdAt: FromUnix(CreatedAt),
+                expiresAt: FromUnix(ExpiresAt),
+                maxLifetime: FromUnix(MaxLifetime)
             );
+        }
 
-            var session = Domain.Aggregates.SessionAggregate.Session.Create(UserId, deviceInfo, Session, RefreshToken);
+        #endregion
 
-            typeof(Entity).GetProperty("Id")!.SetValue(session, Id);
-            typeof(Session).GetProperty("CreatedAt")!.SetValue(session, CreatedAt);
-            typeof(Session).GetProperty("ExpiresAt")!.SetValue(session, ExpiresAt);
+        #region Helpers
 
-            return session;
+        private static long ToUnix(DateTime date)
+        {
+            return new DateTimeOffset(date).ToUnixTimeSeconds();
+        }
+
+        private static DateTime FromUnix(long seconds)
+        {
+            return DateTimeOffset.FromUnixTimeSeconds(seconds).UtcDateTime;
         }
 
         #endregion

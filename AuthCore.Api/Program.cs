@@ -18,9 +18,13 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-#region Middleware
+#region Middlewares
 
+app.UseRouting();
+
+app.UseStaticFiles();
 app.UseSwaggerDoc();
+
 app.UseExceptionsHandling();
 app.UseAuthentication();
 app.UseAuthorization();

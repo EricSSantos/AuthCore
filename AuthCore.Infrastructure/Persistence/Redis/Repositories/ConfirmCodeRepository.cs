@@ -24,36 +24,29 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
         public async Task<ConfirmCode?> Get(Guid userId, CodeType type)
         {
             var key = BuildKey(userId, type);
-
             var value = await _redis.StringGetAsync(key);
+
             if (value.IsNullOrEmpty)
                 return null;
 
             var document = JsonSerializer.Deserialize<ConfirmCodeDocument>(value!);
+            if (document is null)
+                return null;
 
-            return ConfirmCode.FromPersistence(
-                document!.Code,
-                document.Type,
-                document.CreatedAt
-            );
+            return document.ToEntity();
         }
 
-        public async Task Set(Guid userId, ConfirmCode verificationCode)
+        public async Task Set(Guid userId, ConfirmCode confirmCode)
         {
-            var key = BuildKey(userId, verificationCode.Type);
+            var key = BuildKey(userId, confirmCode.Type);
 
-            var document = new ConfirmCodeDocument
-            {
-                Code = verificationCode.Code,
-                Type = verificationCode.Type,
-                UserId = userId,
-                CreatedAt = verificationCode.CreatedAt
-            };
+            var document = ConfirmCodeDocument.ToDocument(confirmCode, userId);
 
-            await _redis.StringSetAsync(key, JsonSerializer.Serialize(document), DEFAULT_TTL);
+            var json = JsonSerializer.Serialize(document);
+            await _redis.StringSetAsync(key, json, DEFAULT_TTL);
         }
 
-        #region Private Methods
+        #region Helpers
 
         private static string BuildKey(Guid userId, CodeType type)
         {

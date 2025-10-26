@@ -1,5 +1,5 @@
-﻿using AuthCore.Domain.Commons.Interfaces.Messaging;
-using AuthCore.Domain.Commons.Settings;
+﻿using AuthCore.Domain.Core.Interfaces.Messaging;
+using AuthCore.Domain.Core.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
@@ -30,6 +30,7 @@ namespace AuthCore.Infrastructure.Messaging.RabbitMq
 
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
+
             _logger.LogInformation("RabbitMQ conectado");
         }
 

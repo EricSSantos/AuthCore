@@ -1,4 +1,4 @@
-﻿using AuthCore.Domain.Commons.Settings;
+﻿using AuthCore.Domain.Core.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;

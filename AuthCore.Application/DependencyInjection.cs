@@ -1,6 +1,4 @@
-﻿using AuthCore.Application.Services;
-using AuthCore.Application.Services.Interfaces;
-using AuthCore.Application.UseCases.AuthCase;
+﻿using AuthCore.Application.UseCases.AuthCase;
 using AuthCore.Application.UseCases.AuthCase.Interfaces;
 using AuthCore.Application.UseCases.SessionCase;
 using AuthCore.Application.UseCases.SessionCase.Interfaces;
@@ -14,21 +12,7 @@ namespace AuthCore.Application
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
-            services
-                .AddApplicationServices()
-                .AddUseCases();
-
-            return services;
-        }
-
-        #region Application
-
-        private static IServiceCollection AddApplicationServices(this IServiceCollection services)
-        {
-            // Serviços de aplicação (cross use cases)
-            services.AddScoped<IOwnership, Ownership>();
-
-            return services;
+            return services.AddUseCases();
         }
 
         private static IServiceCollection AddUseCases(this IServiceCollection services)
@@ -39,7 +23,7 @@ namespace AuthCore.Application
             services.AddScoped<IRefresh, Refresh>();
 
             // Session
-            services.AddScoped<IGetSessions, GetSessions>();
+            services.AddScoped<IGetSessions, GetOtherSessions>();
             services.AddScoped<IRevokeSession, RevokeSessions>();
 
             // User
@@ -51,7 +35,5 @@ namespace AuthCore.Application
 
             return services;
         }
-
-        #endregion
     }
 }

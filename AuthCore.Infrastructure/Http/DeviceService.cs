@@ -1,5 +1,5 @@
 ﻿using AuthCore.Domain.Aggregates.SessionAggregate;
-using AuthCore.Domain.Commons.Interfaces.Http;
+using AuthCore.Domain.Core.Interfaces.Http;
 using Microsoft.AspNetCore.Http;
 using UAParser;
 
@@ -35,7 +35,7 @@ namespace AuthCore.Infrastructure.Http
             }
         }
 
-        #region Private Methods
+        #region Helpers
 
         private static string GetIp(HttpContext context)
         {

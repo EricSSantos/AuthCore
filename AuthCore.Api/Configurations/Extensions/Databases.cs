@@ -1,4 +1,4 @@
-﻿using AuthCore.Domain.Commons.Settings;
+﻿using AuthCore.Domain.Core.Settings;
 using AuthCore.Infrastructure.Persistence.PostgreSQL.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -74,7 +74,6 @@ namespace AuthCore.Api.Configurations.Extensions
             // Configura o cache Redis
             builder.Services.AddStackExchangeRedisCache(options =>
             {
-                options.InstanceName = redis.InstanceName;
                 options.Configuration = redis.ConnectionString;
             });
         }

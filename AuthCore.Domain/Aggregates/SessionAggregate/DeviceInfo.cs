@@ -1,22 +1,34 @@
-﻿using AuthCore.Domain.Commons.Exceptions;
-using AuthCore.Domain.Shared;
+﻿using AuthCore.Domain.Core.Exceptions;
+using AuthCore.Domain.Core.Interfaces.Base;
 using System.Net;
 
 namespace AuthCore.Domain.Aggregates.SessionAggregate
 {
-    public sealed class DeviceInfo : ValueObject
+    /// <summary>
+    /// Representa as informações do dispositivo associado a uma sessão de usuário.
+    /// </summary>
+    public sealed class DeviceInfo : IValueObject
     {
         #region Properties
 
+        /// <summary>
+        /// Endereço IP do dispositivo.
+        /// </summary>
         public string Ip { get; }
+
+        /// <summary>
+        /// Plataforma ou sistema operacional identificado.
+        /// </summary>
         public string Platform { get; }
+
+        /// <summary>
+        /// Navegador ou agente de usuário identificado.
+        /// </summary>
         public string Browser { get; }
 
         #endregion
 
         #region Constructors
-
-        protected DeviceInfo() { }
 
         private DeviceInfo(string ip, string platform, string browser)
         {
@@ -29,41 +41,48 @@ namespace AuthCore.Domain.Aggregates.SessionAggregate
 
         #region Factory
 
+        /// <summary>
+        /// Cria uma nova instância de informações de dispositivo.
+        /// </summary>
         public static DeviceInfo Create(string ip, string? platform, string? browser)
         {
-            var errors = new List<string>();
-
             if (string.IsNullOrWhiteSpace(ip))
-                errors.Add("O endereço IP é obrigatório.");
-            else if (!IsValidIp(ip))
-                errors.Add("O endereço IP informado é inválido.");
+                throw new BadRequestException("O endereço IP é obrigatório.");
+            if (!IsValidIp(ip))
+                throw new BadRequestException("O endereço IP informado é inválido.");
 
             platform = string.IsNullOrWhiteSpace(platform) ? "Desconhecido" : platform.Trim();
             browser = string.IsNullOrWhiteSpace(browser) ? "Desconhecido" : browser.Trim();
 
-            if (errors.Any())
-                throw new BadRequestException(errors);
-
-            return new DeviceInfo(ip.Trim(), platform.Trim(), browser.Trim());
+            return new DeviceInfo(ip.Trim(), platform, browser);
         }
 
         #endregion
 
-        #region Behavior
+        #region Helpers
 
-        /// <summary>
-        /// Verifica se o endereço IP informado é válido.
-        /// </summary>
         private static bool IsValidIp(string ip)
         {
             return IPAddress.TryParse(ip, out _);
         }
 
-        protected override IEnumerable<object> GetValues()
+        #endregion
+
+        #region Equality
+
+        public override bool Equals(object? obj)
         {
-            yield return Ip;
-            yield return Platform;
-            yield return Browser;
+            if (obj is not DeviceInfo other)
+                return false;
+
+            return Ip == other.Ip
+                && Platform == other.Platform
+                && Browser == other.Browser;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Ip, Platform, Browser);
         }
 
         #endregion

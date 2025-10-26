@@ -2,8 +2,8 @@
 using AuthCore.Application.UseCases.UserCase.Interfaces;
 using AuthCore.Domain.Aggregates.ConfirmCodeAggregate;
 using AuthCore.Domain.Aggregates.UserAggregate;
-using AuthCore.Domain.Commons.Exceptions;
-using AuthCore.Domain.Commons.Interfaces.Security.Hashing;
+using AuthCore.Domain.Core.Exceptions;
+using AuthCore.Domain.Core.Interfaces.Security;
 
 namespace AuthCore.Application.UseCases.UserCase
 {
@@ -11,16 +11,16 @@ namespace AuthCore.Application.UseCases.UserCase
     {
         private readonly IUserRepository _userRepository;
         private readonly IConfirmCodeRepository _confirmCodeRepository;
-        private readonly IBCrypt _bcrypt;
+        private readonly IPasswordHasher _passwordHasher;
 
         public ResetPassword(
             IUserRepository userRepository,
             IConfirmCodeRepository confirmCodeRepository,
-            IBCrypt bcrypt)
+            IPasswordHasher passwordHasher)
         {
             _userRepository = userRepository;
             _confirmCodeRepository = confirmCodeRepository;
-            _bcrypt = bcrypt;
+            _passwordHasher = passwordHasher;
         }
 
         public async Task OnExecute(ResetPasswordInputModel input)
@@ -28,17 +28,18 @@ namespace AuthCore.Application.UseCases.UserCase
             var user = await _userRepository.GetByEmail(input.Email)
                 ?? throw new NotFoundException("Usuário não encontrado.");
 
+            if (!user.IsActive())
+                throw new ForbiddenException("Usuário inativo.");
+
             var confirmCode = await _confirmCodeRepository.Get(user.Id, CodeType.ForgotPassword)
-                ?? throw new NotFoundException("Código nãod encontrado.");
+                ?? throw new NotFoundException("Código de verificação não encontrado.");
 
-            if (!confirmCode.IsMatching(input.Code) || !user.IsActive())
-                throw new BadRequestException("Código de verificação inválido.");
+            if (!confirmCode.Matching(input.Code))
+                throw new BadRequestException("Código inválido ou expirado.");
 
-            user.ChangePassword(
-                hashedPassword:     _bcrypt.Hash(input.NewPassword),
-                password:           input.NewPassword,
-                confirmPassword:    input.ConfirmNewPassword
-            );
+            Password.ValidateWithConfirmation(input.NewPassword, input.ConfirmNewPassword);
+
+            user.ChangePassword(passwordHash: _passwordHasher.Hash(input.NewPassword));
 
             _userRepository.Update(user);
             await _userRepository.SaveChanges();

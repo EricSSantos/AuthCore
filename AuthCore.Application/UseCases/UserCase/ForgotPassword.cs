@@ -4,19 +4,18 @@ using AuthCore.Domain.Aggregates.ConfirmCodeAggregate;
 using AuthCore.Domain.Aggregates.EmailAggregate;
 using AuthCore.Domain.Aggregates.EmailAggregate.Payloads;
 using AuthCore.Domain.Aggregates.UserAggregate;
-using AuthCore.Domain.Commons.Exceptions;
 
 namespace AuthCore.Application.UseCases.UserCase
 {
     public sealed class ForgotPassword : IForgotPassword
     {
         private readonly IUserRepository _userRepository;
-        private readonly IEmailService _emailService;
+        private readonly IEmailPublisher _emailService;
         private readonly IConfirmCodeRepository _confirmCodeRepository;
 
         public ForgotPassword(
             IUserRepository userRepository,
-            IEmailService emailService,
+            IEmailPublisher emailService,
             IConfirmCodeRepository confirmCodeRepository)
         {
             _userRepository = userRepository;
@@ -38,7 +37,7 @@ namespace AuthCore.Application.UseCases.UserCase
             );
 
             if (email.Payload is not ForgotPasswordPayload payload)
-                throw new BadRequestException("Falha ao gerar o código de recuperação de senha.");
+                throw new InvalidOperationException("Falha ao gerar o código de recuperação de senha.");
 
             var code = ConfirmCode.Create(
                 code:   payload.Code,

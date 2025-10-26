@@ -2,10 +2,10 @@
 using AuthCore.Application.UseCases.AuthCase.Interfaces;
 using AuthCore.Domain.Aggregates.SessionAggregate;
 using AuthCore.Domain.Aggregates.UserAggregate;
-using AuthCore.Domain.Commons.Exceptions;
-using AuthCore.Domain.Commons.Interfaces.Http;
-using AuthCore.Domain.Commons.Interfaces.Security.Hashing;
-using AuthCore.Domain.Commons.Interfaces.Security.Jwt;
+using AuthCore.Domain.Core.Exceptions;
+using AuthCore.Domain.Core.Interfaces.Http;
+using AuthCore.Domain.Core.Interfaces.Security;
+using AuthCore.Domain.Core.Settings;
 
 namespace AuthCore.Application.UseCases.AuthCase
 {
@@ -13,73 +13,97 @@ namespace AuthCore.Application.UseCases.AuthCase
     {
         private readonly IUserRepository _userRepository;
         private readonly ISessionRepository _sessionRepository;
-        private readonly IAccessToken _accessToken;
-        private readonly IEntropy _entropy;
-        private readonly IBCrypt _bCrypt;
+        private readonly IJwtTokenProvider _jwtTokenProvider;
+        private readonly ISecureKeyGenerator _secureKeyGenerator;
+        private readonly IPasswordHasher _passwordHasher;
+        private readonly ISessionState _sessionState;
         private readonly IDevice _device;
-        private readonly ICookie _cookie;
+        private readonly SecuritySettings _settings;
 
         public SignIn(
             IUserRepository userRepository,
             ISessionRepository sessionRepository,
-            IAccessToken accessToken,
-            IEntropy entropy,
-            IBCrypt bCrypt,
+            IJwtTokenProvider jwtTokenProvider,
+            ISecureKeyGenerator secureKeyGenerator,
+            IPasswordHasher passwordHasher,
+            ISessionState sessionState,
             IDevice device,
-            ICookie cookie)
+            SecuritySettings settings)
         {
             _userRepository = userRepository;
             _sessionRepository = sessionRepository;
-            _accessToken = accessToken;
-            _entropy = entropy;
-            _bCrypt = bCrypt;
+            _jwtTokenProvider = jwtTokenProvider;
+            _secureKeyGenerator = secureKeyGenerator;
+            _passwordHasher = passwordHasher;
+            _sessionState = sessionState;
             _device = device;
-            _cookie = cookie;
+            _settings = settings;
         }
 
         public async Task OnExecute(SignInInputModel input)
         {
-            var user = await ValidateCredentials(input.Email, input.Password);
-            await ValidateSessions(user.Id);
-
-            var (rawSession, hashedSession) = _entropy.GeneratePair(32);
-            var (rawRefresh, hashedRefresh) = _entropy.GeneratePair(64);
-
-            var device = _device.Device;
-
-            var session = Session.Create(user.Id, device, hashedSession, hashedRefresh);
-            await _sessionRepository.Set(session);
-
-            var accessToken = _accessToken.Generate(user.Id, user.Role);
-
-            _cookie.SetAuthCookies(rawSession, accessToken, rawRefresh);
-        }
-
-        #region Private Methods
-
-        private async Task<User> ValidateCredentials(string email, string password)
-        {
-            var user = await _userRepository.GetByEmail(email)
+            var user = await _userRepository.GetByEmail(input.Email)
                 ?? throw new UnauthorizedException("E-mail ou senha inválidos.");
 
-            user.SignIn(_bCrypt.isValid(password, user.Password.Value));
+            await ValidateUserCredentials(user, input.Password);
+            await EnforceSessionLimit(user.Id);
 
-            _userRepository.Update(user);
-            await _userRepository.SaveChanges();
+            var session = _secureKeyGenerator.Generate();
+            var sessionHash = _secureKeyGenerator.Hash(session);
 
-            return user;
+            var ttl = TimeSpan.FromDays(_settings.Session.ExpiresInDays);
+            var maxLifetime = TimeSpan.FromDays(_settings.Session.MaxLifetimeInDays);
+
+            var newSession = Session.Create(
+                id:             sessionHash,
+                userId:         user.Id,
+                deviceInfo:     _device.Device,
+                ttl:            ttl,
+                maxLifetime:    maxLifetime
+            );
+
+            await _sessionRepository.Set(newSession);
+
+            var accessToken = _jwtTokenProvider.Generate(user.Id);
+            _sessionState.SetCookies(session, accessToken);
         }
 
-        private async Task ValidateSessions(Guid userId)
-        {
-            var sessions = (await _sessionRepository.GetByUserId(userId)).ToList();
+        #region Helpers
 
-            if (sessions.Count < 4)
+        private async Task ValidateUserCredentials(User user, string password)
+        {
+            if (!user.IsActive())
+                throw new ForbiddenException("Usuário inativo.");
+
+            if (!_passwordHasher.IsValid(password, user.Password.Value))
+            {
+                user.LoginAttempts.RegisterFailure();
+
+                _userRepository.Update(user);
+                await _userRepository.SaveChanges();
+
+                throw new UnauthorizedException("E-mail ou senha inválidos.");
+            }
+
+            if (user.LoginAttempts.FailedAttempts > 0)
+            {
+                user.LoginAttempts.Reset();
+                _userRepository.Update(user);
+                await _userRepository.SaveChanges();
+            }
+        }
+
+        private async Task EnforceSessionLimit(Guid userId)
+        {
+            var sessions = await _sessionRepository.GetAllByUserId(userId);
+            if (sessions.Count() < 4)
                 return;
 
-            var oldestSession = sessions.Last();
+            var oldestSession = sessions
+                .OrderBy(s => s.CreatedAt)
+                .First();
 
-            await _sessionRepository.DeleteById(oldestSession.Id);
+            await _sessionRepository.Delete(oldestSession.Id);
         }
 
         #endregion

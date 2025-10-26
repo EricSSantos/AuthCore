@@ -2,13 +2,14 @@
 
 namespace AuthCore.Domain.Aggregates.UserAggregate
 {
+    /// <summary>
+    /// Define diferentes níveis de acesso de um usuário no sistema.
+    /// </summary>
     public enum RoleType
     {
-        [Description("Usuário")]
+        [Description("Usuário padrão")]
         User,
-        [Description("Administrador")]
-        Admin,
-        [Description("Proprietário")]
-        Owner
+        [Description("Administrador do sistema")]
+        Admin
     }
 }

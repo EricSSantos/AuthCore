@@ -2,6 +2,6 @@
 {
     public interface IRevokeSession
     {
-        Task OnExecute(List<Guid> Ids);
+        Task OnExecute();
     }
 }

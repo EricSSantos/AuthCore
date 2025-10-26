@@ -1,4 +1,4 @@
-﻿using AuthCore.Domain.Commons.Settings;
+﻿using AuthCore.Domain.Core.Settings;
 using Microsoft.OpenApi.Models;
 
 namespace AuthCore.Api.Configurations.Extensions
@@ -7,7 +7,7 @@ namespace AuthCore.Api.Configurations.Extensions
     {
         /// <summary>
         /// Registra e configura o Swagger no container de serviços da aplicação,
-        /// utilizando as informações de versão definidas em <see cref="ApiSettings"/>.
+        /// incluindo os comentários XML gerados automaticamente pelo compilador.
         /// </summary>
         /// <param name="builder">Instância do <see cref="WebApplicationBuilder"/> utilizada para configuração dos serviços.</param>
         /// <exception cref="InvalidOperationException">Lançada quando as configurações da API não estão definidas ou são inválidas.</exception>
@@ -19,6 +19,7 @@ namespace AuthCore.Api.Configurations.Extensions
 
             builder.Services.AddSwaggerGen(c =>
             {
+                // Define as versões da documentação com base nas configurações
                 foreach (var (versionKey, versionInfo) in settings.Versions)
                 {
                     c.SwaggerDoc(versionKey, new OpenApiInfo
@@ -27,6 +28,13 @@ namespace AuthCore.Api.Configurations.Extensions
                         Version = versionKey,
                         Description = versionInfo.Description
                     });
+                }
+
+                // Inclui comentários xml
+                var xmlFiles = Directory.GetFiles(AppContext.BaseDirectory, "*.xml", SearchOption.TopDirectoryOnly);
+                foreach (var xmlFile in xmlFiles)
+                {
+                    c.IncludeXmlComments(xmlFile, includeControllerXmlComments: true);
                 }
             });
         }
@@ -51,9 +59,11 @@ namespace AuthCore.Api.Configurations.Extensions
                     c.SwaggerEndpoint($"/swagger/{versionKey}/swagger.json", versionInfo.Name);
                 }
 
-                // Oculta os modelos de schema e habilita credenciais
+                // Configura layout e aparência
                 c.DefaultModelsExpandDepth(-1);
+                c.RoutePrefix = string.Empty;
                 c.ConfigObject.AdditionalItems["withCredentials"] = true;
+                c.InjectStylesheet("/swagger/SwaggerStyle.css");
             });
         }
     }

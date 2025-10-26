@@ -1,4 +1,4 @@
-﻿using AuthCore.Domain.Commons.Settings;
+﻿using AuthCore.Domain.Core.Settings;
 
 namespace AuthCore.Api.Configurations.Extensions
 {

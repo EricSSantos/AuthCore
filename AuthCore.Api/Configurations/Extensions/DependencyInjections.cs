@@ -1,5 +1,5 @@
 ﻿using AuthCore.Application;
-using AuthCore.Domain.Commons.Settings;
+using AuthCore.Domain.Core.Settings;
 using AuthCore.Infrastructure;
 using Microsoft.Extensions.Options;
 
@@ -36,15 +36,12 @@ namespace AuthCore.Api.Configurations.Extensions
             services.Configure<DatabaseSettings>(config.GetSection("Database"));
             services.Configure<CorsSettings>(config.GetSection("Cors"));
             services.Configure<SecuritySettings>(config.GetSection("Security"));
-            services.Configure<RedisSettings>(config.GetSection("Redis"));
             services.Configure<RabbitMqSettings>(config.GetSection("RabbitMQ"));
             
-
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<ApiSettings>>().Value);
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<DatabaseSettings>>().Value);
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<CorsSettings>>().Value);
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<SecuritySettings>>().Value);
-            services.AddSingleton(sp => sp.GetRequiredService<IOptions<RedisSettings>>().Value);
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<RabbitMqSettings>>().Value);
             
             return services;

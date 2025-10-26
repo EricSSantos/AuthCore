@@ -1,31 +1,31 @@
 ﻿using AuthCore.Application.Models.Output;
 using AuthCore.Application.UseCases.UserCase.Interfaces;
 using AuthCore.Domain.Aggregates.UserAggregate;
-using AuthCore.Domain.Commons.Exceptions;
-using AuthCore.Domain.Commons.Interfaces.Security.Jwt;
+using AuthCore.Domain.Core.Exceptions;
+using AuthCore.Domain.Core.Interfaces.Security;
 
 namespace AuthCore.Application.UseCases.UserCase
 {
     public sealed class GetCurrentUser : IGetCurrentUser
     {
         private readonly IUserRepository _userRepository;
-        private readonly IAccessToken _accessToken;
+        private readonly IJwtTokenProvider _jwtTokenProvider;
 
         public GetCurrentUser(
             IUserRepository userRepository,
-            IAccessToken accessToken)
+            IJwtTokenProvider jwtTokenProvider)
         {
             _userRepository = userRepository;
-            _accessToken = accessToken;
+            _jwtTokenProvider = jwtTokenProvider;
         }
 
         public async Task<UserViewModel> OnExecute()
         {
-            var user = await _userRepository.GetById(_accessToken.Sub)
+            var user = await _userRepository.GetById(_jwtTokenProvider.Sub)
                 ?? throw new NotFoundException("Usuário não encontrado.");
 
             if (!user.IsActive())
-                throw new ForbiddenException("Usuário inativo ou bloqueado.");
+                throw new ForbiddenException("A conta deste usuário está inativa.");
 
             return new UserViewModel
             {

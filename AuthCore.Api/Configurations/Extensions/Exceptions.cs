@@ -1,5 +1,5 @@
 ﻿using AuthCore.Application.Models;
-using AuthCore.Domain.Shared;
+using AuthCore.Domain.Core.Exceptions;
 using System.Net;
 using System.Text.Json;
 

@@ -10,8 +10,7 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
         #region Constants
 
         private const string PREFIX = "sessions:";
-        private static readonly TimeSpan DEFAULT_TTL = TimeSpan.FromDays(7);
-        private static readonly JsonSerializerOptions JsonOptions = new()
+        private static readonly JsonSerializerOptions JSON_OPTIONS = new()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             WriteIndented = false
@@ -28,101 +27,75 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
             _redis = connection.GetDatabase();
         }
 
-        public async Task<Session?> Get(string sessionHash)
+        public async Task<Session?> Get(string sessionId)
         {
-            var key = BuildKey(sessionHash);
-            
+            var key = BuildKey(sessionId);
             var value = await _redis.StringGetAsync(key);
-            if (value.IsNullOrEmpty) 
+
+            if (value.IsNullOrEmpty)
                 return null;
 
-            var doc = JsonSerializer.Deserialize<SessionDocument>(value!, JsonOptions);
+            var doc = JsonSerializer.Deserialize<SessionDocument>(value!, JSON_OPTIONS);
+            if (doc is null)
+                return null;
 
-            return doc?.ToEntity();
+            return doc.ToEntity();
         }
 
-        public async Task<Session?> GetById(Guid sessionId)
-        {
-            await foreach (var key in EnumerateKeysAsync())
-            {
-                var value = await _redis.StringGetAsync(key);
-                if (value.IsNullOrEmpty) 
-                    continue;
-
-                var doc = JsonSerializer.Deserialize<SessionDocument>(value!, JsonOptions);
-                if (doc is not null && doc.Id == sessionId)
-                    return doc.ToEntity();
-            }
-
-            return null;
-        }
-
-        public async Task<IEnumerable<Session>> GetByUserId(Guid userId)
+        public async Task<IEnumerable<Session>> GetAllByUserId(Guid userId)
         {
             var list = new List<Session>();
 
             await foreach (var key in EnumerateKeysAsync())
             {
                 var value = await _redis.StringGetAsync(key);
-                if (value.IsNullOrEmpty) 
+                if (value.IsNullOrEmpty)
                     continue;
 
-                var doc = JsonSerializer.Deserialize<SessionDocument>(value!, JsonOptions);
+                var doc = JsonSerializer.Deserialize<SessionDocument>(value!, JSON_OPTIONS);
                 if (doc is not null && doc.UserId == userId)
                     list.Add(doc.ToEntity());
             }
 
-            return list.OrderByDescending(s => s.CreatedAt);
+            return list.OrderByDescending(x => x.CreatedAt);
         }
 
         public async Task Set(Session session)
         {
-            var key = BuildKey(session.SessionHash);
-            var payload = JsonSerializer.Serialize(SessionDocument.ToDocument(session), JsonOptions);
-
-            await _redis.StringSetAsync(key, payload, DEFAULT_TTL);
+            var key = BuildKey(session.Id);
+            var document = SessionDocument.ToDocument(session);
+            var payload = JsonSerializer.Serialize(document, JSON_OPTIONS);
+            var ttl = session.ExpiresAt - DateTime.UtcNow;
+            await _redis.StringSetAsync(key, payload, ttl);
         }
 
-        public async Task Delete(string sessionHash)
+        public async Task Delete(string sessionId)
         {
-            var key = BuildKey(sessionHash);
+            var key = BuildKey(sessionId);
             await _redis.KeyDeleteAsync(key);
         }
 
-        public async Task DeleteById(Guid sessionId)
+        #region Helpers
+
+        private static string BuildKey(string sessionId)
         {
-            await foreach (var key in EnumerateKeysAsync())
-            {
-                var value = await _redis.StringGetAsync(key);
-                if (value.IsNullOrEmpty) 
-                    continue;
-
-                var doc = JsonSerializer.Deserialize<SessionDocument>(value!, JsonOptions);
-                if (doc is not null && doc.Id == sessionId)
-                {
-                    await _redis.KeyDeleteAsync(key);
-                    return;
-                }
-            }
+            return $"{PREFIX}{sessionId}";
         }
-
-        #region Private Methods
-
-        private static string BuildKey(string sessionHash) => $"{PREFIX}{sessionHash}";
 
         private async IAsyncEnumerable<string> EnumerateKeysAsync(int pageSize = 500)
         {
             var pattern = PREFIX + "*";
-            foreach (var ep in _conn.GetEndPoints(configuredOnly: true))
+
+            foreach (var endpoint in _conn.GetEndPoints(configuredOnly: true))
             {
-                var server = _conn.GetServer(ep);
+                var server = _conn.GetServer(endpoint);
+
                 foreach (var key in server.Keys(_redis.Database, pattern: pattern, pageSize: pageSize))
                     yield return key;
 
                 await Task.Yield();
             }
         }
-
 
         #endregion
     }

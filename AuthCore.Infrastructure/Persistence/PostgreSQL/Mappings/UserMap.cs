@@ -4,16 +4,22 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Mappings
 {
-    internal class UserMap : IEntityTypeConfiguration<User>
+    internal sealed class UserMap : IEntityTypeConfiguration<User>
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
             builder.ToTable("users");
 
+            #region Primary Key
+
             builder.HasKey(u => u.Id);
 
             builder.Property(u => u.Id)
                    .HasColumnName("id");
+
+            #endregion
+
+            #region Basic Properties
 
             builder.Property(u => u.FirstName)
                    .HasColumnName("first_name")
@@ -30,6 +36,26 @@ namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Mappings
                    .HasMaxLength(255)
                    .IsRequired();
 
+            builder.Property(u => u.Role)
+                   .HasConversion<int>()
+                   .HasColumnName("role")
+                   .IsRequired();
+
+            builder.Property(u => u.Active)
+                   .HasColumnName("active")
+                   .IsRequired();
+
+            builder.Property(u => u.CreatedAt)
+                   .HasColumnName("created_at")
+                   .IsRequired();
+
+            builder.Property(u => u.InactivatedAt)
+                   .HasColumnName("inactivated_at");
+
+            #endregion
+
+            #region Value Objects
+
             builder.OwnsOne(u => u.Password, vo =>
             {
                 vo.Property(p => p.Value)
@@ -39,22 +65,6 @@ namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Mappings
 
                 vo.WithOwner();
             });
-
-            builder.Property(u => u.Role)
-                   .HasConversion<int>()
-                   .HasColumnName("role")
-                   .IsRequired();
-
-            builder.Property(u => u.Active)
-                   .HasColumnName("activate")
-                   .IsRequired();
-
-            builder.Property(u => u.CreatedAt)
-                   .HasColumnName("created_at")
-                   .IsRequired();
-
-            builder.Property(u => u.InactivatedAt)
-                   .HasColumnName("inactivated_at");
 
             builder.OwnsOne(u => u.LoginAttempts, vo =>
             {
@@ -69,6 +79,15 @@ namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Mappings
 
                 vo.WithOwner();
             });
+
+            #endregion
+
+            #region Indexes
+
+            builder.HasIndex(u => u.Email)
+                   .IsUnique();
+
+            #endregion
         }
     }
 }
