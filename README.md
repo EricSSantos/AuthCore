@@ -221,3 +221,16 @@ Defina os caminhos das chaves no appsettings.json ou .env:
 | **PATCH** | `/api/v1/users/reset-password`     | Redefine a senha usando o código recebido.              |
 
 </details>
+
+---
+
+### 🗺️ Roadmap
+
+Abaixo estão as próximas implementações planejadas. As melhorias não possuem data definida e serão adicionadas progressivamente conforme o projeto evoluir.
+
+| Etapa                               | Descrição                                                                                                    |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **Validação em dois fatores (2FA)** | Implementar autenticação em dois fatores (TOTP ou código por e-mail/SMS) para reforçar a segurança do login. |
+| **Login social com Google**         | Permitir autenticação de usuários utilizando conta do Google via OAuth 2.0.                                  |
+| **Melhorias de observabilidade**    | Adicionar métricas, logs estruturados e rastreamento de requisições para melhor monitoramento e diagnóstico. |
+
