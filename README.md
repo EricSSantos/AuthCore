@@ -6,7 +6,7 @@
 ![Redis](https://img.shields.io/badge/Redis-7-red?logo=redis\&logoColor=white)
 ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-3.13+-orange?logo=rabbitmq\&logoColor=white)
 
-A ideia é transformar este projeto em um **Boilerplate para inicialização de APIs em .NET 9**, com suporte a autenticação via **JWT**, gerenciamento de **sessões**.
+A ideia é transformar este projeto em um **Boilerplate para inicialização de APIs em .NET 9** ou um serviço isolado para controle de autenticações, com suporte a autenticação via **JWT**, gerenciamento de **sessões**.
 
 ### 🧩 Pré-requisitos
 
