@@ -228,9 +228,12 @@ Defina os caminhos das chaves no appsettings.json ou .env:
 
 Abaixo estão as próximas implementações planejadas. As melhorias não possuem data definida e serão adicionadas progressivamente conforme o projeto evoluir.
 
-| Etapa                               | Descrição                                                                                                    |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **Validação em dois fatores (2FA)** | Implementar autenticação em dois fatores (TOTP ou código por e-mail/SMS) para reforçar a segurança do login. |
-| **Login social com Google**         | Permitir autenticação de usuários utilizando conta do Google via OAuth 2.0.                                  |
-| **Melhorias de observabilidade**    | Adicionar métricas, logs estruturados e rastreamento de requisições para melhor monitoramento e diagnóstico. |
-
+| Etapa                               | Descrição                                                                                                    |   Status  |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------ | --------- |
+| **Validação de e-mail no cadastro** | Enviar e validar um link de confirmação de e-mail ao criar uma nova conta.                                   |    N/A    |
+| **Ativar conta de usuário**         | Permitir que o usuário reative sua conta após inativação ou verificação pendente.                            |    N/A    |
+| **Inativar conta de usuário**       | Possibilitar que o usuário desative temporariamente sua conta sem excluí-la.                                 |    N/A    |
+| **Excluir conta de usuário**        | Implementar remoção completa e segura dos dados do usuário.                                                  |    N/A    |
+| **Validação em dois fatores (2FA)** | Adicionar autenticação em dois fatores (TOTP ou código via e-mail/SMS) para reforçar a segurança do login.   |    N/A    |
+| **Login social com Google**         | Permitir autenticação de usuários utilizando conta do Google via OAuth 2.0.                                  |    N/A    |
+| **Melhorias de observabilidade**    | Adicionar métricas, logs estruturados e rastreamento de requisições para melhor monitoramento e diagnóstico. |    N/A    |
