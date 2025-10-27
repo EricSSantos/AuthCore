@@ -9,6 +9,7 @@ builder.AddDependencyInjections();
 builder.AddAuthentication();
 builder.AddSwaggerService();
 builder.AddCorsPolicies();
+builder.AddRateLimiting();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -23,6 +24,7 @@ var app = builder.Build();
 app.UseRouting();
 app.UseStaticFiles();
 app.UseSwaggerDoc();
+app.UseRateLimiter();
 app.UseExceptionsHandling();
 app.UseAuthentication();
 app.UseAuthorization();
