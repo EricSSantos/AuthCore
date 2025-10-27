@@ -6,12 +6,15 @@ using System.Security.Cryptography;
 
 namespace AuthCore.Api.Configurations.Extensions
 {
+    /// <summary>
+    /// Configura a autenticação JWT da aplicação.
+    /// </summary>
     public static class AuthenticationExtensions
     {
         /// <summary>
-        /// Registra e configura a autenticação JWT no container de serviços da aplicação.
+        /// Adiciona e configura a autenticação JWT.
         /// </summary>
-        /// <param name="builder">Instância do <see cref="WebApplicationBuilder"/> utilizada para configurar os serviços.</param>
+        /// <param name="builder">Instância usada para configurar os serviços da aplicação.</param>
         /// <exception cref="InvalidOperationException">Lançada quando as configurações de segurança não estão definidas.</exception>
         public static void AddAuthentication(this WebApplicationBuilder builder)
         {
@@ -28,17 +31,16 @@ namespace AuthCore.Api.Configurations.Extensions
         #region Private Methods
 
         /// <summary>
-        /// Obtém e importa a chave pública ECDSA a partir do caminho físico ou da variável de ambiente configurada.
+        /// Carrega a chave pública ECDSA usada para validar os tokens JWT.
         /// </summary>
-        /// <param name="securitySettings">Configurações de segurança carregadas do arquivo <c>appsettings.json</c>.</param>
-        /// <returns>Instância de <see cref="ECDsaSecurityKey"/> contendo a chave pública para validação de tokens.</returns>
+        /// <param name="securitySettings">Configurações de segurança da aplicação.</param>
+        /// <returns>Chave pública para validação de tokens.</returns>
         /// <exception cref="FileNotFoundException">Lançada quando a chave pública não é encontrada.</exception>
         private static ECDsaSecurityKey GetPublicKey(SecuritySettings securitySettings)
         {
             var keyPath = securitySettings.Keys.Asymmetric.PublicKeyPath
                 ?? throw new FileNotFoundException("Caminho ou variável de chave pública não definido.");
 
-            // Tenta ler a chave pública da variável de ambiente ou do arquivo físico
             var publicKeyPem = Environment.GetEnvironmentVariable(keyPath)
                 ?? (File.Exists(keyPath) ? File.ReadAllText(keyPath) : null)
                 ?? throw new FileNotFoundException("Chave pública não encontrada. Nenhuma variável de ambiente ou arquivo físico foi localizado.");
@@ -50,16 +52,16 @@ namespace AuthCore.Api.Configurations.Extensions
         }
 
         /// <summary>
-        /// Configura o esquema de autenticação JWT, definindo o algoritmo de assinatura,
-        /// os validadores de emissor, audiência e chave, e a leitura do token via cookie.
+        /// Configura o esquema de autenticação JWT e os parâmetros de validação.
         /// </summary>
         /// <param name="services">Coleção de serviços da aplicação.</param>
-        /// <param name="settings">Configurações de segurança extraídas do <see cref="SecuritySettings"/>.</param>
-        /// <param name="publicKey">Chave pública utilizada para validação dos tokens.</param>
+        /// <param name="settings">Configurações de segurança carregadas do appsettings.</param>
+        /// <param name="publicKey">Chave pública usada para validar tokens.</param>
         private static void ConfigureJwtAuthentication(IServiceCollection services, SecuritySettings settings, ECDsaSecurityKey publicKey)
         {
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
             JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
+
             services
                 .AddAuthentication(options =>
                 {
@@ -68,7 +70,6 @@ namespace AuthCore.Api.Configurations.Extensions
                 })
                 .AddJwtBearer(options =>
                 {
-                    // Permite que o token seja lido a partir de cookies
                     options.Events = new JwtBearerEvents
                     {
                         OnMessageReceived = context =>

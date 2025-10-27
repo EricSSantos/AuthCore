@@ -6,20 +6,20 @@ using StackExchange.Redis;
 
 namespace AuthCore.Api.Configurations.Extensions
 {
+    /// <summary>
+    /// Configura os bancos de dados da aplicação.
+    /// </summary>
     public static class Databases
     {
         /// <summary>
-        /// Registra os bancos de dados e provedores de persistência no container de injeção de dependência.
-        /// Inclui a configuração do PostgreSQL e do Redis com base nas seções definidas em <c>appsettings.json</c>.
+        /// Registra o PostgreSQL e o Redis na aplicação.
         /// </summary>
-        /// <param name="builder">Instância do <see cref="WebApplicationBuilder"/> utilizada para configurar os serviços.</param>
+        /// <param name="builder">Instância usada para configurar os serviços da aplicação.</param>
         /// <exception cref="InvalidOperationException">Lançada quando as strings de conexão não estão definidas.</exception>
         public static void AddDatabases(this WebApplicationBuilder builder)
         {
-            // Registra a seção "Database" como fortemente tipada
             builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection("Database"));
 
-            // Configura provedores
             builder.AddPostgreSql();
             builder.AddRedis();
         }
@@ -27,10 +27,9 @@ namespace AuthCore.Api.Configurations.Extensions
         #region PostgreSQL
 
         /// <summary>
-        /// Registra e configura o provedor do Entity Framework Core para PostgreSQL,
-        /// utilizando o contexto <see cref="AppDbContext"/> e a connection string definida nas configurações.
+        /// Configura o Entity Framework Core com o provedor PostgreSQL.
         /// </summary>
-        /// <param name="builder">Instância do <see cref="WebApplicationBuilder"/> utilizada para configuração do serviço.</param>
+        /// <param name="builder">Instância usada para configurar o serviço.</param>
         /// <exception cref="InvalidOperationException">Lançada quando a string de conexão do PostgreSQL não está definida.</exception>
         private static void AddPostgreSql(this WebApplicationBuilder builder)
         {
@@ -52,9 +51,9 @@ namespace AuthCore.Api.Configurations.Extensions
         #region Redis
 
         /// <summary>
-        /// Registra e configura a conexão com o Redis, permitindo o uso de cache distribuído e repositórios em memória.
+        /// Configura o Redis para cache e armazenamento em memória.
         /// </summary>
-        /// <param name="builder">Instância do <see cref="WebApplicationBuilder"/> utilizada para configuração do serviço.</param>
+        /// <param name="builder">Instância usada para configurar o serviço.</param>
         /// <exception cref="InvalidOperationException">Lançada quando a string de conexão do Redis não está definida.</exception>
         private static void AddRedis(this WebApplicationBuilder builder)
         {
@@ -67,11 +66,9 @@ namespace AuthCore.Api.Configurations.Extensions
             if (string.IsNullOrWhiteSpace(redis.ConnectionString))
                 throw new InvalidOperationException("A string de conexão do Redis não foi definida.");
 
-            // Cria o multiplexer
             var multiplexer = ConnectionMultiplexer.Connect(redis.ConnectionString);
             builder.Services.AddSingleton<IConnectionMultiplexer>(multiplexer);
 
-            // Configura o cache Redis
             builder.Services.AddStackExchangeRedisCache(options =>
             {
                 options.Configuration = redis.ConnectionString;

@@ -21,10 +21,8 @@ var app = builder.Build();
 #region Middlewares
 
 app.UseRouting();
-
 app.UseStaticFiles();
 app.UseSwaggerDoc();
-
 app.UseExceptionsHandling();
 app.UseAuthentication();
 app.UseAuthorization();

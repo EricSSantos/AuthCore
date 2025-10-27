@@ -2,6 +2,9 @@
 
 namespace AuthCore.Api.Configurations.Extensions
 {
+    /// <summary>
+    /// Configura as políticas de CORS da aplicação.
+    /// </summary>
     public static class Cors
     {
         #region Constants
@@ -12,10 +15,9 @@ namespace AuthCore.Api.Configurations.Extensions
         #endregion
 
         /// <summary>
-        /// Registra as políticas de CORS no container de injeção de dependência,
-        /// utilizando as origens definidas no arquivo de configuração (appsettings.json).
+        /// Adiciona as políticas de CORS com base nas origens definidas nas configurações.
         /// </summary>
-        /// <param name="builder">Instância do <see cref="WebApplicationBuilder"/> utilizada para configuração dos serviços da aplicação.</param>
+        /// <param name="builder">Instância usada para configurar os serviços da aplicação.</param>
         public static void AddCorsPolicies(this WebApplicationBuilder builder)
         {
             var corsSettings = builder.Configuration
@@ -41,10 +43,9 @@ namespace AuthCore.Api.Configurations.Extensions
         }
 
         /// <summary>
-        /// Aplica o redirecionamento HTTPS, habilita o roteamento
-        /// e define a política de CORS correspondente ao ambiente atual.
+        /// Ativa HTTPS, roteamento e aplica a política de CORS conforme o ambiente.
         /// </summary>
-        /// <param name="app">Instância do <see cref="WebApplication"/> utilizada para configuração do pipeline HTTP.</param>
+        /// <param name="app">Instância usada para configurar o pipeline HTTP.</param>
         public static void UseCorsAndHttps(this WebApplication app)
         {
             var env = app.Services.GetRequiredService<IWebHostEnvironment>();
