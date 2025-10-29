@@ -2,6 +2,7 @@
 using AuthCore.Application.UseCases.EmailCase.Interface;
 using AuthCore.Domain.Aggregates.ConfirmCodeAggregate;
 using AuthCore.Domain.Aggregates.EmailAggregate;
+using AuthCore.Domain.Aggregates.EmailAggregate.Payloads;
 using AuthCore.Domain.Aggregates.UserAggregate;
 using AuthCore.Domain.Core.Exceptions;
 
@@ -26,10 +27,8 @@ namespace AuthCore.Application.UseCases.EmailCase
         public async Task OnExecute(SendEmailRequest request)
         {
             var user = await _userRepository.GetByEmail(request.Email);
-            if (user is null || !user.IsActive())
+            if (user is null)
                 return;
-
-            var codeType = ResolveCodeType(request.Type);
 
             var email = Email.Create(
                 to: user.Email,
@@ -37,7 +36,7 @@ namespace AuthCore.Application.UseCases.EmailCase
                 type: request.Type
             );
 
-            var code = ConfirmCode.Create(codeType);
+            var code = CreateConfirmCode(email);
 
             await _confirmCodeRepository.Set(user.Id, code);
             await _emailService.Send(email);
@@ -45,14 +44,16 @@ namespace AuthCore.Application.UseCases.EmailCase
 
         #region Helpers
 
-        private static CodeType ResolveCodeType(EmailType type)
+        private static ConfirmCode CreateConfirmCode(Email email)
         {
-            switch (type)
+            switch (email.Type)
             {
                 case EmailType.ConfirmEmail:
-                    return CodeType.ConfirmEmail;
+                    var confirmPayload = email.GetPayload<ConfirmEmailPayload>();
+                    return ConfirmCode.Create(confirmPayload.Code, CodeType.ConfirmEmail);
                 case EmailType.ForgotPassword:
-                    return CodeType.ForgotPassword;
+                    var forgotPayload = email.GetPayload<ForgotPasswordPayload>();
+                    return ConfirmCode.Create(forgotPayload.Code, CodeType.ForgotPassword);
                 default:
                     throw new BadRequestException("Tipo de e-mail inválido para geração de código.");
             }

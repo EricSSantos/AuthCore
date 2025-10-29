@@ -46,6 +46,12 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
             await _redis.StringSetAsync(key, json, DEFAULT_TTL);
         }
 
+        public async Task Delete(Guid userId, CodeType type)
+        {
+            var key = BuildKey(userId, type);
+            await _redis.KeyDeleteAsync(key);
+        }
+
         #region Helpers
 
         private static string BuildKey(Guid userId, CodeType type)

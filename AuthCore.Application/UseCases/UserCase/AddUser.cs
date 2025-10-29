@@ -60,7 +60,10 @@ namespace AuthCore.Application.UseCases.UserCase
 
             var payload = email.GetPayload<ConfirmEmailPayload>();
 
-            var code = ConfirmCode.Create(CodeType.ConfirmEmail);
+            var code = ConfirmCode.Create(
+                code: payload.Code,
+                type: CodeType.ConfirmEmail
+            );
 
             await _confirmCodeRepository.Set(user.Id, code);
             await _emailPublisher.Send(email);

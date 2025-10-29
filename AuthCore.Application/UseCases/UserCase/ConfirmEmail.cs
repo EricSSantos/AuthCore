@@ -31,8 +31,8 @@ namespace AuthCore.Application.UseCases.UserCase
             var confirm = await _confirmCodeRepository.Get(user.Id, CodeType.ConfirmEmail)
                 ?? throw new NotFoundException("Código de confirmação não encontrado");
 
-            // TODO: Criar um fluco de expurgo de códigos usados ou expirados
             confirm.Matching(confirm.Code);
+            await _confirmCodeRepository.Delete(user.Id, confirm.Type);
 
             user.Confirm();
             _userRepository.Update(user);

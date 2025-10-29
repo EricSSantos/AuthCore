@@ -31,11 +31,11 @@ namespace AuthCore.Application.UseCases.UserCase
             if (!user.IsActive())
                 throw new ForbiddenException("Usuário inativo.");
 
-            var confirmCode = await _confirmCodeRepository.Get(user.Id, CodeType.ForgotPassword)
-                ?? throw new NotFoundException("Código de verificação não encontrado.");
+            var confirm = await _confirmCodeRepository.Get(user.Id, CodeType.ForgotPassword)
+                ?? throw new NotFoundException("Código de confirmação não encontrado");
 
-            // TODO: Criar um fluco de expurgo de códigos usados ou expirados
-            confirmCode.Matching(request.Code);
+            confirm.Matching(request.Code);
+            await _confirmCodeRepository.Delete(user.Id, confirm.Type);
 
             Password.ValidateWithConfirmation(request.NewPassword, request.ConfirmNewPassword);
 

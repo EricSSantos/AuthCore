@@ -66,9 +66,10 @@ namespace AuthCore.Domain.Aggregates.ConfirmCodeAggregate
         /// <summary>
         /// Cria uma nova instância de código de confirmação.
         /// </summary>
-        public static ConfirmCode Create(CodeType type)
+        public static ConfirmCode Create(
+            int code,
+            CodeType type)
         {
-            int code = ConfirmCodeGenerator.Generate();
             return new ConfirmCode(code, type, DateTime.UtcNow);
         }
 
