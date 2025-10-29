@@ -75,11 +75,11 @@ namespace AuthCore.Domain.Aggregates.EmailAggregate
 
             switch (type)
             {
-                case EmailType.Welcome:
-                    payload = new WelcomeEmailPayload();
-                    break;
                 case EmailType.ConfirmEmail:
                     payload = new ConfirmEmailPayload();
+                    break;
+                case EmailType.Welcome:
+                    payload = new WelcomeEmailPayload();
                     break;
                 case EmailType.ForgotPassword:
                     payload = new ForgotPasswordPayload();

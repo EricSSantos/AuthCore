@@ -2,9 +2,9 @@
 
 namespace AuthCore.Application.Models.Requests
 {
-    public sealed record ForgotPasswordRequest
+    public sealed record EmailRequest
     {
         [JsonPropertyName("email")]
-        public required string Email { get; init; }
+        public required string Email { get; set; }
     }
 }

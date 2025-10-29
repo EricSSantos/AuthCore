@@ -86,24 +86,6 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Envia um código de recuperação de senha para o e-mail informado.
-        /// </summary>
-        [HttpPost("forgot-password")]
-        [ProducesResponseType(typeof(Response<object>), (int)HttpStatusCode.Accepted)]
-        public async Task<ActionResult<Response<object>>> ForgotPassword(
-            [FromBody] ForgotPasswordRequest request,
-            [FromServices] IForgotPassword forgotPassword)
-        {
-            await forgotPassword.OnExecute(request);
-
-            return Accepted(Response<object>.Success(
-                null!,
-                "Se o e-mail informado for válido, enviaremos um código de recuperação.",
-                HttpStatusCode.Accepted
-            ));
-        }
-
-        /// <summary>
         /// Redefine a senha utilizando o código de verificação recebido.
         /// </summary>
         [HttpPut("reset-password")]

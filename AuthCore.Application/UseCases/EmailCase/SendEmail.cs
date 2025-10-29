@@ -1,19 +1,19 @@
 ﻿using AuthCore.Application.Models.Requests;
-using AuthCore.Application.UseCases.UserCase.Interfaces;
+using AuthCore.Application.UseCases.EmailCase.Interface;
 using AuthCore.Domain.Aggregates.ConfirmCodeAggregate;
 using AuthCore.Domain.Aggregates.EmailAggregate;
-using AuthCore.Domain.Aggregates.EmailAggregate.Payloads;
 using AuthCore.Domain.Aggregates.UserAggregate;
+using AuthCore.Domain.Core.Exceptions;
 
-namespace AuthCore.Application.UseCases.UserCase
+namespace AuthCore.Application.UseCases.EmailCase
 {
-    public sealed class ForgotPassword : IForgotPassword
+    public sealed class SendEmail : ISendEmail
     {
         private readonly IUserRepository _userRepository;
         private readonly IEmailPublisher _emailService;
         private readonly IConfirmCodeRepository _confirmCodeRepository;
 
-        public ForgotPassword(
+        public SendEmail(
             IUserRepository userRepository,
             IEmailPublisher emailService,
             IConfirmCodeRepository confirmCodeRepository)
@@ -23,28 +23,41 @@ namespace AuthCore.Application.UseCases.UserCase
             _confirmCodeRepository = confirmCodeRepository;
         }
 
-        public async Task OnExecute(ForgotPasswordRequest request)
+        public async Task OnExecute(SendEmailRequest request)
         {
-            // Busca silenciosa, não revela se o e-mail existe
             var user = await _userRepository.GetByEmail(request.Email);
             if (user is null || !user.IsActive())
                 return;
 
+            var codeType = ResolveCodeType(request.Type);
+
             var email = Email.Create(
                 to: user.Email,
                 fullName: user.FullName,
-                type: EmailType.ForgotPassword
+                type: request.Type
             );
 
-            var payload = email.GetPayload<ForgotPasswordPayload>();
-
-            var code = ConfirmCode.Create(
-                code: payload.Code,
-                type: CodeType.ForgotPassword
-            );
+            var code = ConfirmCode.Create(codeType);
 
             await _confirmCodeRepository.Set(user.Id, code);
             await _emailService.Send(email);
         }
+
+        #region Helpers
+
+        private static CodeType ResolveCodeType(EmailType type)
+        {
+            switch (type)
+            {
+                case EmailType.ConfirmEmail:
+                    return CodeType.ConfirmEmail;
+                case EmailType.ForgotPassword:
+                    return CodeType.ForgotPassword;
+                default:
+                    throw new BadRequestException("Tipo de e-mail inválido para geração de código.");
+            }
+        }
+
+        #endregion
     }
 }
