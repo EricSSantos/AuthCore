@@ -1,4 +1,4 @@
-﻿using AuthCore.Application.Models.Input;
+﻿using AuthCore.Application.Models.Requests;
 using AuthCore.Application.UseCases.UserCase.Interfaces;
 using AuthCore.Domain.Aggregates.ConfirmCodeAggregate;
 using AuthCore.Domain.Aggregates.UserAggregate;
@@ -23,9 +23,9 @@ namespace AuthCore.Application.UseCases.UserCase
             _passwordHasher = passwordHasher;
         }
 
-        public async Task OnExecute(ResetPasswordInputModel input)
+        public async Task OnExecute(ResetPasswordRequest request)
         {
-            var user = await _userRepository.GetByEmail(input.Email)
+            var user = await _userRepository.GetByEmail(request.Email)
                 ?? throw new NotFoundException("Usuário não encontrado.");
 
             if (!user.IsActive())
@@ -34,12 +34,12 @@ namespace AuthCore.Application.UseCases.UserCase
             var confirmCode = await _confirmCodeRepository.Get(user.Id, CodeType.ForgotPassword)
                 ?? throw new NotFoundException("Código de verificação não encontrado.");
 
-            if (!confirmCode.Matching(input.Code))
-                throw new BadRequestException("Código inválido ou expirado.");
+            // TODO: Criar um fluco de expurgo de códigos usados ou expirados
+            confirmCode.Matching(request.Code);
 
-            Password.ValidateWithConfirmation(input.NewPassword, input.ConfirmNewPassword);
+            Password.ValidateWithConfirmation(request.NewPassword, request.ConfirmNewPassword);
 
-            user.ChangePassword(passwordHash: _passwordHasher.Hash(input.NewPassword));
+            user.ChangePassword(passwordHash: _passwordHasher.Hash(request.NewPassword));
 
             _userRepository.Update(user);
             await _userRepository.SaveChanges();

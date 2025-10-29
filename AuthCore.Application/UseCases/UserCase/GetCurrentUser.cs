@@ -1,4 +1,4 @@
-﻿using AuthCore.Application.Models.Output;
+﻿using AuthCore.Application.Models.Responses;
 using AuthCore.Application.UseCases.UserCase.Interfaces;
 using AuthCore.Domain.Aggregates.UserAggregate;
 using AuthCore.Domain.Core.Exceptions;
@@ -19,7 +19,7 @@ namespace AuthCore.Application.UseCases.UserCase
             _jwtTokenProvider = jwtTokenProvider;
         }
 
-        public async Task<UserViewModel> OnExecute()
+        public async Task<UserResponse> OnExecute()
         {
             var user = await _userRepository.GetById(_jwtTokenProvider.Sub)
                 ?? throw new NotFoundException("Usuário não encontrado.");
@@ -27,7 +27,7 @@ namespace AuthCore.Application.UseCases.UserCase
             if (!user.IsActive())
                 throw new ForbiddenException("A conta deste usuário está inativa.");
 
-            return new UserViewModel
+            return new UserResponse
             {
                 Id = user.Id,
                 Email = user.Email,

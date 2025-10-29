@@ -1,6 +1,6 @@
 ﻿using AuthCore.Application.Models;
-using AuthCore.Application.Models.Input;
-using AuthCore.Application.Models.Output;
+using AuthCore.Application.Models.Requests;
+using AuthCore.Application.Models.Responses;
 using AuthCore.Application.UseCases.UserCase.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,30 +18,30 @@ namespace AuthCore.Api.Controllers.v1
         [HttpPost]
         [ProducesResponseType((int)HttpStatusCode.Created)]
         public async Task<ActionResult<Response<object>>> Add(
-            [FromBody] AddUserInputModel input,
+            [FromBody] AddUserRequest request,
             [FromServices] IAddUser addUser)
         {
-            await addUser.OnExecute(input);
+            await addUser.OnExecute(request);
 
             return Ok(Response<object>.Success(
                 null!,
-                "Usuário criado com sucesso.",
+                "Cadastro realizado com sucesso! Enviamos um e-mail com o código de confirmação da conta.",
                 HttpStatusCode.Created
             ));
         }
 
         /// <summary>
-        /// Retorna os dados do usuário atual.
+        /// Retorna os dados do usuário autenticado.
         /// </summary>
         [Authorize]
         [HttpGet("me")]
-        [ProducesResponseType(typeof(Response<UserViewModel>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<Response<UserViewModel>>> Me(
+        [ProducesResponseType(typeof(Response<UserResponse>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<Response<UserResponse>>> Me(
             [FromServices] IGetCurrentUser getCurrentUser)
         {
             var user = await getCurrentUser.OnExecute();
 
-            return Ok(Response<UserViewModel>.Success(
+            return Ok(Response<UserResponse>.Success(
                 user,
                 "Usuário obtido com sucesso.",
                 HttpStatusCode.OK
@@ -49,16 +49,16 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Altera a senha do usuário atual.
+        /// Altera a senha do usuário autenticado.
         /// </summary>
         [Authorize]
-        [HttpPatch("me/change-password")]
+        [HttpPut("me/change-password")]
         [ProducesResponseType(typeof(Response<object>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<Response<object>>> ChangePassword(
-            [FromBody] ChangePasswordInputModel input,
+            [FromBody] ChangePasswordRequest request,
             [FromServices] IChangePassword changePassword)
         {
-            await changePassword.OnExecute(input);
+            await changePassword.OnExecute(request);
 
             return Ok(Response<object>.Success(
                 null!,
@@ -68,33 +68,51 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Envia um código de recuperação para o e-mail informado.
+        /// Confirma o endereço de e-mail do usuário.
+        /// </summary>
+        [HttpPut("confirm-email")]
+        [ProducesResponseType(typeof(Response<object>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<Response<object>>> ConfirmEmail(
+            [FromBody] ConfirmEmailRequest request,
+            [FromServices] IConfirmEmail confirmEmail)
+        {
+            await confirmEmail.OnExecute(request);
+
+            return Ok(Response<object>.Success(
+                null!,
+                "E-mail confirmado com sucesso.",
+                HttpStatusCode.OK
+            ));
+        }
+
+        /// <summary>
+        /// Envia um código de recuperação de senha para o e-mail informado.
         /// </summary>
         [HttpPost("forgot-password")]
         [ProducesResponseType(typeof(Response<object>), (int)HttpStatusCode.Accepted)]
         public async Task<ActionResult<Response<object>>> ForgotPassword(
-            [FromBody] ForgotPasswordInputModel input,
+            [FromBody] ForgotPasswordRequest request,
             [FromServices] IForgotPassword forgotPassword)
         {
-            await forgotPassword.OnExecute(input);
+            await forgotPassword.OnExecute(request);
 
             return Accepted(Response<object>.Success(
                 null!,
-                "Se o e-mail existir, enviaremos instruções de recuperação.",
+                "Se o e-mail informado for válido, enviaremos um código de recuperação.",
                 HttpStatusCode.Accepted
             ));
         }
 
         /// <summary>
-        /// Redefine a senha usando o código recebido.
+        /// Redefine a senha utilizando o código de verificação recebido.
         /// </summary>
-        [HttpPatch("reset-password")]
+        [HttpPut("reset-password")]
         [ProducesResponseType(typeof(Response<object>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<Response<object>>> ResetPassword(
-            [FromBody] ResetPasswordInputModel input,
+            [FromBody] ResetPasswordRequest request,
             [FromServices] IResetPassword resetPassword)
         {
-            await resetPassword.OnExecute(input);
+            await resetPassword.OnExecute(request);
 
             return Ok(Response<object>.Success(
                 null!,

@@ -1,6 +1,8 @@
-﻿using AuthCore.Application.Models.Input;
+﻿using AuthCore.Application.Models.Requests;
 using AuthCore.Application.UseCases.UserCase.Interfaces;
+using AuthCore.Domain.Aggregates.ConfirmCodeAggregate;
 using AuthCore.Domain.Aggregates.EmailAggregate;
+using AuthCore.Domain.Aggregates.EmailAggregate.Payloads;
 using AuthCore.Domain.Aggregates.UserAggregate;
 using AuthCore.Domain.Core.Exceptions;
 using AuthCore.Domain.Core.Interfaces.Security;
@@ -10,49 +12,60 @@ namespace AuthCore.Application.UseCases.UserCase
     public sealed class AddUser : IAddUser
     {
         private readonly IUserRepository _userRepository;
+        private readonly IConfirmCodeRepository _confirmCodeRepository;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IEmailPublisher _emailPublisher;
 
         public AddUser(
             IUserRepository userRepository,
+            IConfirmCodeRepository confirmCodeRepository,
             IPasswordHasher passwordHasher,
             IEmailPublisher emailPublisher)
         {
             _userRepository = userRepository;
+            _confirmCodeRepository = confirmCodeRepository;
             _passwordHasher = passwordHasher;
             _emailPublisher = emailPublisher;
         }
 
-        public async Task OnExecute(AddUserInputModel input)
+        public async Task OnExecute(AddUserRequest request)
         {
-            if (await _userRepository.Exists(u => u.Email == input.Email))
+            if (await _userRepository.Exists(u => u.Email == request.Email))
                 throw new ConflictException("E-mail já cadastrado.");
 
-            Password.ValidateWithConfirmation(input.Password, input.ConfirmPassword);
+            Password.ValidateWithConfirmation(request.Password, request.ConfirmPassword);
 
             var user = User.Create(
-                firstName:      input.FirstName,
-                lastName:       input.LastName,
-                email:          input.Email,
-                passwordHash:   _passwordHasher.Hash(input.Password)
+                firstName: request.FirstName,
+                lastName: request.LastName,
+                email: request.Email,
+                passwordHash: _passwordHasher.Hash(request.Password)
             );
 
             await _userRepository.Add(user);
             await _userRepository.SaveChanges();
 
-            await SendWelcomeEmail(user.Email, user.FullName);
+            await SendEmail(user);
         }
 
         #region Helpers
 
-        private async Task SendWelcomeEmail(string to, string fullName)
+        private async Task SendEmail(User user)
         {
             var email = Email.Create(
-                to:         to,
-                fullName:   fullName,
-                type:       EmailType.Welcome
+                to: user.Email,
+                fullName: user.FullName,
+                type: EmailType.ConfirmEmail
             );
 
+            var payload = email.GetPayload<ConfirmEmailPayload>();
+
+            var code = ConfirmCode.Create(
+                code: payload.Code,
+                type: CodeType.ConfirmEmail
+            );
+
+            await _confirmCodeRepository.Set(user.Id, code);
             await _emailPublisher.Send(email);
         }
 

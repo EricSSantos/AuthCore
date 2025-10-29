@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace AuthCore.Application.Models.Input
+namespace AuthCore.Application.Models.Requests
 {
-    public sealed record SignInInputModel
+    public sealed record SignInRequest
     {
         [JsonPropertyName("email")]
         public required string Email { get; init; }

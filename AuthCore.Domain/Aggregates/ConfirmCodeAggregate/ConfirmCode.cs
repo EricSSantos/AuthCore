@@ -92,9 +92,12 @@ namespace AuthCore.Domain.Aggregates.ConfirmCodeAggregate
         /// <summary>
         /// Verifica se o código informado corresponde ao código atual.
         /// </summary>
-        public bool Matching(int code)
+        public void Matching(int code)
         {
-            return Code == code;
+            if (Code != code)
+                throw new BadRequestException("Código inválido ou expirado.");
+
+            return;
         }
 
         #endregion

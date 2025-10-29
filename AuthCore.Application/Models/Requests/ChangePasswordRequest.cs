@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace AuthCore.Application.Models.Input
+namespace AuthCore.Application.Models.Requests
 {
-    public sealed record ChangePasswordInputModel
+    public sealed record ChangePasswordRequest
     {
         [JsonPropertyName("current_password")]
         public required string CurrentPassword { get; init; }

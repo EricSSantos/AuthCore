@@ -1,9 +1,9 @@
-﻿using AuthCore.Application.Models.Output;
+﻿using AuthCore.Application.Models.Responses;
 
 namespace AuthCore.Application.UseCases.UserCase.Interfaces
 {
     public interface IGetCurrentUser
     {
-        Task<UserViewModel> OnExecute();
+        Task<UserResponse> OnExecute();
     }
 }

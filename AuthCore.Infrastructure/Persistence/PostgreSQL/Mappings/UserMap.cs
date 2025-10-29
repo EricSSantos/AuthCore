@@ -41,6 +41,10 @@ namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Mappings
                    .HasColumnName("role")
                    .IsRequired();
 
+            builder.Property(u => u.Verified)
+                   .HasColumnName("verified")
+                   .IsRequired();
+
             builder.Property(u => u.Active)
                    .HasColumnName("active")
                    .IsRequired();

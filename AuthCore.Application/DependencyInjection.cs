@@ -32,6 +32,7 @@ namespace AuthCore.Application
             services.AddScoped<IForgotPassword, ForgotPassword>();
             services.AddScoped<IResetPassword, ResetPassword>();
             services.AddScoped<IChangePassword, ChangePassword>();
+            services.AddScoped<IConfirmEmail, ConfirmEmail>();
 
             return services;
         }

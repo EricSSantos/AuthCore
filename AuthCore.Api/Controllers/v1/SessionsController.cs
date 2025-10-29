@@ -1,5 +1,5 @@
 ﻿using AuthCore.Application.Models;
-using AuthCore.Application.Models.Output;
+using AuthCore.Application.Models.Responses;
 using AuthCore.Application.UseCases.SessionCase.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,16 +13,16 @@ namespace AuthCore.Api.Controllers.v1
     public sealed class SessionsController : ControllerBase
     {
         /// <summary>
-        /// Lista outras sessões ativas do usuário.
+        /// Retorna todas as sessões ativas do usuário.
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(Response<IEnumerable<SessionViewModel>>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<Response<IEnumerable<SessionViewModel>>>> GetAll(
-            [FromServices] IGetSessions getUserSessions)
+        [ProducesResponseType(typeof(Response<IEnumerable<SessionResponse>>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<Response<IEnumerable<SessionResponse>>>> GetAll(
+            [FromServices] IGetSessions getSessions)
         {
-            var sessions = await getUserSessions.OnExecute();
+            var sessions = await getSessions.OnExecute();
 
-            return Ok(Response<IEnumerable<SessionViewModel>>.Success(
+            return Ok(Response<IEnumerable<SessionResponse>>.Success(
                 sessions,
                 "Sessões recuperadas com sucesso.",
                 HttpStatusCode.OK
@@ -30,7 +30,7 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Encerra todas as outras sessões e mantém apenas a atual.
+        /// Revoga todas as sessões do usuário, mantendo apenas a atual.
         /// </summary>
         [HttpDelete]
         [ProducesResponseType(typeof(Response<object>), (int)HttpStatusCode.OK)]

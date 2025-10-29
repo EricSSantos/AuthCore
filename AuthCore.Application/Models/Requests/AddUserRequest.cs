@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace AuthCore.Application.Models.Input
+namespace AuthCore.Application.Models.Requests
 {
-    public sealed record AddUserInputModel
+    public sealed record AddUserRequest
     {
         [JsonPropertyName("first_name")]
         public required string FirstName { get; init; }
