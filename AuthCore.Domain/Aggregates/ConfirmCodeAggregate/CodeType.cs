@@ -3,11 +3,13 @@
 namespace AuthCore.Domain.Aggregates.ConfirmCodeAggregate
 {
     /// <summary>
-    /// Define os tipos de códigos de confirmação gerados pela aplicação.
+    /// Representa os tipos de códigos de confirmação da aplicação.
     /// </summary>
     public enum CodeType
     {
-        [Description("Código usado para redefinir a senha de um usuário.")]
+        [Description("Verificação de e-mail.")]
+        ConfirmEmail,
+        [Description("Recuperação de senha.")]
         ForgotPassword
     }
 }

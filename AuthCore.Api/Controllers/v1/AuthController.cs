@@ -1,5 +1,5 @@
 ﻿using AuthCore.Application.Models;
-using AuthCore.Application.Models.Input;
+using AuthCore.Application.Models.Requests;
 using AuthCore.Application.UseCases.AuthCase.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,15 +12,15 @@ namespace AuthCore.Api.Controllers.v1
     public sealed class AuthController : ControllerBase
     {
         /// <summary>
-        /// Faz login e inicia uma nova sessão.
+        /// Autentica o usuário e inicia uma nova sessão.
         /// </summary>
         [HttpPost("sign-in")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         public async Task<ActionResult<Response<object>>> SignIn(
-            [FromBody] SignInInputModel input,
+            [FromBody] SignInRequest request,
             [FromServices] ISignIn signIn)
         {
-            await signIn.OnExecute(input);
+            await signIn.OnExecute(request);
 
             return Ok(Response<object>.Success(
                 null!,
@@ -30,7 +30,7 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Faz logout e encerra a sessão atual.
+        /// Encerra a sessão do usuário autenticado.
         /// </summary>
         [Authorize]
         [HttpPost("sign-out")]
@@ -48,7 +48,7 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Atualiza o token de acesso do usuário.
+        /// Gera um novo token de acesso para o usuário.
         /// </summary>
         [HttpPost("refresh-token")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
@@ -59,7 +59,7 @@ namespace AuthCore.Api.Controllers.v1
 
             return Ok(Response<object>.Success(
                 null!,
-                "Token atualizado com sucesso.",
+                "Sessão atualizada com sucesso.",
                 HttpStatusCode.NoContent
             ));
         }

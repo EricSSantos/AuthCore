@@ -1,9 +1,9 @@
-﻿using AuthCore.Application.Models.Output;
+﻿using AuthCore.Application.Models.Responses;
 
 namespace AuthCore.Application.UseCases.SessionCase.Interfaces
 {
     public interface IGetSessions
     {
-        Task<IEnumerable<SessionViewModel>> OnExecute();
+        Task<IEnumerable<SessionResponse>> OnExecute();
     }
 }

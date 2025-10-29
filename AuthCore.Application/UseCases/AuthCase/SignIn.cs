@@ -1,4 +1,4 @@
-﻿using AuthCore.Application.Models.Input;
+﻿using AuthCore.Application.Models.Requests;
 using AuthCore.Application.UseCases.AuthCase.Interfaces;
 using AuthCore.Domain.Aggregates.SessionAggregate;
 using AuthCore.Domain.Aggregates.UserAggregate;
@@ -40,12 +40,12 @@ namespace AuthCore.Application.UseCases.AuthCase
             _settings = settings;
         }
 
-        public async Task OnExecute(SignInInputModel input)
+        public async Task OnExecute(SignInRequest request)
         {
-            var user = await _userRepository.GetByEmail(input.Email)
+            var user = await _userRepository.GetByEmail(request.Email)
                 ?? throw new UnauthorizedException("E-mail ou senha inválidos.");
 
-            await ValidateUserCredentials(user, input.Password);
+            await ValidateUserCredentials(user, request.Password);
             await EnforceSessionLimit(user.Id);
 
             var session = _secureKeyGenerator.Generate();
@@ -55,11 +55,11 @@ namespace AuthCore.Application.UseCases.AuthCase
             var maxLifetime = TimeSpan.FromDays(_settings.Session.MaxLifetimeInDays);
 
             var newSession = Session.Create(
-                id:             sessionHash,
-                userId:         user.Id,
-                deviceInfo:     _device.Device,
-                ttl:            ttl,
-                maxLifetime:    maxLifetime
+                id: sessionHash,
+                userId: user.Id,
+                deviceInfo: _device.Device,
+                ttl: ttl,
+                maxLifetime: maxLifetime
             );
 
             await _sessionRepository.Set(newSession);

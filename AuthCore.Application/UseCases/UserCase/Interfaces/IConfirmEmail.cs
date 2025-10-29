@@ -2,8 +2,8 @@
 
 namespace AuthCore.Application.UseCases.UserCase.Interfaces
 {
-    public interface IAddUser
+    public interface IConfirmEmail
     {
-        Task OnExecute(AddUserRequest request);
+        Task OnExecute(ConfirmEmailRequest request);
     }
 }

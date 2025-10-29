@@ -1,4 +1,4 @@
-﻿using AuthCore.Application.Models.Input;
+﻿using AuthCore.Application.Models.Requests;
 using AuthCore.Application.UseCases.UserCase.Interfaces;
 using AuthCore.Domain.Aggregates.UserAggregate;
 using AuthCore.Domain.Core.Exceptions;
@@ -22,16 +22,16 @@ namespace AuthCore.Application.UseCases.UserCase
             _userRepository = userRepository;
         }
 
-        public async Task OnExecute(ChangePasswordInputModel input)
+        public async Task OnExecute(ChangePasswordRequest request)
         {
             var user = await _sessionState.GetCurrentUser();
 
-            if (!_passwordHasher.IsValid(input.CurrentPassword, user.Password.Value))
+            if (!_passwordHasher.IsValid(request.CurrentPassword, user.Password.Value))
                 throw new BadRequestException("A senha atual está incorreta.");
 
-            Password.ValidateWithConfirmation(input.NewPassword, input.ConfirmNewPassword);
+            Password.ValidateWithConfirmation(request.NewPassword, request.ConfirmNewPassword);
 
-            user.ChangePassword(_passwordHasher.Hash(input.NewPassword));
+            user.ChangePassword(_passwordHasher.Hash(request.NewPassword));
 
             _userRepository.Update(user);
 

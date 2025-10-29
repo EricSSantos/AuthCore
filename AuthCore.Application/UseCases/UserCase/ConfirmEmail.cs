@@ -1,48 +1,50 @@
 ﻿using AuthCore.Application.Models.Requests;
 using AuthCore.Application.UseCases.UserCase.Interfaces;
 using AuthCore.Domain.Aggregates.ConfirmCodeAggregate;
+using AuthCore.Domain.Aggregates.EmailAggregate;
 using AuthCore.Domain.Aggregates.UserAggregate;
 using AuthCore.Domain.Core.Exceptions;
-using AuthCore.Domain.Core.Interfaces.Security;
 
 namespace AuthCore.Application.UseCases.UserCase
 {
-    public sealed class ResetPassword : IResetPassword
+    public sealed class ConfirmEmail : IConfirmEmail
     {
         private readonly IUserRepository _userRepository;
         private readonly IConfirmCodeRepository _confirmCodeRepository;
-        private readonly IPasswordHasher _passwordHasher;
+        private readonly IEmailPublisher _emailPublisher;
 
-        public ResetPassword(
+        public ConfirmEmail(
             IUserRepository userRepository,
             IConfirmCodeRepository confirmCodeRepository,
-            IPasswordHasher passwordHasher)
+            IEmailPublisher emailPublisher)
         {
             _userRepository = userRepository;
             _confirmCodeRepository = confirmCodeRepository;
-            _passwordHasher = passwordHasher;
+            _emailPublisher = emailPublisher;
         }
 
-        public async Task OnExecute(ResetPasswordRequest request)
+        public async Task OnExecute(ConfirmEmailRequest request)
         {
             var user = await _userRepository.GetByEmail(request.Email)
-                ?? throw new NotFoundException("Usuário não encontrado.");
+                ?? throw new NotFoundException("Usuário não encontrado");
 
-            if (!user.IsActive())
-                throw new ForbiddenException("Usuário inativo.");
-
-            var confirm = await _confirmCodeRepository.Get(user.Id, CodeType.ForgotPassword)
+            var confirm = await _confirmCodeRepository.Get(user.Id, CodeType.ConfirmEmail)
                 ?? throw new NotFoundException("Código de confirmação não encontrado");
 
-            confirm.Matching(request.Code);
+            confirm.Matching(confirm.Code);
             await _confirmCodeRepository.Delete(user.Id, confirm.Type);
 
-            Password.ValidateWithConfirmation(request.NewPassword, request.ConfirmNewPassword);
-
-            user.ChangePassword(passwordHash: _passwordHasher.Hash(request.NewPassword));
-
+            user.Confirm();
             _userRepository.Update(user);
             await _userRepository.SaveChanges();
+
+            var email = Email.Create(
+                to: user.Email,
+                fullName: user.FullName,
+                type: EmailType.Welcome
+            );
+
+            await _emailPublisher.Send(email);
         }
     }
 }

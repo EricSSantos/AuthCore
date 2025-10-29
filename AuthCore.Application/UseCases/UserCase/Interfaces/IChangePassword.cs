@@ -1,9 +1,9 @@
-﻿using AuthCore.Application.Models.Input;
+﻿using AuthCore.Application.Models.Requests;
 
 namespace AuthCore.Application.UseCases.UserCase.Interfaces
 {
     public interface IChangePassword
     {
-        Task OnExecute(ChangePasswordInputModel input);
+        Task OnExecute(ChangePasswordRequest request);
     }
 }

@@ -1,4 +1,4 @@
-﻿using AuthCore.Application.Models.Output;
+﻿using AuthCore.Application.Models.Responses;
 using AuthCore.Application.UseCases.SessionCase.Interfaces;
 using AuthCore.Domain.Core.Interfaces.Security;
 
@@ -13,10 +13,10 @@ namespace AuthCore.Application.UseCases.SessionCase
             _sessionState = sessionState;
         }
 
-        public async Task<IEnumerable<SessionViewModel>> OnExecute()
+        public async Task<IEnumerable<SessionResponse>> OnExecute()
         {
             var sessions = await _sessionState.GetOtherSessions();
-            return sessions.Select(s => new SessionViewModel
+            return sessions.Select(s => new SessionResponse
             {
                 Id = s.Id,
                 IpAddress = s.DeviceInfo.Ip,

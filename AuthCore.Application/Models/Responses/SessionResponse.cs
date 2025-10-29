@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace AuthCore.Application.Models.Output
+namespace AuthCore.Application.Models.Responses
 {
-    public sealed class SessionViewModel
+    public sealed class SessionResponse
     {
         [JsonPropertyName("id")]
         public string Id { get; set; } = string.Empty;

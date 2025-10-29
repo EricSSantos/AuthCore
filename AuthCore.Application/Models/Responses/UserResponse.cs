@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace AuthCore.Application.Models.Output
+namespace AuthCore.Application.Models.Responses
 {
-    public sealed record UserViewModel
+    public sealed record UserResponse
     {
         [JsonPropertyName("id")]
         public Guid Id { get; init; }

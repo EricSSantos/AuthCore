@@ -1,5 +1,7 @@
 ﻿using AuthCore.Application.UseCases.AuthCase;
 using AuthCore.Application.UseCases.AuthCase.Interfaces;
+using AuthCore.Application.UseCases.EmailCase;
+using AuthCore.Application.UseCases.EmailCase.Interface;
 using AuthCore.Application.UseCases.SessionCase;
 using AuthCore.Application.UseCases.SessionCase.Interfaces;
 using AuthCore.Application.UseCases.UserCase;
@@ -22,6 +24,9 @@ namespace AuthCore.Application
             services.AddScoped<ISignOut, SignOut>();
             services.AddScoped<IRefresh, Refresh>();
 
+            // Email
+            services.AddScoped<ISendEmail, SendEmail>();
+
             // Session
             services.AddScoped<IGetSessions, GetOtherSessions>();
             services.AddScoped<IRevokeSession, RevokeSessions>();
@@ -29,10 +34,10 @@ namespace AuthCore.Application
             // User
             services.AddScoped<IAddUser, AddUser>();
             services.AddScoped<IGetCurrentUser, GetCurrentUser>();
-            services.AddScoped<IForgotPassword, ForgotPassword>();
+            services.AddScoped<IConfirmEmail, ConfirmEmail>();
             services.AddScoped<IResetPassword, ResetPassword>();
             services.AddScoped<IChangePassword, ChangePassword>();
-
+            
             return services;
         }
     }
