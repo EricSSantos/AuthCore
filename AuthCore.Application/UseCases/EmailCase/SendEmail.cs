@@ -30,6 +30,9 @@ namespace AuthCore.Application.UseCases.EmailCase
             if (user is null)
                 return;
 
+            if (request.Type == EmailType.ConfirmEmail && user.Verified)
+                return;
+
             var email = Email.Create(
                 to: user.Email,
                 fullName: user.FullName,
