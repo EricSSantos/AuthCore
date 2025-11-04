@@ -7,7 +7,7 @@ using System.Net;
 
 [ApiController]
 [Route("api/v1/emails")]
-public sealed class EmailController : ControllerBase
+public sealed class EmailsController : ControllerBase
 {
     /// <summary>
     /// Envia um novo e-mail de confirmação de conta.

@@ -52,7 +52,7 @@ namespace AuthCore.Api.Controllers.v1
         /// Atualiza a senha do usuário autenticado.
         /// </summary>
         [Authorize]
-        [HttpPut("me/change-password")]
+        [HttpPatch("me/change-password")]
         [ProducesResponseType(typeof(Response<object>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<Response<object>>> UpdatePassword(
             [FromBody] ChangePasswordRequest request,
@@ -70,7 +70,7 @@ namespace AuthCore.Api.Controllers.v1
         /// <summary>
         /// Confirma o endereço de e-mail de um usuário pelo código de verificação.
         /// </summary>
-        [HttpPut("{email}/confirm")]
+        [HttpPatch("{email}/confirm")]
         [ProducesResponseType(typeof(Response<object>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<Response<object>>> ConfirmEmail(
             [FromRoute] string email,
@@ -91,7 +91,7 @@ namespace AuthCore.Api.Controllers.v1
         /// <summary>
         /// Redefine a senha de um usuário usando o código de verificação recebido por e-mail.
         /// </summary>
-        [HttpPut("{email}/reset-password")]
+        [HttpPatch("{email}/reset-password")]
         [ProducesResponseType(typeof(Response<object>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<Response<object>>> ResetPassword(
             [FromRoute] string email,
