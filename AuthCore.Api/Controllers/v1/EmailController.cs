@@ -5,58 +5,55 @@ using AuthCore.Domain.Aggregates.EmailAggregate;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
-namespace AuthCore.Api.Controllers.v1
+[ApiController]
+[Route("api/v1/emails")]
+public sealed class EmailController : ControllerBase
 {
-    [ApiController]
-    [Route("api/v1/emails/send")]
-    public sealed class EmailController : ControllerBase
+    /// <summary>
+    /// Envia um novo e-mail de confirmação de conta.
+    /// </summary>
+    [HttpPost("{email}/confirmation")]
+    [ProducesResponseType(typeof(Response<object>), (int)HttpStatusCode.Accepted)]
+    public async Task<ActionResult<Response<object>>> SendConfirmationEmail(
+        [FromRoute] string email,
+        [FromServices] ISendEmail sendEmail)
     {
-        /// <summary>
-        /// Envia um e-mail de confirmação de conta com um novo código.
-        /// </summary>
-        [HttpPost("confirm-email")]
-        [ProducesResponseType(typeof(Response<object>), (int)HttpStatusCode.Accepted)]
-        public async Task<ActionResult<Response<object>>> SendConfirmEmail(
-            [FromBody] EmailRequest request,
-            [FromServices] ISendEmail sendEmail)
+        var input = new SendEmailRequest
         {
-            var input = new SendEmailRequest
-            {
-                Email = request.Email,
-                Type = EmailType.ConfirmEmail
-            };
+            Email = email,
+            Type = EmailType.ConfirmEmail
+        };
 
-            await sendEmail.OnExecute(input);
+        await sendEmail.OnExecute(input);
 
-            return Accepted(Response<object>.Success(
-                null!,
-                "Se o e-mail informado for válido, reenviamos o código de confirmação.",
-                HttpStatusCode.Accepted
-            ));
-        }
+        return Accepted(Response<object>.Success(
+            null!,
+            "Se o e-mail informado for válido, reenviamos o código de confirmação.",
+            HttpStatusCode.Accepted
+        ));
+    }
 
-        /// <summary>
-        /// Envia um e-mail de recuperação de senha com um novo código.
-        /// </summary>
-        [HttpPost("forgot-password")]
-        [ProducesResponseType(typeof(Response<object>), (int)HttpStatusCode.Accepted)]
-        public async Task<ActionResult<Response<object>>> SendForgotPassword(
-            [FromBody] EmailRequest request,
-            [FromServices] ISendEmail sendEmail)
+    /// <summary>
+    /// Envia um novo e-mail de recuperação de senha.
+    /// </summary>
+    [HttpPost("{email}/forgot-password")]
+    [ProducesResponseType(typeof(Response<object>), (int)HttpStatusCode.Accepted)]
+    public async Task<ActionResult<Response<object>>> SendPasswordRecoveryEmail(
+        [FromRoute] string email,
+        [FromServices] ISendEmail sendEmail)
+    {
+        var input = new SendEmailRequest
         {
-            var input = new SendEmailRequest
-            {
-                Email = request.Email,
-                Type = EmailType.ForgotPassword
-            };
+            Email = email,
+            Type = EmailType.ForgotPassword
+        };
 
-            await sendEmail.OnExecute(input);
+        await sendEmail.OnExecute(input);
 
-            return Accepted(Response<object>.Success(
-                null!,
-                "Se o e-mail informado for válido, reenviamos o código de recuperação.",
-                HttpStatusCode.Accepted
-            ));
-        }
+        return Accepted(Response<object>.Success(
+            null!,
+            "Se o e-mail informado for válido, reenviamos o código de recuperação.",
+            HttpStatusCode.Accepted
+        ));
     }
 }

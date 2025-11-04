@@ -16,14 +16,14 @@ namespace AuthCore.Api.Controllers.v1
         /// Registra um novo usuário.
         /// </summary>
         [HttpPost]
-        [ProducesResponseType((int)HttpStatusCode.Created)]
-        public async Task<ActionResult<Response<object>>> Add(
+        [ProducesResponseType(typeof(Response<object>), (int)HttpStatusCode.Created)]
+        public async Task<ActionResult<Response<object>>> Register(
             [FromBody] AddUserRequest request,
             [FromServices] IAddUser addUser)
         {
             await addUser.OnExecute(request);
 
-            return Ok(Response<object>.Success(
+            return Created(string.Empty, Response<object>.Success(
                 null!,
                 "Cadastro realizado com sucesso! Enviamos um e-mail com o código de confirmação da conta.",
                 HttpStatusCode.Created
@@ -36,7 +36,7 @@ namespace AuthCore.Api.Controllers.v1
         [Authorize]
         [HttpGet("me")]
         [ProducesResponseType(typeof(Response<UserResponse>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<Response<UserResponse>>> Me(
+        public async Task<ActionResult<Response<UserResponse>>> GetCurrent(
             [FromServices] IGetCurrentUser getCurrentUser)
         {
             var user = await getCurrentUser.OnExecute();
@@ -49,12 +49,12 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Altera a senha do usuário autenticado.
+        /// Atualiza a senha do usuário autenticado.
         /// </summary>
         [Authorize]
         [HttpPut("me/change-password")]
         [ProducesResponseType(typeof(Response<object>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<Response<object>>> ChangePassword(
+        public async Task<ActionResult<Response<object>>> UpdatePassword(
             [FromBody] ChangePasswordRequest request,
             [FromServices] IChangePassword changePassword)
         {
@@ -68,14 +68,17 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Confirma o endereço de e-mail do usuário.
+        /// Confirma o endereço de e-mail de um usuário pelo código de verificação.
         /// </summary>
-        [HttpPut("confirm-email")]
+        [HttpPut("{email}/confirm")]
         [ProducesResponseType(typeof(Response<object>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<Response<object>>> ConfirmEmail(
+            [FromRoute] string email,
             [FromBody] ConfirmEmailRequest request,
             [FromServices] IConfirmEmail confirmEmail)
         {
+            request.Email = email;
+
             await confirmEmail.OnExecute(request);
 
             return Ok(Response<object>.Success(
@@ -86,19 +89,22 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Redefine a senha utilizando o código de verificação recebido.
+        /// Redefine a senha de um usuário usando o código de verificação recebido por e-mail.
         /// </summary>
-        [HttpPut("reset-password")]
+        [HttpPut("{email}/reset-password")]
         [ProducesResponseType(typeof(Response<object>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<Response<object>>> ResetPassword(
+            [FromRoute] string email,
             [FromBody] ResetPasswordRequest request,
             [FromServices] IResetPassword resetPassword)
         {
+            request.Email = email;
+
             await resetPassword.OnExecute(request);
 
             return Ok(Response<object>.Success(
                 null!,
-                "Senha alterada com sucesso.",
+                "Senha redefinida com sucesso.",
                 HttpStatusCode.OK
             ));
         }
