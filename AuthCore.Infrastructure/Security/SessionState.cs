@@ -1,8 +1,10 @@
 ﻿using AuthCore.Domain.Aggregates.SessionAggregate;
+using AuthCore.Domain.Aggregates.SessionAggregate.Interfaces;
 using AuthCore.Domain.Aggregates.UserAggregate;
+using AuthCore.Domain.Aggregates.UserAggregate.Interfaces;
 using AuthCore.Domain.Core.Exceptions;
-using AuthCore.Domain.Core.Interfaces.Http;
-using AuthCore.Domain.Core.Interfaces.Security;
+using AuthCore.Domain.Core.Interfaces.Infrastructure.Http;
+using AuthCore.Domain.Core.Interfaces.Infrastructure.Security;
 using AuthCore.Domain.Core.Settings;
 
 namespace AuthCore.Infrastructure.Security

@@ -16,13 +16,13 @@ namespace AuthCore.Api.Controllers.v1
         /// Retorna todas as sessões ativas do usuário.
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(Response<IEnumerable<SessionResponse>>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<Response<IEnumerable<SessionResponse>>>> GetAll(
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<SessionResponse>>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<ApiResponse<IEnumerable<SessionResponse>>>> GetAll(
             [FromServices] IGetSessions getSessions)
         {
             var sessions = await getSessions.OnExecute();
 
-            return Ok(Response<IEnumerable<SessionResponse>>.Success(
+            return Ok(ApiResponse<IEnumerable<SessionResponse>>.Success(
                 sessions,
                 "Sessões recuperadas com sucesso.",
                 HttpStatusCode.OK
@@ -33,13 +33,13 @@ namespace AuthCore.Api.Controllers.v1
         /// Revoga todas as sessões do usuário, mantendo apenas a atual.
         /// </summary>
         [HttpDelete]
-        [ProducesResponseType(typeof(Response<object>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<Response<object>>> Revoke(
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<ApiResponse<object>>> Revoke(
             [FromServices] IRevokeSession revokeSessions)
         {
             await revokeSessions.OnExecute();
 
-            return Ok(Response<object>.Success(
+            return Ok(ApiResponse<object>.Success(
                 null!,
                 "Sessões revogadas com sucesso.",
                 HttpStatusCode.OK

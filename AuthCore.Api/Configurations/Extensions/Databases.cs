@@ -19,7 +19,6 @@ namespace AuthCore.Api.Configurations.Extensions
         public static void AddDatabases(this WebApplicationBuilder builder)
         {
             builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection("Database"));
-
             builder.AddPostgreSql();
             builder.AddRedis();
         }

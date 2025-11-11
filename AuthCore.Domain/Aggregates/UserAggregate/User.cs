@@ -1,70 +1,27 @@
-﻿using AuthCore.Domain.Aggregates.ConfirmCodeAggregate;
-using AuthCore.Domain.Core.Exceptions;
+﻿using AuthCore.Domain.Core.Exceptions;
 using AuthCore.Domain.Core.Interfaces.Base;
-using System.Text.RegularExpressions;
 
 namespace AuthCore.Domain.Aggregates.UserAggregate
 {
     /// <summary>
-    /// Representa um usuário autenticável do sistema.
+    /// Representa um usuário autenticável.
     /// </summary>
     public sealed class User : IAggregateRoot
     {
         #region Properties
 
-        /// <summary>
-        /// Identifica o usuário de forma única.
-        /// </summary>
         public Guid Id { get; private set; }
-
-        /// <summary>
-        /// Armazena o primeiro nome do usuário.
-        /// </summary>
-        public string FirstName { get; private set; }
-
-        /// <summary>
-        /// Armazena o sobrenome do usuário.
-        /// </summary>
-        public string LastName { get; private set; }
-
-        /// <summary>
-        /// Armazena o e-mail do usuário.
-        /// </summary>
-        public string Email { get; private set; }
-
-        /// <summary>
-        /// Armazena a senha criptografada do usuário.
-        /// </summary>
+        public string FirstName { get; private set; } = null!;
+        public string LastName { get; private set; } = null!;
+        public string FullName { get { return $"{FirstName} {LastName}"; } }
+        public Email Email { get; private set; } = null!;
         public Password Password { get; private set; }
-
-        /// <summary>
-        /// Define o papel atribuído ao usuário.
-        /// </summary>
-        public RoleType Role { get; private set; }
-
-        /// <summary>
-        /// Indica se o e-mail do usuário foi verificado.
-        /// </summary>
+        public Role Role { get; private set; }
         public bool Verified { get; private set; } = false;
-
-        /// <summary>
-        /// Indica se o usuário está ativo no sistema.
-        /// </summary>
         public bool Active { get; private set; } = false;
-
-        /// <summary>
-        /// Registra a data de criação do usuário (UTC).
-        /// </summary>
         public DateTime CreatedAt { get; private set; }
-
-        /// <summary>
-        /// Registra a data de inativação, se houver.
-        /// </summary>
+        public DateTime? UpdatedAt { get; private set; }
         public DateTime? InactivatedAt { get; private set; }
-
-        /// <summary>
-        /// Controla as tentativas de login consecutivas.
-        /// </summary>
         public LoginAttempts LoginAttempts { get; private set; }
 
         #endregion
@@ -77,18 +34,28 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
             Guid id,
             string firstName,
             string lastName,
-            string email,
+            Email email,
             string passwordHash,
-            RoleType role)
+            Role role,
+            bool verified,
+            bool active,
+            DateTime createdAt,
+            DateTime? updatedAt,
+            DateTime? inactivatedAt,
+            LoginAttempts loginAttempts)
         {
             Id = id;
             FirstName = firstName.Trim();
             LastName = lastName.Trim();
-            Email = email.Trim().ToLowerInvariant();
+            Email = email;
             Password = Password.Create(passwordHash);
             Role = role;
-            CreatedAt = DateTime.UtcNow;
-            LoginAttempts = LoginAttempts.Create();
+            Verified = verified;
+            Active = active;
+            CreatedAt = createdAt;
+            UpdatedAt = updatedAt;
+            InactivatedAt = inactivatedAt;
+            LoginAttempts = loginAttempts;
             Validate();
         }
 
@@ -97,22 +64,62 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         #region Factory
 
         /// <summary>
-        /// Cria um novo usuário com validações aplicadas.
+        /// Cria um novo usuário.
         /// </summary>
-        /// <param name="firstName">Primeiro nome do usuário.</param>
-        /// <param name="lastName">Sobrenome do usuário.</param>
-        /// <param name="email">E-mail do usuário.</param>
-        /// <param name="passwordHash">Senha criptografada (hash).</param>
-        /// <param name="role">Função atribuída (padrão: User).</param>
-        /// <returns>Instância válida de <see cref="User"/> pronta para persistência.</returns>
         public static User Create(
             string firstName,
             string lastName,
             string email,
             string passwordHash,
-            RoleType role = RoleType.User)
+            Role role = Role.User)
         {
-            return new User(Guid.NewGuid(), firstName, lastName, email, passwordHash, role);
+            return new User(
+                Guid.NewGuid(),
+                firstName,
+                lastName,
+                Email.Create(email),
+                passwordHash,
+                role,
+                verified: false,
+                active: false,
+                createdAt: DateTime.UtcNow,
+                updatedAt: null,
+                inactivatedAt: null,
+                loginAttempts: LoginAttempts.Create()
+            );
+        }
+
+        /// <summary>
+        /// Restaura um usuário persistido.
+        /// </summary>
+        public static User Restore(
+            Guid id,
+            string firstName,
+            string lastName,
+            string email,
+            string passwordHash,
+            Role role,
+            bool verified,
+            bool active,
+            DateTime createdAt,
+            DateTime updatedAt,
+            DateTime? inactivatedAt,
+            LoginAttempts loginAttempts)
+        {
+            return new User(
+                id,
+                firstName,
+                lastName,
+                Email.Create(email),
+                passwordHash,
+                role,
+                verified,
+                active,
+                createdAt,
+                updatedAt,
+                inactivatedAt,
+                loginAttempts
+            );
         }
 
         #endregion
@@ -120,36 +127,27 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         #region Behavior
 
         /// <summary>
-        /// Retorna o nome completo do usuário.
-        /// </summary>
-        public string FullName
-        {
-            get { return $"{FirstName} {LastName}"; }
-        }
-
-        /// <summary>
         /// Altera a senha do usuário.
         /// </summary>
-        /// <param name="passwordHash">Nova senha criptografada (hash).</param>
         public void ChangePassword(string passwordHash)
         {
             Password = Password.Create(passwordHash);
+            UpdatedAt = DateTime.UtcNow;
         }
 
         /// <summary>
-        /// Marca o usuário como verificado e ativa sua conta.
+        /// Confirma e ativa o usuário.
         /// </summary>
         public void Confirm()
         {
             Verified = true;
             Active = true;
+            UpdatedAt = DateTime.UtcNow;
         }
 
         /// <summary>
-        /// Verifica se o usuário está ativo e verificado, sem bloqueios.
+        /// Verifica se o usuário está apto para autenticação.
         /// </summary>
-        /// <returns>Verdadeiro se o usuário estiver apto a autenticar; caso contrário, lança exceção.</returns>
-        /// <exception cref="UnauthorizedException">Lançada quando o usuário está bloqueado por tentativas falhas.</exception>
         public bool IsActive()
         {
             if (LoginAttempts.IsLocked())
@@ -166,37 +164,39 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         #region Validation
 
         /// <summary>
-        /// Valida os dados obrigatórios do usuário.
+        /// Valida dados essenciais do usuário.
         /// </summary>
         private void Validate()
         {
+            if (Id == Guid.Empty)
+                throw new BadRequestException("Identificador inválido.");
+
             if (string.IsNullOrWhiteSpace(FirstName))
                 throw new BadRequestException("O nome é obrigatório.");
 
             if (string.IsNullOrWhiteSpace(LastName))
                 throw new BadRequestException("O sobrenome é obrigatório.");
 
-            if (string.IsNullOrWhiteSpace(Email))
+            if (Email is null)
                 throw new BadRequestException("O e-mail é obrigatório.");
-
-            if (!IsValidEmail(Email))
-                throw new BadRequestException("O e-mail informado é inválido.");
 
             if (Password is null)
                 throw new BadRequestException("A senha é obrigatória.");
-        }
 
-        /// <summary>
-        /// Valida o formato de um e-mail.
-        /// </summary>
-        private static bool IsValidEmail(string email)
-        {
-            var regex = new Regex(
-                @"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$",
-                RegexOptions.Compiled | RegexOptions.IgnoreCase
-            );
+            if (!Enum.IsDefined(typeof(Role), Role))
+                throw new BadRequestException("Perfil de usuário inválido.");
 
-            return regex.IsMatch(email);
+            if (CreatedAt == default)
+                throw new BadRequestException("A data de criação é obrigatória.");
+
+            if (UpdatedAt.HasValue && UpdatedAt.Value < CreatedAt)
+                throw new BadRequestException("A data de atualização não pode ser anterior à criação.");
+
+            if (InactivatedAt.HasValue && Active)
+                throw new BadRequestException("Usuário ativo não pode ter data de inativação.");
+
+            if (LoginAttempts is null)
+                throw new BadRequestException("Os dados de tentativas de login são obrigatórios.");
         }
 
         #endregion

@@ -1,9 +1,11 @@
 ﻿using AuthCore.Application.Models.Requests;
 using AuthCore.Application.UseCases.EmailCase.Interface;
 using AuthCore.Domain.Aggregates.ConfirmCodeAggregate;
-using AuthCore.Domain.Aggregates.EmailAggregate;
-using AuthCore.Domain.Aggregates.EmailAggregate.Payloads;
-using AuthCore.Domain.Aggregates.UserAggregate;
+using AuthCore.Domain.Aggregates.ConfirmCodeAggregate.Interfaces;
+using AuthCore.Domain.Aggregates.MessagingAggregate;
+using AuthCore.Domain.Aggregates.MessagingAggregate.Interfaces;
+using AuthCore.Domain.Aggregates.MessagingAggregate.Payloads;
+using AuthCore.Domain.Aggregates.UserAggregate.Interfaces;
 using AuthCore.Domain.Core.Exceptions;
 
 namespace AuthCore.Application.UseCases.EmailCase
@@ -30,11 +32,11 @@ namespace AuthCore.Application.UseCases.EmailCase
             if (user is null)
                 return;
 
-            if (request.Type == EmailType.ConfirmEmail && user.Verified)
+            if (request.Type == MessagingType.ConfirmEmail && user.Verified)
                 return;
 
-            var email = Email.Create(
-                to: user.Email,
+            var email = Messaging.Create(
+                to: user.Email.Value,
                 fullName: user.FullName,
                 type: request.Type
             );
@@ -47,14 +49,14 @@ namespace AuthCore.Application.UseCases.EmailCase
 
         #region Helpers
 
-        private static ConfirmCode CreateConfirmCode(Email email)
+        private static ConfirmCode CreateConfirmCode(Messaging email)
         {
             switch (email.Type)
             {
-                case EmailType.ConfirmEmail:
+                case MessagingType.ConfirmEmail:
                     var confirmPayload = email.GetPayload<ConfirmEmailPayload>();
                     return ConfirmCode.Create(confirmPayload.Code, CodeType.ConfirmEmail);
-                case EmailType.ForgotPassword:
+                case MessagingType.ForgotPassword:
                     var forgotPayload = email.GetPayload<ForgotPasswordPayload>();
                     return ConfirmCode.Create(forgotPayload.Code, CodeType.ForgotPassword);
                 default:

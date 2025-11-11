@@ -10,24 +10,9 @@ namespace AuthCore.Domain.Aggregates.ConfirmCodeAggregate
     {
         #region Properties
 
-        /// <summary>
-        /// Identificador único do código de confirmação.
-        /// </summary>
         public Guid Id { get; private set; }
-
-        /// <summary>
-        /// Valor numérico de 6 dígitos usado na confirmação.
-        /// </summary>
         public int Code { get; private set; }
-
-        /// <summary>
-        /// Tipo do código (ex: recuperação de senha).
-        /// </summary>
         public CodeType Type { get; private set; }
-
-        /// <summary>
-        /// Data e hora de criação do código.
-        /// </summary>
         public DateTime CreatedAt { get; private set; }
 
         #endregion

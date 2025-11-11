@@ -1,5 +1,5 @@
 ﻿using AuthCore.Domain.Core.Interfaces.Base;
-using AuthCore.Domain.Core.Interfaces.Persistence;
+using AuthCore.Domain.Core.Interfaces.Infrastructure.Persistence;
 using AuthCore.Infrastructure.Persistence.PostgreSQL.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;

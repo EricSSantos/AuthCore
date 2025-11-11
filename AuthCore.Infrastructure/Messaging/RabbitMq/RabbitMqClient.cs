@@ -1,4 +1,4 @@
-﻿using AuthCore.Domain.Core.Interfaces.Messaging;
+﻿using AuthCore.Domain.Core.Interfaces.Infrastructure.Messaging;
 using AuthCore.Domain.Core.Settings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

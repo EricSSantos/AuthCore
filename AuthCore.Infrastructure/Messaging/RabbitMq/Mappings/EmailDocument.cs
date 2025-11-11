@@ -1,4 +1,4 @@
-﻿using AuthCore.Domain.Aggregates.EmailAggregate;
+﻿using AuthCore.Domain.Aggregates.MessagingAggregate;
 using System.Text.Json.Serialization;
 
 namespace AuthCore.Infrastructure.Messaging.RabbitMq.Mappings
@@ -15,7 +15,7 @@ namespace AuthCore.Infrastructure.Messaging.RabbitMq.Mappings
         public string FullName { get; init; } = string.Empty;
 
         [JsonPropertyName("type")]
-        public EmailType Type { get; init; }
+        public MessagingType Type { get; init; }
 
         [JsonPropertyName("payload")]
         public object? Payload { get; init; }

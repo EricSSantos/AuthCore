@@ -16,13 +16,13 @@ namespace AuthCore.Api.Controllers.v1
         /// </summary>
         [HttpPost("sign-in")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
-        public async Task<ActionResult<Response<object>>> SignIn(
+        public async Task<ActionResult<ApiResponse<object>>> SignIn(
             [FromBody] SignInRequest request,
             [FromServices] ISignIn signIn)
         {
             await signIn.OnExecute(request);
 
-            return Ok(Response<object>.Success(
+            return Ok(ApiResponse<object>.Success(
                 null!,
                 "Login realizado com sucesso.",
                 HttpStatusCode.NoContent
@@ -35,12 +35,12 @@ namespace AuthCore.Api.Controllers.v1
         [Authorize]
         [HttpPost("sign-out")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
-        public async Task<ActionResult<Response<object>>> SignOut(
+        public async Task<ActionResult<ApiResponse<object>>> SignOut(
             [FromServices] ISignOut signOut)
         {
             await signOut.OnExecute();
 
-            return Ok(Response<object>.Success(
+            return Ok(ApiResponse<object>.Success(
                 null!,
                 "Logout realizado com sucesso.",
                 HttpStatusCode.NoContent
@@ -52,12 +52,12 @@ namespace AuthCore.Api.Controllers.v1
         /// </summary>
         [HttpPost("refresh-token")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
-        public async Task<ActionResult<Response<object>>> RefreshToken(
+        public async Task<ActionResult<ApiResponse<object>>> RefreshToken(
             [FromServices] IRefresh refresh)
         {
             await refresh.OnExecute();
 
-            return Ok(Response<object>.Success(
+            return Ok(ApiResponse<object>.Success(
                 null!,
                 "Sessão atualizada com sucesso.",
                 HttpStatusCode.NoContent

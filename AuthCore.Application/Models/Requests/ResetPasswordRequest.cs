@@ -4,6 +4,9 @@ namespace AuthCore.Application.Models.Requests
 {
     public sealed record ResetPasswordRequest
     {
+        [JsonIgnore]
+        public string Email { get; set; } = string.Empty;
+        
         [JsonPropertyName("code")]
         public required int Code { get; init; }
 
@@ -12,8 +15,5 @@ namespace AuthCore.Application.Models.Requests
 
         [JsonPropertyName("confirm_new_password")]
         public required string ConfirmNewPassword { get; init; }
-
-        [JsonIgnore]
-        public string Email { get; set; } = string.Empty;
     }
 }

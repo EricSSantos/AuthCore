@@ -10,34 +10,11 @@ namespace AuthCore.Domain.Aggregates.SessionAggregate
     {
         #region Properties
 
-        /// <summary>
-        /// Identificador único da sessão (hash armazenado no Redis).
-        /// </summary>
-        public string Id { get; private set; }
-
-        /// <summary>
-        /// Identificador do usuário proprietário da sessão.
-        /// </summary>
+        public string Id { get; private set; } = null!;
         public Guid UserId { get; private set; }
-
-        /// <summary>
-        /// Informações do dispositivo usado na autenticação.
-        /// </summary>
         public DeviceInfo DeviceInfo { get; private set; }
-
-        /// <summary>
-        /// Data e hora em que a sessão foi criada (UTC).
-        /// </summary>
         public DateTime CreatedAt { get; private set; }
-
-        /// <summary>
-        /// Data e hora de expiração por inatividade.
-        /// </summary>
         public DateTime ExpiresAt { get; private set; }
-
-        /// <summary>
-        /// Tempo máximo de vida útil da sessão.
-        /// </summary>
         public DateTime MaxLifetime { get; private set; }
 
         #endregion

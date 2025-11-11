@@ -1,4 +1,5 @@
 ﻿using AuthCore.Domain.Aggregates.ConfirmCodeAggregate;
+using AuthCore.Domain.Aggregates.ConfirmCodeAggregate.Interfaces;
 using AuthCore.Infrastructure.Persistence.Redis.Mappings;
 using StackExchange.Redis;
 using System.Text.Json;

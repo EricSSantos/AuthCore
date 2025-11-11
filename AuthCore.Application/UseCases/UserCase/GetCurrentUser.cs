@@ -1,8 +1,8 @@
 ﻿using AuthCore.Application.Models.Responses;
 using AuthCore.Application.UseCases.UserCase.Interfaces;
-using AuthCore.Domain.Aggregates.UserAggregate;
+using AuthCore.Domain.Aggregates.UserAggregate.Interfaces;
 using AuthCore.Domain.Core.Exceptions;
-using AuthCore.Domain.Core.Interfaces.Security;
+using AuthCore.Domain.Core.Interfaces.Infrastructure.Security;
 
 namespace AuthCore.Application.UseCases.UserCase
 {
@@ -30,7 +30,7 @@ namespace AuthCore.Application.UseCases.UserCase
             return new UserResponse
             {
                 Id = user.Id,
-                Email = user.Email,
+                Email = user.Email.Value,
                 FullName = user.FullName,
                 Role = user.Role.ToString()
             };

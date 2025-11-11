@@ -1,4 +1,5 @@
 ﻿using AuthCore.Domain.Aggregates.SessionAggregate;
+using AuthCore.Domain.Aggregates.SessionAggregate.Interfaces;
 using AuthCore.Infrastructure.Persistence.Redis.Mappings;
 using StackExchange.Redis;
 using System.Text.Json;

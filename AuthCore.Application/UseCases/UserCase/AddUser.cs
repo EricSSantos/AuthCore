@@ -1,11 +1,14 @@
 ﻿using AuthCore.Application.Models.Requests;
 using AuthCore.Application.UseCases.UserCase.Interfaces;
 using AuthCore.Domain.Aggregates.ConfirmCodeAggregate;
-using AuthCore.Domain.Aggregates.EmailAggregate;
-using AuthCore.Domain.Aggregates.EmailAggregate.Payloads;
+using AuthCore.Domain.Aggregates.ConfirmCodeAggregate.Interfaces;
+using AuthCore.Domain.Aggregates.MessagingAggregate;
+using AuthCore.Domain.Aggregates.MessagingAggregate.Interfaces;
+using AuthCore.Domain.Aggregates.MessagingAggregate.Payloads;
 using AuthCore.Domain.Aggregates.UserAggregate;
+using AuthCore.Domain.Aggregates.UserAggregate.Interfaces;
 using AuthCore.Domain.Core.Exceptions;
-using AuthCore.Domain.Core.Interfaces.Security;
+using AuthCore.Domain.Core.Interfaces.Infrastructure.Security;
 
 namespace AuthCore.Application.UseCases.UserCase
 {
@@ -30,7 +33,7 @@ namespace AuthCore.Application.UseCases.UserCase
 
         public async Task OnExecute(AddUserRequest request)
         {
-            if (await _userRepository.Exists(u => u.Email == request.Email))
+            if (await _userRepository.Exists(u => u.Email.Value == request.Email))
                 throw new ConflictException("E-mail já cadastrado.");
 
             Password.ValidateWithConfirmation(request.Password, request.ConfirmPassword);
@@ -52,10 +55,10 @@ namespace AuthCore.Application.UseCases.UserCase
 
         private async Task SendEmail(User user)
         {
-            var email = Email.Create(
-                to: user.Email,
+            var email = Messaging.Create(
+                to: user.Email.Value,
                 fullName: user.FullName,
-                type: EmailType.ConfirmEmail
+                type: MessagingType.ConfirmEmail
             );
 
             var payload = email.GetPayload<ConfirmEmailPayload>();

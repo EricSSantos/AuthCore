@@ -3,8 +3,7 @@
 namespace AuthCore.Domain.Aggregates.UserAggregate
 {
     /// <summary>
-    /// Representa o controle de tentativas de login de um usuário,
-    /// incluindo bloqueios temporários após falhas consecutivas.
+    /// Controla tentativas de login e bloqueios temporários.
     /// </summary>
     public sealed class LoginAttempts : IValueObject
     {
@@ -15,26 +14,9 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
 
         #endregion
 
-        #region Properties
-
-        /// <summary>
-        /// Quantidade de tentativas consecutivas de login mal sucedidas.
-        /// </summary>
         public int FailedAttempts { get; private set; }
-
-        /// <summary>
-        /// Data e hora da última tentativa de login falha.
-        /// </summary>
         public DateTime? LastFailedAt { get; private set; }
-
-        /// <summary>
-        /// Data e hora até a qual o usuário permanecerá bloqueado.
-        /// </summary>
         public DateTime? LockedUntil { get; private set; }
-
-        #endregion
-
-        #region Constructors
 
         private LoginAttempts(
             int failedAttempts,
@@ -48,25 +30,16 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
 
         private LoginAttempts() { }
 
-        #endregion
-
-        #region Factory
-
         /// <summary>
-        /// Cria um novo controle de tentativas (sem falhas registradas).
+        /// Cria um novo controle de tentativas.
         /// </summary>
         public static LoginAttempts Create()
         {
             return new LoginAttempts(0, null, null);
         }
 
-        #endregion
-
-        #region Behavior
-
         /// <summary>
-        /// Registra uma nova tentativa de login falha.
-        /// Bloqueia temporariamente o usuário se atingir o número máximo permitido.
+        /// Registra uma falha e aplica bloqueio se necessário.
         /// </summary>
         public LoginAttempts RegisterFailure()
         {
@@ -81,7 +54,7 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         }
 
         /// <summary>
-        /// Reseta o contador de tentativas, liberando o usuário.
+        /// Reseta contadores e remove bloqueios.
         /// </summary>
         public LoginAttempts Reset()
         {
@@ -89,7 +62,7 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         }
 
         /// <summary>
-        /// Indica se o usuário está bloqueado por excesso de tentativas.
+        /// Verifica se o usuário está bloqueado.
         /// </summary>
         public bool IsLocked()
         {
@@ -97,7 +70,7 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         }
 
         /// <summary>
-        /// Retorna uma mensagem de bloqueio com o tempo restante.
+        /// Obtém mensagem de bloqueio com o tempo restante.
         /// </summary>
         public string? GetLockMessage()
         {
@@ -111,7 +84,5 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
 
             return $"A conta está temporariamente bloqueada. Tente novamente em {Math.Ceiling(remaining.TotalMinutes)} minutos.";
         }
-
-        #endregion
     }
 }

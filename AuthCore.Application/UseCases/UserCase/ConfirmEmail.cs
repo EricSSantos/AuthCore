@@ -1,8 +1,10 @@
 ﻿using AuthCore.Application.Models.Requests;
 using AuthCore.Application.UseCases.UserCase.Interfaces;
 using AuthCore.Domain.Aggregates.ConfirmCodeAggregate;
-using AuthCore.Domain.Aggregates.EmailAggregate;
-using AuthCore.Domain.Aggregates.UserAggregate;
+using AuthCore.Domain.Aggregates.ConfirmCodeAggregate.Interfaces;
+using AuthCore.Domain.Aggregates.MessagingAggregate;
+using AuthCore.Domain.Aggregates.MessagingAggregate.Interfaces;
+using AuthCore.Domain.Aggregates.UserAggregate.Interfaces;
 using AuthCore.Domain.Core.Exceptions;
 
 namespace AuthCore.Application.UseCases.UserCase
@@ -38,10 +40,10 @@ namespace AuthCore.Application.UseCases.UserCase
             _userRepository.Update(user);
             await _userRepository.SaveChanges();
 
-            var email = Email.Create(
-                to: user.Email,
+            var email = Messaging.Create(
+                to: user.Email.Value,
                 fullName: user.FullName,
-                type: EmailType.Welcome
+                type: MessagingType.Welcome
             );
 
             await _emailPublisher.Send(email);

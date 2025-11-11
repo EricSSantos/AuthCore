@@ -1,5 +1,5 @@
 ﻿using AuthCore.Domain.Core.Exceptions;
-using AuthCore.Domain.Core.Interfaces.Http;
+using AuthCore.Domain.Core.Interfaces.Infrastructure.Http;
 using Microsoft.AspNetCore.Http;
 
 namespace AuthCore.Infrastructure.Http

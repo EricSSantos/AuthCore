@@ -1,5 +1,5 @@
-﻿using AuthCore.Domain.Aggregates.EmailAggregate;
-using AuthCore.Domain.Core.Interfaces.Messaging;
+﻿using AuthCore.Domain.Aggregates.MessagingAggregate.Interfaces;
+using AuthCore.Domain.Core.Interfaces.Infrastructure.Messaging;
 using AuthCore.Domain.Core.Settings;
 using AuthCore.Infrastructure.Messaging.RabbitMq.Mappings;
 using Microsoft.Extensions.Logging;
@@ -23,7 +23,7 @@ namespace AuthCore.Infrastructure.Messaging.RabbitMq
             _logger = logger;
         }
 
-        public Task Send(Email email)
+        public Task Send(Domain.Aggregates.MessagingAggregate.Messaging email)
         {
             var document = new EmailDocument
             {

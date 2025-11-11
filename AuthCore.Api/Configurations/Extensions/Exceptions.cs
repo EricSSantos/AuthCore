@@ -84,7 +84,7 @@ namespace AuthCore.Api.Configurations.Extensions
                         }
                         : null;
 
-                    var response = Response<object>.Error(errors, title, status);
+                    var response = ApiResponse<object>.Error(errors, title, status);
 
                     var json = JsonSerializer.Serialize(new
                     {

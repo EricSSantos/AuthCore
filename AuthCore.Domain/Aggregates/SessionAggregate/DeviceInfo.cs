@@ -11,20 +11,9 @@ namespace AuthCore.Domain.Aggregates.SessionAggregate
     {
         #region Properties
 
-        /// <summary>
-        /// Endereço IP do dispositivo.
-        /// </summary>
-        public string Ip { get; }
-
-        /// <summary>
-        /// Plataforma ou sistema operacional identificado.
-        /// </summary>
-        public string Platform { get; }
-
-        /// <summary>
-        /// Navegador ou agente de usuário identificado.
-        /// </summary>
-        public string Browser { get; }
+        public string Ip { get; } = null!;
+        public string Platform { get; } = null!;
+        public string Browser { get; } = null!;
 
         #endregion
 

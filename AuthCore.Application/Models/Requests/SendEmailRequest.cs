@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Serialization;
-using AuthCore.Domain.Aggregates.EmailAggregate;
+using AuthCore.Domain.Aggregates.MessagingAggregate;
 
 namespace AuthCore.Application.Models.Requests
 {
@@ -7,7 +7,8 @@ namespace AuthCore.Application.Models.Requests
     {
         [JsonPropertyName("email")]
         public required string Email { get; set; }
+
         [JsonPropertyName("type")]
-        public required EmailType Type { get; set; }
+        public required MessagingType Type { get; set; }
     }
 }

@@ -1,5 +1,5 @@
 ﻿using AuthCore.Domain.Core.Exceptions;
-using AuthCore.Domain.Core.Interfaces.Security;
+using AuthCore.Domain.Core.Interfaces.Infrastructure.Security;
 using AuthCore.Domain.Core.Settings;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;

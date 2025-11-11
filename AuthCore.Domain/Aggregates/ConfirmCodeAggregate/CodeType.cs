@@ -7,9 +7,7 @@ namespace AuthCore.Domain.Aggregates.ConfirmCodeAggregate
     /// </summary>
     public enum CodeType
     {
-        [Description("Verificação de e-mail.")]
         ConfirmEmail,
-        [Description("Recuperação de senha.")]
         ForgotPassword
     }
 }

@@ -1,9 +1,11 @@
 ﻿using AuthCore.Application.Models.Requests;
 using AuthCore.Application.UseCases.UserCase.Interfaces;
 using AuthCore.Domain.Aggregates.ConfirmCodeAggregate;
+using AuthCore.Domain.Aggregates.ConfirmCodeAggregate.Interfaces;
 using AuthCore.Domain.Aggregates.UserAggregate;
+using AuthCore.Domain.Aggregates.UserAggregate.Interfaces;
 using AuthCore.Domain.Core.Exceptions;
-using AuthCore.Domain.Core.Interfaces.Security;
+using AuthCore.Domain.Core.Interfaces.Infrastructure.Security;
 
 namespace AuthCore.Application.UseCases.UserCase
 {

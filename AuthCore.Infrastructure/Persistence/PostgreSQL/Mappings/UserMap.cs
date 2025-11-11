@@ -19,7 +19,7 @@ namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Mappings
 
             #endregion
 
-            #region Basic Properties
+            #region Properties
 
             builder.Property(u => u.FirstName)
                    .HasColumnName("first_name")
@@ -29,11 +29,6 @@ namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Mappings
             builder.Property(u => u.LastName)
                    .HasColumnName("last_name")
                    .HasMaxLength(50)
-                   .IsRequired();
-
-            builder.Property(u => u.Email)
-                   .HasColumnName("email")
-                   .HasMaxLength(255)
                    .IsRequired();
 
             builder.Property(u => u.Role)
@@ -53,12 +48,25 @@ namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Mappings
                    .HasColumnName("created_at")
                    .IsRequired();
 
+            builder.Property(u => u.UpdatedAt)
+                   .HasColumnName("updated_at");
+
             builder.Property(u => u.InactivatedAt)
                    .HasColumnName("inactivated_at");
 
             #endregion
 
             #region Value Objects
+
+            builder.OwnsOne(u => u.Email, vo =>
+            {
+                vo.Property(p => p.Value)
+                  .HasColumnName("email")
+                  .HasMaxLength(255)
+                  .IsRequired();
+
+                vo.WithOwner();
+            });
 
             builder.OwnsOne(u => u.Password, vo =>
             {
@@ -67,6 +75,7 @@ namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Mappings
                   .HasMaxLength(255)
                   .IsRequired();
 
+                vo.HasIndex(p => p.Value).IsUnique();
                 vo.WithOwner();
             });
 
@@ -83,13 +92,6 @@ namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Mappings
 
                 vo.WithOwner();
             });
-
-            #endregion
-
-            #region Indexes
-
-            builder.HasIndex(u => u.Email)
-                   .IsUnique();
 
             #endregion
         }

@@ -1,6 +1,6 @@
 ﻿using AuthCore.Application.UseCases.AuthCase.Interfaces;
-using AuthCore.Domain.Aggregates.SessionAggregate;
-using AuthCore.Domain.Core.Interfaces.Security;
+using AuthCore.Domain.Aggregates.SessionAggregate.Interfaces;
+using AuthCore.Domain.Core.Interfaces.Infrastructure.Security;
 
 namespace AuthCore.Application.UseCases.AuthCase
 {

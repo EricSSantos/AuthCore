@@ -1,4 +1,4 @@
-﻿using AuthCore.Domain.Core.Interfaces.Security;
+﻿using AuthCore.Domain.Core.Interfaces.Infrastructure.Security;
 
 namespace AuthCore.Infrastructure.Security
 {

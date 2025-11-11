@@ -20,15 +20,13 @@ namespace AuthCore.Api.Configurations.Extensions
         {
             var services = builder.Services;
             var configuration = builder.Configuration;
-
             var settings = configuration.GetSection("Security").Get<SecuritySettings>()
                 ?? throw new InvalidOperationException("As configurações de segurança não foram definidas.");
-
             var key = GetPublicKey(settings);
             ConfigureJwtAuthentication(services, settings, key);
         }
 
-        #region Private Methods
+        #region Helpers
 
         /// <summary>
         /// Carrega a chave pública ECDSA usada para validar os tokens JWT.
