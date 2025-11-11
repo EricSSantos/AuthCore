@@ -5,7 +5,7 @@ namespace AuthCore.Application.Models.Requests
     public sealed record ConfirmEmailRequest
     {
         [JsonIgnore]
-        public required string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [JsonPropertyName("code")]
         public required int Code { get; set; }
