@@ -17,7 +17,7 @@ namespace AuthCore.Application.UseCases.SessionCase
             _sessionRepository = sessionRepository;
         }
 
-        public async Task OnExecuteAsyc()
+        public async Task OnExecuteAsync()
         {
             var otherSessions = await _sessionState.GetOtherSessions();
             var deleteTasks = otherSessions.Select(s => _sessionRepository.DeleteAsync(s.Id));
