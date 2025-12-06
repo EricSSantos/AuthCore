@@ -30,6 +30,8 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
 
         private LoginAttempts() { }
 
+        #region Factory
+
         /// <summary>
         /// Cria um novo controle de tentativas.
         /// </summary>
@@ -38,6 +40,23 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         {
             return new LoginAttempts(0, null, null);
         }
+
+        /// <summary>
+        /// Restaura um controle de tentativas já persistido.
+        /// </summary>
+        /// <param name="failedAttempts">Quantidade de tentativas falhas.</param>
+        /// <param name="lastFailedAt">Data/hora da última falha.</param>
+        /// <param name="lockedUntil">Data/hora de expiração do bloqueio.</param>
+        /// <returns>Instância restaurada de <see cref="LoginAttempts"/>.</returns>
+        public static LoginAttempts Restore(
+            int failedAttempts,
+            DateTime? lastFailedAt,
+            DateTime? lockedUntil)
+        {
+            return new LoginAttempts(failedAttempts, lastFailedAt, lockedUntil);
+        }
+
+        #endregion
 
         /// <summary>
         /// Registra falha e aplica bloqueio quando necessário.

@@ -34,9 +34,7 @@ namespace AuthCore.Application.UseCases.UserCase
 
             user.ChangePassword(_passwordHasher.Hash(request.NewPassword));
 
-            _userRepository.Update(user);
-
-            await _userRepository.SaveChanges();
+            await _userRepository.UpdateAsync(user);
         }
     }
 }

@@ -50,7 +50,7 @@ namespace AuthCore.Infrastructure.Security
         {
             var session = await GetCurrentSession();
 
-            var user = await _userRepository.GetById(session.UserId)
+            var user = await _userRepository.GetByIdAsync(session.UserId)
                 ?? throw new NotFoundException("Usuário não encontrado.");
 
             if (!user.IsActive())

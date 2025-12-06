@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Mappings
+namespace AuthCore.Infrastructure.Persistence.PostgreSQL.EFCore.Mappings
 {
     internal sealed class UserMap : IEntityTypeConfiguration<User>
     {
@@ -65,6 +65,7 @@ namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Mappings
                   .HasMaxLength(255)
                   .IsRequired();
 
+                vo.HasIndex(p => p.Value).IsUnique();
                 vo.WithOwner();
             });
 
@@ -75,7 +76,6 @@ namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Mappings
                   .HasMaxLength(255)
                   .IsRequired();
 
-                vo.HasIndex(p => p.Value).IsUnique();
                 vo.WithOwner();
             });
 

@@ -33,7 +33,7 @@ namespace AuthCore.Application.UseCases.UserCase
 
         public async Task OnExecuteAsync(AddUserRequest request)
         {
-            if (await _userRepository.Exists(u => u.Email.Value == request.Email))
+            if (await _userRepository.EmailExistsAsync(request.Email))
                 throw new ConflictException("E-mail já cadastrado.");
 
             Password.ValidateWithConfirmation(request.Password, request.ConfirmPassword);
@@ -45,8 +45,7 @@ namespace AuthCore.Application.UseCases.UserCase
                 passwordHash: _passwordHasher.Hash(request.Password)
             );
 
-            await _userRepository.Add(user);
-            await _userRepository.SaveChanges();
+            await _userRepository.AddAsync(user);
 
             await SendEmail(user);
         }

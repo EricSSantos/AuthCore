@@ -81,8 +81,7 @@ namespace AuthCore.Application.UseCases.AuthCase
             {
                 user.LoginAttempts.RegisterFailure();
 
-                _userRepository.Update(user);
-                await _userRepository.SaveChanges();
+                await _userRepository.UpdateAsync(user);
 
                 throw new UnauthorizedException("E-mail ou senha inválidos.");
             }
@@ -90,8 +89,7 @@ namespace AuthCore.Application.UseCases.AuthCase
             if (user.LoginAttempts.FailedAttempts > 0)
             {
                 user.LoginAttempts.Reset();
-                _userRepository.Update(user);
-                await _userRepository.SaveChanges();
+                await _userRepository.UpdateAsync(user);
             }
         }
 

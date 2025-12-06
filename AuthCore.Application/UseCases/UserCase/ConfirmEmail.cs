@@ -37,8 +37,7 @@ namespace AuthCore.Application.UseCases.UserCase
             await _confirmCodeRepository.DeleteAsync(user.Id, confirm.Type);
 
             user.Confirm();
-            _userRepository.Update(user);
-            await _userRepository.SaveChanges();
+            await _userRepository.UpdateAsync(user);
 
             var email = Messaging.Create(
                 to: user.Email.Value,

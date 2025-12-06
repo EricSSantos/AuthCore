@@ -1,5 +1,4 @@
 ﻿using AuthCore.Domain.Core.Settings;
-using AuthCore.Infrastructure.Persistence.PostgreSQL.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
@@ -18,32 +17,8 @@ namespace AuthCore.Api.Configurations.Extensions
         public static void AddDatabases(this WebApplicationBuilder builder)
         {
             builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection("Database"));
-            builder.AddPostgreSql();
             builder.AddRedis();
         }
-
-        #region PostgreSQL
-
-        /// <summary>
-        /// Configura o EF Core com PostgreSQL.
-        /// </summary>
-        /// <param name="builder">Instância para configurar serviços.</param>
-        private static void AddPostgreSql(this WebApplicationBuilder builder)
-        {
-            builder.Services.AddDbContext<AppDbContext>((sp, options) =>
-            {
-                var settings = sp.GetRequiredService<IOptions<DatabaseSettings>>().Value;
-                var connectionString = settings.Postgres.ConnectionString;
-
-                if (string.IsNullOrWhiteSpace(connectionString))
-                    throw new InvalidOperationException("A string de conexão do PostgreSQL não foi definida.");
-
-                options.UseNpgsql(connectionString, npgsql =>
-                    npgsql.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName));
-            });
-        }
-
-        #endregion
 
         #region Redis
 

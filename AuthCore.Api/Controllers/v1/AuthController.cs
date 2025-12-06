@@ -7,9 +7,6 @@ using System.Net;
 
 namespace AuthCore.Api.Controllers.v1
 {
-    /// <summary>
-    /// Gerencia operações de autenticação.
-    /// </summary>
     [ApiController]
     [Route("api/v1/auth")]
     public sealed class AuthController : ControllerBase

@@ -19,7 +19,7 @@ namespace AuthCore.Api.Configurations.Extensions
             var services = builder.Services;
             services.AddSettings(builder.Configuration);
             services.AddApplication();
-            services.AddInfrastructure();
+            services.AddInfrastructure(builder.Configuration);
             services.AddHttpContextAccessor();
         }
 
