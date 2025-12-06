@@ -15,8 +15,9 @@ namespace AuthCore.Domain.Aggregates.ConfirmCodeAggregate
         #endregion
 
         /// <summary>
-        /// Gera um código aleatório de 6 dígitos de forma segura.
+        /// Gera um código seguro de 6 dígitos.
         /// </summary>
+        /// <returns>Código numérico gerado.</returns>
         internal static int Generate()
         {
             return RandomNumberGenerator.GetInt32(CODE_MIN, CODE_MAX);

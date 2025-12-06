@@ -3,12 +3,12 @@
 namespace AuthCore.Domain.Core.Interfaces.Infrastructure.Http
 {
     /// <summary>
-    /// Define propriedades para obter informações sobre o dispositivo do cliente.
+    /// Define acesso às informações do dispositivo do cliente.
     /// </summary>
     public interface IDevice
     {
         /// <summary>
-        /// Retorna as informações do dispositivo atual (IP, navegador, plataforma).
+        /// Obtém os dados do dispositivo atual.
         /// </summary>
         DeviceInfo Device { get; }
     }

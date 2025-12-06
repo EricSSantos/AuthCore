@@ -31,7 +31,7 @@ namespace AuthCore.Application.UseCases.UserCase
             _emailPublisher = emailPublisher;
         }
 
-        public async Task OnExecute(AddUserRequest request)
+        public async Task OnExecuteAsync(AddUserRequest request)
         {
             if (await _userRepository.Exists(u => u.Email.Value == request.Email))
                 throw new ConflictException("E-mail já cadastrado.");
@@ -68,8 +68,8 @@ namespace AuthCore.Application.UseCases.UserCase
                 type: CodeType.ConfirmEmail
             );
 
-            await _confirmCodeRepository.Set(user.Id, code);
-            await _emailPublisher.Send(email);
+            await _confirmCodeRepository.SetAsync(user.Id, code);
+            await _emailPublisher.SendAsync(email);
         }
 
         #endregion

@@ -7,21 +7,21 @@ using System.Text.Json.Serialization;
 namespace AuthCore.Api.Configurations.Extensions
 {
     /// <summary>
-    /// Configura o tratamento global de exceções na aplicação.
+    /// Configura o tratamento global de exceções da aplicação.
     /// </summary>
     public static class Exceptions
     {
         /// <summary>
-        /// Ativa o middleware global de tratamento de erros.
+        /// Ativa o middleware global de erros.
         /// </summary>
-        /// <param name="app">Aplicação web atual.</param>
+        /// <param name="app">Instância atual da aplicação.</param>
         public static void UseExceptionsHandling(this WebApplication app)
         {
             app.UseMiddleware<ExceptionMiddleware>();
         }
 
         /// <summary>
-        /// Middleware que captura erros não tratados e retorna respostas JSON padronizadas.
+        /// Middleware que captura exceções e retorna respostas padronizadas.
         /// </summary>
         private sealed class ExceptionMiddleware
         {
@@ -30,11 +30,11 @@ namespace AuthCore.Api.Configurations.Extensions
             private readonly IHostEnvironment _env;
 
             /// <summary>
-            /// Cria uma nova instância do middleware de exceções.
+            /// Inicializa o middleware de exceções.
             /// </summary>
-            /// <param name="next">Próximo middleware no pipeline.</param>
+            /// <param name="next">Próximo middleware do pipeline.</param>
             /// <param name="logger">Logger para registrar erros.</param>
-            /// <param name="env">Ambiente atual da aplicação.</param>
+            /// <param name="env">Ambiente de execução.</param>
             public ExceptionMiddleware(
                 RequestDelegate next,
                 ILogger<ExceptionMiddleware> logger,
@@ -46,9 +46,9 @@ namespace AuthCore.Api.Configurations.Extensions
             }
 
             /// <summary>
-            /// Processa a requisição e trata exceções não capturadas.
+            /// Processa a requisição e trata erros não capturados.
             /// </summary>
-            /// <param name="context">Contexto da requisição HTTP.</param>
+            /// <param name="context">Contexto HTTP atual.</param>
             public async Task InvokeAsync(HttpContext context)
             {
                 try

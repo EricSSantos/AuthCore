@@ -1,27 +1,30 @@
 ﻿namespace AuthCore.Domain.Core.Interfaces.Infrastructure.Security
 {
     /// <summary>
-    /// Define métodos para gerar chaves seguras.
+    /// Define operações para gerar chaves e hashes seguros.
     /// </summary>
     public interface ISecureKeyGenerator
     {
         /// <summary>
-        /// Cria uma string aleatória segura em formato hexadecimal.
+        /// Gera string aleatória segura em hexadecimal.
         /// </summary>
-        /// <param name="size">Tamanho do buffer em bytes (padrão: 32).</param>
+        /// <param name="size">Tamanho do buffer em bytes.</param>
+        /// <returns>Chave gerada.</returns>
         string Generate(int size = 32);
 
         /// <summary>
-        /// Gera um hash HMAC-SHA256 a partir do valor informado.
+        /// Gera hash HMAC-SHA256 do valor informado.
         /// </summary>
-        /// <param name="raw">Valor original a ser transformado em hash.</param>
+        /// <param name="raw">Valor original.</param>
+        /// <returns>Hash gerado.</returns>
         string Hash(string raw);
 
         /// <summary>
-        /// Verifica se o valor corresponde ao hash gerado.
+        /// Verifica se o valor corresponde ao hash.
         /// </summary>
         /// <param name="raw">Valor original.</param>
-        /// <param name="hash">Hash armazenado para comparação.</param>
+        /// <param name="hash">Hash armazenado.</param>
+        /// <returns>True quando os valores coincidem.</returns>
         bool Verify(string raw, string hash);
     }
 }

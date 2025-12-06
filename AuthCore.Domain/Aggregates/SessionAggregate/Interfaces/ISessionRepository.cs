@@ -6,23 +6,29 @@
     public interface ISessionRepository
     {
         /// <summary>
-        /// Obtém uma sessão pelo identificador.
+        /// Obtém a sessão pelo identificador.
         /// </summary>
-        Task<Session?> Get(string id);
+        /// <param name="id">Identificador da sessão.</param>
+        /// <returns>Sessão encontrada ou null.</returns>
+        Task<Session?> GetAsync(string id);
 
         /// <summary>
-        /// Obtém todas as sessões de um usuário.
+        /// Obtém todas as sessões do usuário.
         /// </summary>
-        Task<IEnumerable<Session>> GetAllByUserId(Guid userId);
+        /// <param name="userId">Identificador do usuário.</param>
+        /// <returns>Sessões associadas ao usuário.</returns>
+        Task<IEnumerable<Session>> GetAllByUserIdAsync(Guid userId);
 
         /// <summary>
-        /// Armazena ou atualiza uma sessão.
+        /// Armazena ou atualiza a sessão.
         /// </summary>
-        Task Set(Session session);
+        /// <param name="session">Instância da sessão.</param>
+        Task SetAsync(Session session);
 
         /// <summary>
-        /// Remove uma sessão pelo identificador.
+        /// Remove a sessão pelo identificador.
         /// </summary>
-        Task Delete(string id);
+        /// <param name="id">Identificador da sessão.</param>
+        Task DeleteAsync(string id);
     }
 }

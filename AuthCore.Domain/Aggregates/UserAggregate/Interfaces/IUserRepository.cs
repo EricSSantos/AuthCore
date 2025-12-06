@@ -8,8 +8,10 @@ namespace AuthCore.Domain.Aggregates.UserAggregate.Interfaces
     public interface IUserRepository : IBaseRepository<User>
     {
         /// <summary>
-        /// Obtém um usuário pelo e-mail informado.
+        /// Obtém o usuário pelo e-mail.
         /// </summary>
-        Task<User?> GetByEmail(string email);
+        /// <param name="email">E-mail do usuário.</param>
+        /// <returns>Usuário encontrado ou null.</returns>
+        Task<User?> GetByEmailAsync(string email);
     }
 }

@@ -8,16 +8,12 @@ namespace AuthCore.Domain.Aggregates.SessionAggregate
     /// </summary>
     public sealed class Session : IAggregateRoot
     {
-        #region Properties
-
         public string Id { get; private set; } = null!;
         public Guid UserId { get; private set; }
         public DeviceInfo DeviceInfo { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime ExpiresAt { get; private set; }
         public DateTime MaxLifetime { get; private set; }
-
-        #endregion
 
         #region Constructors
 
@@ -59,8 +55,14 @@ namespace AuthCore.Domain.Aggregates.SessionAggregate
         #region Factory
 
         /// <summary>
-        /// Cria uma nova instância de sessão com tempo de vida e limites configurados.
+        /// Cria uma sessão com tempos de expiração definidos.
         /// </summary>
+        /// <param name="id">Identificador da sessão.</param>
+        /// <param name="userId">Identificador do usuário.</param>
+        /// <param name="deviceInfo">Informações do dispositivo.</param>
+        /// <param name="ttl">Tempo até expiração.</param>
+        /// <param name="maxLifetime">Tempo máximo de vida.</param>
+        /// <returns>Instância criada de <see cref="Session"/>.</returns>
         public static Session Create(
             string id,
             Guid userId,
@@ -72,8 +74,15 @@ namespace AuthCore.Domain.Aggregates.SessionAggregate
         }
 
         /// <summary>
-        /// Restaura uma sessão existente a partir dos dados persistidos.
+        /// Restaura uma sessão previamente persistida.
         /// </summary>
+        /// <param name="id">Identificador da sessão.</param>
+        /// <param name="userId">Identificador do usuário.</param>
+        /// <param name="deviceInfo">Informações do dispositivo.</param>
+        /// <param name="createdAt">Data de criação.</param>
+        /// <param name="expiresAt">Data de expiração.</param>
+        /// <param name="maxLifetime">Tempo máximo de vida.</param>
+        /// <returns>Instância restaurada de <see cref="Session"/>.</returns>
         public static Session Restore(
             string id,
             Guid userId,
@@ -90,8 +99,9 @@ namespace AuthCore.Domain.Aggregates.SessionAggregate
         #region Behavior
 
         /// <summary>
-        /// Verifica se a sessão expirou, seja por inatividade ou por tempo máximo de vida.
+        /// Verifica se a sessão está expirada.
         /// </summary>
+        /// <returns>True quando a sessão expirou.</returns>
         public bool IsExpired()
         {
             var now = DateTime.UtcNow;
@@ -99,8 +109,10 @@ namespace AuthCore.Domain.Aggregates.SessionAggregate
         }
 
         /// <summary>
-        /// Renova a expiração da sessão, se ainda estiver dentro do tempo máximo permitido.
+        /// Renova a expiração da sessão quando permitido.
         /// </summary>
+        /// <param name="ttl">Tempo adicional até a próxima expiração.</param>
+        /// <exception cref="ForbiddenException">Lançada quando excede o tempo máximo de vida.</exception>
         public void Refresh(TimeSpan ttl)
         {
             if (DateTime.UtcNow > MaxLifetime)
@@ -113,6 +125,9 @@ namespace AuthCore.Domain.Aggregates.SessionAggregate
 
         #region Validation
 
+        /// <summary>
+        /// Valida os dados obrigatórios da sessão.
+        /// </summary>
         private void Validate()
         {
             if (string.IsNullOrWhiteSpace(Id))

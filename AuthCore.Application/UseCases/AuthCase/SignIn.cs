@@ -42,9 +42,9 @@ namespace AuthCore.Application.UseCases.AuthCase
             _settings = settings;
         }
 
-        public async Task OnExecute(SignInRequest request)
+        public async Task OnExecuteAsync(SignInRequest request)
         {
-            var user = await _userRepository.GetByEmail(request.Email)
+            var user = await _userRepository.GetByEmailAsync(request.Email)
                 ?? throw new UnauthorizedException("E-mail ou senha inválidos.");
 
             await ValidateUserCredentials(user, request.Password);
@@ -64,7 +64,7 @@ namespace AuthCore.Application.UseCases.AuthCase
                 maxLifetime: maxLifetime
             );
 
-            await _sessionRepository.Set(newSession);
+            await _sessionRepository.SetAsync(newSession);
 
             var accessToken = _jwtTokenProvider.Generate(user.Id);
             _sessionState.SetCookies(session, accessToken);
@@ -97,7 +97,7 @@ namespace AuthCore.Application.UseCases.AuthCase
 
         private async Task EnforceSessionLimit(Guid userId)
         {
-            var sessions = await _sessionRepository.GetAllByUserId(userId);
+            var sessions = await _sessionRepository.GetAllByUserIdAsync(userId);
             if (sessions.Count() < 4)
                 return;
 
@@ -105,7 +105,7 @@ namespace AuthCore.Application.UseCases.AuthCase
                 .OrderBy(s => s.CreatedAt)
                 .First();
 
-            await _sessionRepository.Delete(oldestSession.Id);
+            await _sessionRepository.DeleteAsync(oldestSession.Id);
         }
 
         #endregion

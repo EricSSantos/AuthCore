@@ -7,12 +7,15 @@ using System.Net;
 
 namespace AuthCore.Api.Controllers.v1
 {
+    /// <summary>
+    /// Gerencia operações de autenticação.
+    /// </summary>
     [ApiController]
     [Route("api/v1/auth")]
     public sealed class AuthController : ControllerBase
     {
         /// <summary>
-        /// Autentica o usuário e inicia uma nova sessão.
+        /// Autentica o usuário e inicia sessão.
         /// </summary>
         [HttpPost("sign-in")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
@@ -20,7 +23,7 @@ namespace AuthCore.Api.Controllers.v1
             [FromBody] SignInRequest request,
             [FromServices] ISignIn signIn)
         {
-            await signIn.OnExecute(request);
+            await signIn.OnExecuteAsync(request);
 
             return Ok(ApiResponse<object>.Success(
                 null!,
@@ -30,7 +33,7 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Encerra a sessão do usuário autenticado.
+        /// Encerra a sessão atual do usuário.
         /// </summary>
         [Authorize]
         [HttpPost("sign-out")]
@@ -38,7 +41,7 @@ namespace AuthCore.Api.Controllers.v1
         public async Task<ActionResult<ApiResponse<object>>> SignOut(
             [FromServices] ISignOut signOut)
         {
-            await signOut.OnExecute();
+            await signOut.OnExecuteAsync();
 
             return Ok(ApiResponse<object>.Success(
                 null!,
@@ -48,14 +51,14 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Gera um novo token de acesso para o usuário.
+        /// Renova o token de acesso do usuário.
         /// </summary>
         [HttpPost("refresh-token")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         public async Task<ActionResult<ApiResponse<object>>> RefreshToken(
             [FromServices] IRefresh refresh)
         {
-            await refresh.OnExecute();
+            await refresh.OnExecuteAsync();
 
             return Ok(ApiResponse<object>.Success(
                 null!,

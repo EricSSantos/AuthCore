@@ -8,14 +8,10 @@ namespace AuthCore.Domain.Aggregates.ConfirmCodeAggregate
     /// </summary>
     public sealed class ConfirmCode : IAggregateRoot
     {
-        #region Properties
-
         public Guid Id { get; private set; }
         public int Code { get; private set; }
         public CodeType Type { get; private set; }
         public DateTime CreatedAt { get; private set; }
-
-        #endregion
 
         #region Constructors
 
@@ -49,8 +45,11 @@ namespace AuthCore.Domain.Aggregates.ConfirmCodeAggregate
         #region Factory
 
         /// <summary>
-        /// Cria uma nova instância de código de confirmação.
+        /// Cria um novo código de confirmação.
         /// </summary>
+        /// <param name="code">Valor numérico do código.</param>
+        /// <param name="type">Tipo do código.</param>
+        /// <returns>Instância criada de <see cref="ConfirmCode"/>.</returns>
         public static ConfirmCode Create(
             int code,
             CodeType type)
@@ -59,8 +58,13 @@ namespace AuthCore.Domain.Aggregates.ConfirmCodeAggregate
         }
 
         /// <summary>
-        /// Restaura uma instância existente de código de confirmação (ex: a partir de cache ou persistência).
+        /// Restaura um código de confirmação existente.
         /// </summary>
+        /// <param name="id">Identificador da instância.</param>
+        /// <param name="code">Valor numérico do código.</param>
+        /// <param name="type">Tipo do código.</param>
+        /// <param name="createdAt">Data de criação.</param>
+        /// <returns>Instância restaurada de <see cref="ConfirmCode"/>.</returns>
         public static ConfirmCode Restore(
             Guid id,
             int code,
@@ -75,8 +79,9 @@ namespace AuthCore.Domain.Aggregates.ConfirmCodeAggregate
         #region Behavior
 
         /// <summary>
-        /// Verifica se o código informado corresponde ao código atual.
+        /// Verifica se o código informado corresponde ao atual.
         /// </summary>
+        /// <param name="code">Código a validar.</param>
         public void Matching(int code)
         {
             if (Code != code)
@@ -91,6 +96,7 @@ namespace AuthCore.Domain.Aggregates.ConfirmCodeAggregate
         {
             if (Code.ToString().Length != 6)
                 throw new BadRequestException("O código de verificação deve conter 6 dígitos.");
+
             if (!Enum.IsDefined(typeof(CodeType), Type))
                 throw new BadRequestException("O tipo de código informado é inválido.");
         }

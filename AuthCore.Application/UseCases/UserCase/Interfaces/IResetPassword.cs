@@ -2,8 +2,15 @@
 
 namespace AuthCore.Application.UseCases.UserCase.Interfaces
 {
+    /// <summary>
+    /// Define operação para redefinir a senha do usuário.
+    /// </summary>
     public interface IResetPassword
     {
-        Task OnExecute(ResetPasswordRequest request);
+        /// <summary>
+        /// Redefine a senha com os dados informados.
+        /// </summary>
+        /// <param name="request">Dados para redefinição.</param>
+        Task OnExecuteAsync(ResetPasswordRequest request);
     }
 }

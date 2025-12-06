@@ -19,8 +19,10 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         private Email() { }
 
         /// <summary>
-        /// Cria uma nova instância de Email após validar e normalizar o valor.
+        /// Cria o e-mail após validar e normalizar.
         /// </summary>
+        /// <param name="email">Endereço de e-mail informado.</param>
+        /// <returns>Instância criada de <see cref="Email"/>.</returns>
         public static Email Create(string email)
         {
             Validate(email);
@@ -28,8 +30,9 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         }
 
         /// <summary>
-        /// Mascara parte do e-mail para uso seguro.
+        /// Mascara parte do endereço de e-mail.
         /// </summary>
+        /// <returns>E-mail mascarado.</returns>
         public string Mask()
         {
             var parts = Value.Split('@');
@@ -44,25 +47,29 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         }
 
         /// <summary>
-        /// Retorna o e-mail completo sem máscara.
+        /// Retorna o e-mail sem máscara.
         /// </summary>
+        /// <returns>E-mail completo.</returns>
         public string Unmask()
         {
             return Value;
         }
 
         /// <summary>
-        /// Normaliza o e-mail para comparação e armazenamento.
+        /// Normaliza o e-mail para comparação.
         /// </summary>
+        /// <param name="email">E-mail a normalizar.</param>
+        /// <returns>E-mail normalizado.</returns>
         public static string Normalize(string email)
         {
             return email.Trim().ToLowerInvariant();
         }
 
         /// <summary>
-        /// Valida o formato do e-mail informado.
+        /// Valida o formato do e-mail.
         /// </summary>
-        /// <exception cref="BadRequestException"></exception>
+        /// <param name="email">E-mail a validar.</param>
+        /// <exception cref="BadRequestException">Lançada quando o formato é inválido.</exception>
         public static void Validate(string email)
         {
             if (string.IsNullOrWhiteSpace(email))

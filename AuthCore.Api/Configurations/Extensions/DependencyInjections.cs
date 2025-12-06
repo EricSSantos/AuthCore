@@ -11,9 +11,9 @@ namespace AuthCore.Api.Configurations.Extensions
     public static class DependencyInjections
     {
         /// <summary>
-        /// Registra os módulos principais da aplicação e suas dependências.
+        /// Registra módulos e serviços principais.
         /// </summary>
-        /// <param name="builder">Instância usada para configurar os serviços da aplicação.</param>
+        /// <param name="builder">Instância para configurar serviços.</param>
         public static void AddDependencyInjections(this WebApplicationBuilder builder)
         {
             var services = builder.Services;
@@ -26,11 +26,11 @@ namespace AuthCore.Api.Configurations.Extensions
         #region Settings
 
         /// <summary>
-        /// Registra as configurações tipadas da aplicação.
+        /// Registra configurações tipadas da aplicação.
         /// </summary>
-        /// <param name="services">Coleção de serviços da aplicação.</param>
-        /// <param name="config">Instância de configuração usada para mapear as seções do appsettings.</param>
-        /// <returns>O próprio <see cref="IServiceCollection"/> para encadeamento.</returns>
+        /// <param name="services">Coleção de serviços.</param>
+        /// <param name="config">Configurações do appsettings.</param>
+        /// <returns>Instância atualizada de serviços.</returns>
         private static IServiceCollection AddSettings(this IServiceCollection services, IConfiguration config)
         {
             services.Configure<ApiSettings>(config.GetSection("Api"));

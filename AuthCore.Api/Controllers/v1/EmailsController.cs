@@ -10,7 +10,7 @@ using System.Net;
 public sealed class EmailsController : ControllerBase
 {
     /// <summary>
-    /// Envia um novo e-mail de confirmação de conta.
+    /// Envia o e-mail de confirmação de conta.
     /// </summary>
     [HttpPost("{email}/confirmation")]
     [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Accepted)]
@@ -24,7 +24,7 @@ public sealed class EmailsController : ControllerBase
             Type = MessagingType.ConfirmEmail
         };
 
-        await sendEmail.OnExecute(input);
+        await sendEmail.OnExecuteAsync(input);
 
         return Accepted(ApiResponse<object>.Success(
             null!,
@@ -34,7 +34,7 @@ public sealed class EmailsController : ControllerBase
     }
 
     /// <summary>
-    /// Envia um novo e-mail de recuperação de senha.
+    /// Envia o e-mail de recuperação de senha.
     /// </summary>
     [HttpPost("{email}/forgot-password")]
     [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Accepted)]
@@ -48,7 +48,7 @@ public sealed class EmailsController : ControllerBase
             Type = MessagingType.ForgotPassword
         };
 
-        await sendEmail.OnExecute(input);
+        await sendEmail.OnExecuteAsync(input);
 
         return Accepted(ApiResponse<object>.Success(
             null!,

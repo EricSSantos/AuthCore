@@ -23,7 +23,7 @@ namespace AuthCore.Infrastructure.Messaging.RabbitMq
             _logger = logger;
         }
 
-        public Task Send(Domain.Aggregates.MessagingAggregate.Messaging email)
+        public Task SendAsync(Domain.Aggregates.MessagingAggregate.Messaging email)
         {
             var document = new EmailDocument
             {
@@ -41,6 +41,5 @@ namespace AuthCore.Infrastructure.Messaging.RabbitMq
 
             return Task.CompletedTask;
         }
-
     }
 }

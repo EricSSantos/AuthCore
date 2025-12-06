@@ -19,7 +19,7 @@ namespace AuthCore.Application.UseCases.UserCase
             _jwtTokenProvider = jwtTokenProvider;
         }
 
-        public async Task<UserResponse> OnExecute()
+        public async Task<UserResponse> OnExecuteAsync()
         {
             var user = await _userRepository.GetById(_jwtTokenProvider.Sub)
                 ?? throw new NotFoundException("Usuário não encontrado.");

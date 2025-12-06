@@ -28,7 +28,7 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
             _redis = connection.GetDatabase();
         }
 
-        public async Task<Session?> Get(string sessionId)
+        public async Task<Session?> GetAsync(string sessionId)
         {
             var key = BuildKey(sessionId);
             var value = await _redis.StringGetAsync(key);
@@ -43,7 +43,7 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
             return doc.ToEntity();
         }
 
-        public async Task<IEnumerable<Session>> GetAllByUserId(Guid userId)
+        public async Task<IEnumerable<Session>> GetAllByUserIdAsync(Guid userId)
         {
             var list = new List<Session>();
 
@@ -61,7 +61,7 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
             return list.OrderByDescending(x => x.CreatedAt);
         }
 
-        public async Task Set(Session session)
+        public async Task SetAsync(Session session)
         {
             var key = BuildKey(session.Id);
             var document = SessionDocument.ToDocument(session);
@@ -70,7 +70,7 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
             await _redis.StringSetAsync(key, payload, ttl);
         }
 
-        public async Task Delete(string sessionId)
+        public async Task DeleteAsync(string sessionId)
         {
             var key = BuildKey(sessionId);
             await _redis.KeyDeleteAsync(key);

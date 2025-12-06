@@ -8,8 +8,6 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
     /// </summary>
     public sealed class User : IAggregateRoot
     {
-        #region Properties
-
         public Guid Id { get; private set; }
         public string FirstName { get; private set; } = null!;
         public string LastName { get; private set; } = null!;
@@ -23,8 +21,6 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         public DateTime? UpdatedAt { get; private set; }
         public DateTime? InactivatedAt { get; private set; }
         public LoginAttempts LoginAttempts { get; private set; }
-
-        #endregion
 
         #region Constructors
 
@@ -66,6 +62,12 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         /// <summary>
         /// Cria um novo usuário.
         /// </summary>
+        /// <param name="firstName">Nome do usuário.</param>
+        /// <param name="lastName">Sobrenome do usuário.</param>
+        /// <param name="email">E-mail do usuário.</param>
+        /// <param name="passwordHash">Senha criptografada.</param>
+        /// <param name="role">Perfil do usuário.</param>
+        /// <returns>Instância criada de <see cref="User"/>.</returns>
         public static User Create(
             string firstName,
             string lastName,
@@ -92,6 +94,7 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         /// <summary>
         /// Restaura um usuário persistido.
         /// </summary>
+        /// <returns>Instância restaurada de <see cref="User"/>.</returns>
         public static User Restore(
             Guid id,
             string firstName,
@@ -129,6 +132,7 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         /// <summary>
         /// Altera a senha do usuário.
         /// </summary>
+        /// <param name="passwordHash">Nova senha criptografada.</param>
         public void ChangePassword(string passwordHash)
         {
             Password = Password.Create(passwordHash);
@@ -146,8 +150,9 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         }
 
         /// <summary>
-        /// Verifica se o usuário está apto para autenticação.
+        /// Verifica se o usuário está apto à autenticação.
         /// </summary>
+        /// <returns>True quando ativo, verificado e não bloqueado.</returns>
         public bool IsActive()
         {
             if (LoginAttempts.IsLocked())
@@ -164,7 +169,7 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         #region Validation
 
         /// <summary>
-        /// Valida dados essenciais do usuário.
+        /// Valida os dados essenciais do usuário.
         /// </summary>
         private void Validate()
         {

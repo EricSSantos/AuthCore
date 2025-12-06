@@ -1,7 +1,7 @@
 ﻿namespace AuthCore.Domain.Core.Interfaces.Base
 {
     /// <summary>
-    /// Indica que a classe é uma raiz de agregação no domínio.
+    /// Define que a classe é uma raiz de agregação.
     /// </summary>
     public interface IAggregateRoot
     { }

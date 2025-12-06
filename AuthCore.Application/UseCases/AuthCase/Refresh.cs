@@ -24,14 +24,14 @@ namespace AuthCore.Application.UseCases.AuthCase
             _settings = settings;
         }
 
-        public async Task OnExecute()
+        public async Task OnExecuteAsync()
         {
             var user = await _sessionState.GetCurrentUser();
             var session = await _sessionState.GetCurrentSession();
 
             session.Refresh(TimeSpan.FromDays(_settings.Session.ExpiresInDays));
 
-            await _sessionRepository.Set(session);
+            await _sessionRepository.SetAsync(session);
 
             var newAccessToken = _jwtTokenProvider.Generate(user.Id);
             _sessionState.SetCookies(_sessionState.Session, newAccessToken);

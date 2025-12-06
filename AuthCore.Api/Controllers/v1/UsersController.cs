@@ -8,6 +8,9 @@ using System.Net;
 
 namespace AuthCore.Api.Controllers.v1
 {
+    /// <summary>
+    /// Gerencia operações relacionadas a usuários.
+    /// </summary>
     [ApiController]
     [Route("api/v1/users")]
     public sealed class UsersController : ControllerBase
@@ -21,7 +24,7 @@ namespace AuthCore.Api.Controllers.v1
             [FromBody] AddUserRequest request,
             [FromServices] IAddUser addUser)
         {
-            await addUser.OnExecute(request);
+            await addUser.OnExecuteAsync(request);
 
             return Created(string.Empty, ApiResponse<object>.Success(
                 null!,
@@ -31,7 +34,7 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Retorna os dados do usuário autenticado.
+        /// Retorna o usuário autenticado.
         /// </summary>
         [Authorize]
         [HttpGet("me")]
@@ -39,7 +42,7 @@ namespace AuthCore.Api.Controllers.v1
         public async Task<ActionResult<ApiResponse<UserResponse>>> GetCurrent(
             [FromServices] IGetCurrentUser getCurrentUser)
         {
-            var user = await getCurrentUser.OnExecute();
+            var user = await getCurrentUser.OnExecuteAsync();
 
             return Ok(ApiResponse<UserResponse>.Success(
                 user,
@@ -58,7 +61,7 @@ namespace AuthCore.Api.Controllers.v1
             [FromBody] ChangePasswordRequest request,
             [FromServices] IChangePassword changePassword)
         {
-            await changePassword.OnExecute(request);
+            await changePassword.OnExecuteAsync(request);
 
             return Ok(ApiResponse<object>.Success(
                 null!,
@@ -68,7 +71,7 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Confirma o endereço de e-mail de um usuário pelo código de verificação.
+        /// Confirma o e-mail do usuário.
         /// </summary>
         [HttpPatch("{email}/confirm")]
         [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.OK)]
@@ -79,7 +82,7 @@ namespace AuthCore.Api.Controllers.v1
         {
             request.Email = email;
 
-            await confirmEmail.OnExecute(request);
+            await confirmEmail.OnExecuteAsync(request);
 
             return Ok(ApiResponse<object>.Success(
                 null!,
@@ -89,7 +92,7 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Redefine a senha de um usuário usando o código de verificação recebido por e-mail.
+        /// Redefine a senha do usuário.
         /// </summary>
         [HttpPatch("{email}/reset-password")]
         [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.OK)]
@@ -100,7 +103,7 @@ namespace AuthCore.Api.Controllers.v1
         {
             request.Email = email;
 
-            await resetPassword.OnExecute(request);
+            await resetPassword.OnExecuteAsync(request);
 
             return Ok(ApiResponse<object>.Success(
                 null!,

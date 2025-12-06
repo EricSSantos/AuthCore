@@ -33,14 +33,16 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         /// <summary>
         /// Cria um novo controle de tentativas.
         /// </summary>
+        /// <returns>Instância inicial de <see cref="LoginAttempts"/>.</returns>
         public static LoginAttempts Create()
         {
             return new LoginAttempts(0, null, null);
         }
 
         /// <summary>
-        /// Registra uma falha e aplica bloqueio se necessário.
+        /// Registra falha e aplica bloqueio quando necessário.
         /// </summary>
+        /// <returns>Instância atualizada com os novos valores.</returns>
         public LoginAttempts RegisterFailure()
         {
             var now = DateTime.UtcNow;
@@ -56,22 +58,25 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         /// <summary>
         /// Reseta contadores e remove bloqueios.
         /// </summary>
+        /// <returns>Instância limpa de tentativas.</returns>
         public LoginAttempts Reset()
         {
             return new LoginAttempts(0, null, null);
         }
 
         /// <summary>
-        /// Verifica se o usuário está bloqueado.
+        /// Verifica se a conta está bloqueada.
         /// </summary>
+        /// <returns>True quando o bloqueio está ativo.</returns>
         public bool IsLocked()
         {
             return LockedUntil.HasValue && LockedUntil > DateTime.UtcNow;
         }
 
         /// <summary>
-        /// Obtém mensagem de bloqueio com o tempo restante.
+        /// Obtém mensagem com o tempo restante de bloqueio.
         /// </summary>
+        /// <returns>Mensagem ou null quando não há bloqueio.</returns>
         public string? GetLockMessage()
         {
             if (!IsLocked())

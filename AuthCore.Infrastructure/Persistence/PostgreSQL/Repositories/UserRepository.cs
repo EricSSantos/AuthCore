@@ -10,7 +10,7 @@ namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Repositories
         public UserRepository(AppDbContext context)
             : base(context) { }
 
-        public async Task<User?> GetByEmail(string email)
+        public async Task<User?> GetByEmailAsync(string email)
         {
             return await _context.Users
                 .AsNoTracking()

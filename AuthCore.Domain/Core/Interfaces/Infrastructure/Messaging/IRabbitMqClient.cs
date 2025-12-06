@@ -1,16 +1,16 @@
 ﻿namespace AuthCore.Domain.Core.Interfaces.Infrastructure.Messaging
 {
     /// <summary>
-    /// Define métodos para publicação de mensagens em filas RabbitMQ.
+    /// Define operações para publicação de mensagens em RabbitMQ.
     /// </summary>
     public interface IRabbitMqClient : IDisposable
     {
         /// <summary>
-        /// Publica uma mensagem na fila especificada.
+        /// Publica a mensagem na fila indicada.
         /// </summary>
-        /// <typeparam name="T">Tipo da mensagem a ser publicada.</typeparam>
-        /// <param name="queueName">Nome da fila de destino.</param>
-        /// <param name="message">Mensagem a ser serializada e enviada.</param>
+        /// <typeparam name="T">Tipo da mensagem.</typeparam>
+        /// <param name="queueName">Nome da fila.</param>
+        /// <param name="message">Mensagem a publicar.</param>
         void Publish<T>(string queueName, T message);
     }
 }

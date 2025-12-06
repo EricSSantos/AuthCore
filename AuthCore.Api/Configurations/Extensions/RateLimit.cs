@@ -3,15 +3,14 @@
 namespace AuthCore.Api.Configurations.Extensions
 {
     /// <summary>
-    /// Responsável por configurar o middleware de Rate Limiting na aplicação.
-    /// Controla o número máximo de requisições por IP dentro de uma janela de tempo fixa.
+    /// Configura o middleware global de Rate Limiting.
     /// </summary>
     public static class RateLimit
     {
         /// <summary>
-        /// Registra o Rate Limiter no container, aplicando uma política global baseada no endereço IP.
+        /// Registra o Rate Limiter baseado no IP do cliente.
         /// </summary>
-        /// <param name="builder">Instância do <see cref="WebApplicationBuilder"/> usada para configurar os serviços.</param>
+        /// <param name="builder">Instância usada para configurar os serviços.</param>
         public static void AddRateLimiting(this WebApplicationBuilder builder)
         {
             builder.Services.AddRateLimiter(options =>

@@ -1,14 +1,14 @@
 ﻿namespace AuthCore.Domain.Aggregates.MessagingAggregate.Interfaces
 {
     /// <summary>
-    /// Define o contrato para enviar notificações por e-mail.
+    /// Define operações para envio de notificações por e-mail.
     /// </summary>
     public interface IEmailPublisher
     {
         /// <summary>
-        /// Envia a notificação informada.
+        /// Envia a notificação de e-mail.
         /// </summary>
-        /// <param name="email">Notificação a ser enviada.</param>
-        Task Send(Messaging email);
+        /// <param name="email">Dados da notificação.</param>
+        Task SendAsync(Messaging email);
     }
 }

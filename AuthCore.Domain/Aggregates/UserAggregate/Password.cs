@@ -26,17 +26,20 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         private Password() { }
 
         /// <summary>
-        /// Cria uma nova instância de Password com a senha já criptografada.
+        /// Cria a senha com o valor já criptografado.
         /// </summary>
+        /// <param name="hashedPassword">Senha criptografada.</param>
+        /// <returns>Instância criada de <see cref="Password"/>.</returns>
         public static Password Create(string hashedPassword)
         {
             return new Password(hashedPassword);
         }
 
         /// <summary>
-        /// Valida os critérios mínimos de segurança da senha.
+        /// Valida os critérios mínimos da senha.
         /// </summary>
-        /// <exception cref="BadRequestException"></exception>
+        /// <param name="password">Senha a validar.</param>
+        /// <exception cref="BadRequestException">Lançada quando o formato é inválido.</exception>
         public static void Validate(string password)
         {
             if (string.IsNullOrWhiteSpace(password))
@@ -52,9 +55,11 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         }
 
         /// <summary>
-        /// Valida a senha e confirma se ambos os valores correspondem.
+        /// Valida a senha e confirma se ambas correspondem.
         /// </summary>
-        /// <exception cref="BadRequestException"></exception>
+        /// <param name="password">Senha informada.</param>
+        /// <param name="confirmPassword">Confirmação da senha.</param>
+        /// <exception cref="BadRequestException">Lançada quando os valores não são compatíveis.</exception>
         public static void ValidateWithConfirmation(string password, string confirmPassword)
         {
             Validate(password);

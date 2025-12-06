@@ -22,7 +22,7 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
             _redis = connection.GetDatabase();
         }
 
-        public async Task<ConfirmCode?> Get(Guid userId, CodeType type)
+        public async Task<ConfirmCode?> GetAsync(Guid userId, CodeType type)
         {
             var key = BuildKey(userId, type);
             var value = await _redis.StringGetAsync(key);
@@ -37,7 +37,7 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
             return document.ToEntity();
         }
 
-        public async Task Set(Guid userId, ConfirmCode confirmCode)
+        public async Task SetAsync(Guid userId, ConfirmCode confirmCode)
         {
             var key = BuildKey(userId, confirmCode.Type);
 
@@ -47,7 +47,7 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
             await _redis.StringSetAsync(key, json, DEFAULT_TTL);
         }
 
-        public async Task Delete(Guid userId, CodeType type)
+        public async Task DeleteAsync(Guid userId, CodeType type)
         {
             var key = BuildKey(userId, type);
             await _redis.KeyDeleteAsync(key);

@@ -5,20 +5,16 @@ using AuthCore.Domain.Core.Interfaces.Base;
 namespace AuthCore.Domain.Aggregates.MessagingAggregate
 {
     /// <summary>
-    /// Representa uma notificação criada pela aplicação.
+    /// Representa uma notificação gerada pela aplicação.
     /// </summary>
     public sealed class Messaging : IAggregateRoot
     {
-        #region Properties
-
         public Guid Id { get; private set; }
         public string To { get; private set; } = null!;
         public string FullName { get; private set; } = null!;
         public MessagingType Type { get; private set; }
         public Payload? Payload { get; private set; }
         public DateTime CreatedAt { get; private set; }
-
-        #endregion
 
         #region Constructors
 
@@ -43,6 +39,7 @@ namespace AuthCore.Domain.Aggregates.MessagingAggregate
         /// <param name="to">E-mail do destinatário.</param>
         /// <param name="fullName">Nome completo do destinatário.</param>
         /// <param name="type">Tipo da notificação.</param>
+        /// <returns>Instância criada.</returns>
         /// <exception cref="BadRequestException">Lançada quando o tipo é inválido.</exception>
         public static Messaging Create(string to, string fullName, MessagingType type)
         {
@@ -70,15 +67,17 @@ namespace AuthCore.Domain.Aggregates.MessagingAggregate
         #region Behavior
 
         /// <summary>
-        /// Retorna o payload convertido para o tipo solicitado.
+        /// Obtém o payload convertido para o tipo solicitado.
         /// </summary>
         /// <typeparam name="TPayload">Tipo esperado do payload.</typeparam>
-        /// <exception cref="BadRequestException">Lançada quando o payload não corresponde ao tipo solicitado.</exception>
+        /// <returns>Payload convertido.</returns>
+        /// <exception cref="BadRequestException">Lançada quando o tipo não corresponde.</exception>
         public TPayload GetPayload<TPayload>() where TPayload : Payload
         {
             if (Payload is not TPayload typedPayload)
                 throw new BadRequestException(
                     $"O payload do tipo '{typeof(TPayload).Name}' não é compatível com a notificação '{Type}'.");
+
             return typedPayload;
         }
 

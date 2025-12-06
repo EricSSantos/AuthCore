@@ -25,19 +25,19 @@ namespace AuthCore.Application.UseCases.UserCase
             _passwordHasher = passwordHasher;
         }
 
-        public async Task OnExecute(ResetPasswordRequest request)
+        public async Task OnExecuteAsync(ResetPasswordRequest request)
         {
-            var user = await _userRepository.GetByEmail(request.Email)
+            var user = await _userRepository.GetByEmailAsync(request.Email)
                 ?? throw new NotFoundException("Usuário não encontrado.");
 
             if (!user.IsActive())
                 throw new ForbiddenException("Usuário inativo.");
 
-            var confirm = await _confirmCodeRepository.Get(user.Id, CodeType.ForgotPassword)
+            var confirm = await _confirmCodeRepository.GetAsync(user.Id, CodeType.ForgotPassword)
                 ?? throw new NotFoundException("Código de confirmação não encontrado");
 
             confirm.Matching(request.Code);
-            await _confirmCodeRepository.Delete(user.Id, confirm.Type);
+            await _confirmCodeRepository.DeleteAsync(user.Id, confirm.Type);
 
             Password.ValidateWithConfirmation(request.NewPassword, request.ConfirmNewPassword);
 

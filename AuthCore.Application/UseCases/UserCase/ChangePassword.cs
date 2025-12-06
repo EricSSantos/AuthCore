@@ -23,7 +23,7 @@ namespace AuthCore.Application.UseCases.UserCase
             _userRepository = userRepository;
         }
 
-        public async Task OnExecute(ChangePasswordRequest request)
+        public async Task OnExecuteAsync(ChangePasswordRequest request)
         {
             var user = await _sessionState.GetCurrentUser();
 

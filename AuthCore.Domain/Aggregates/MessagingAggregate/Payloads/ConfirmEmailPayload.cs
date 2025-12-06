@@ -7,19 +7,12 @@ namespace AuthCore.Domain.Aggregates.MessagingAggregate.Payloads
     /// </summary>
     public sealed class ConfirmEmailPayload : Payload
     {
-        #region Properties
-
-        /// <summary>
-        /// Armazena o código de verificação de 6 dígitos.
-        /// </summary>
         public int Code { get; init; }
-
-        #endregion
 
         #region Constructors
 
         /// <summary>
-        /// Inicializa o payload com um código gerado de forma segura.
+        /// Inicializa o payload gerando um código seguro.
         /// </summary>
         public ConfirmEmailPayload()
         {

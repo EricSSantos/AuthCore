@@ -13,7 +13,7 @@ namespace AuthCore.Application.UseCases.SessionCase
             _sessionState = sessionState;
         }
 
-        public async Task<IEnumerable<SessionResponse>> OnExecute()
+        public async Task<IEnumerable<SessionResponse>> OnExecuteAsync()
         {
             var sessions = await _sessionState.GetOtherSessions();
             return sessions.Select(s => new SessionResponse

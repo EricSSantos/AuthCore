@@ -5,17 +5,13 @@ using System.Net;
 namespace AuthCore.Domain.Aggregates.SessionAggregate
 {
     /// <summary>
-    /// Representa as informações do dispositivo associado a uma sessão de usuário.
+    /// Representa os dados do dispositivo associado à sessão.
     /// </summary>
     public sealed class DeviceInfo : IValueObject
     {
-        #region Properties
-
-        public string Ip { get; } = null!;
-        public string Platform { get; } = null!;
-        public string Browser { get; } = null!;
-
-        #endregion
+        public string Ip { get; private set; } = null!;
+        public string Platform { get; private set; } = null!;
+        public string Browser { get; private set; } = null!;
 
         #region Constructors
 
@@ -31,12 +27,17 @@ namespace AuthCore.Domain.Aggregates.SessionAggregate
         #region Factory
 
         /// <summary>
-        /// Cria uma nova instância de informações de dispositivo.
+        /// Cria informações sobre o dispositivo.
         /// </summary>
+        /// <param name="ip">Endereço IP do dispositivo.</param>
+        /// <param name="platform">Plataforma de acesso.</param>
+        /// <param name="browser">Navegador utilizado.</param>
+        /// <returns>Instância criada de <see cref="DeviceInfo"/>.</returns>
         public static DeviceInfo Create(string ip, string? platform, string? browser)
         {
             if (string.IsNullOrWhiteSpace(ip))
                 throw new BadRequestException("O endereço IP é obrigatório.");
+
             if (!IsValidIp(ip))
                 throw new BadRequestException("O endereço IP informado é inválido.");
 
@@ -50,6 +51,11 @@ namespace AuthCore.Domain.Aggregates.SessionAggregate
 
         #region Helpers
 
+        /// <summary>
+        /// Valida o formato do endereço IP.
+        /// </summary>
+        /// <param name="ip">Endereço IP a validar.</param>
+        /// <returns>True quando o formato é válido.</returns>
         private static bool IsValidIp(string ip)
         {
             return IPAddress.TryParse(ip, out _);
@@ -59,6 +65,11 @@ namespace AuthCore.Domain.Aggregates.SessionAggregate
 
         #region Equality
 
+        /// <summary>
+        /// Compara esta instância com outro objeto.
+        /// </summary>
+        /// <param name="obj">Objeto a comparar.</param>
+        /// <returns>True quando os valores são iguais.</returns>
         public override bool Equals(object? obj)
         {
             if (obj is not DeviceInfo other)
@@ -69,6 +80,10 @@ namespace AuthCore.Domain.Aggregates.SessionAggregate
                 && Browser == other.Browser;
         }
 
+        /// <summary>
+        /// Gera o hash baseado nos valores do objeto.
+        /// </summary>
+        /// <returns>Hash calculado.</returns>
         public override int GetHashCode()
         {
             return HashCode.Combine(Ip, Platform, Browser);

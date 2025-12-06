@@ -15,7 +15,9 @@ namespace AuthCore.Infrastructure.Messaging.RabbitMq
         private readonly IConnection _connection;
         private readonly IModel _channel;
 
-        public RabbitMqClient(IOptions<RabbitMqSettings> options, ILogger<RabbitMqClient> logger)
+        public RabbitMqClient(
+            IOptions<RabbitMqSettings> options, 
+            ILogger<RabbitMqClient> logger)
         {
             _settings = options.Value;
             _logger = logger;

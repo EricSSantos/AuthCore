@@ -12,10 +12,9 @@ namespace AuthCore.Api.Configurations.Extensions
     public static class Databases
     {
         /// <summary>
-        /// Registra o PostgreSQL e o Redis na aplicação.
+        /// Registra PostgreSQL e Redis.
         /// </summary>
-        /// <param name="builder">Instância usada para configurar os serviços da aplicação.</param>
-        /// <exception cref="InvalidOperationException">Lançada quando as strings de conexão não estão definidas.</exception>
+        /// <param name="builder">Instância para configurar serviços.</param>
         public static void AddDatabases(this WebApplicationBuilder builder)
         {
             builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection("Database"));
@@ -26,10 +25,9 @@ namespace AuthCore.Api.Configurations.Extensions
         #region PostgreSQL
 
         /// <summary>
-        /// Configura o Entity Framework Core com o provedor PostgreSQL.
+        /// Configura o EF Core com PostgreSQL.
         /// </summary>
-        /// <param name="builder">Instância usada para configurar o serviço.</param>
-        /// <exception cref="InvalidOperationException">Lançada quando a string de conexão do PostgreSQL não está definida.</exception>
+        /// <param name="builder">Instância para configurar serviços.</param>
         private static void AddPostgreSql(this WebApplicationBuilder builder)
         {
             builder.Services.AddDbContext<AppDbContext>((sp, options) =>
@@ -50,10 +48,9 @@ namespace AuthCore.Api.Configurations.Extensions
         #region Redis
 
         /// <summary>
-        /// Configura o Redis para cache e armazenamento em memória.
+        /// Configura o Redis para cache.
         /// </summary>
-        /// <param name="builder">Instância usada para configurar o serviço.</param>
-        /// <exception cref="InvalidOperationException">Lançada quando a string de conexão do Redis não está definida.</exception>
+        /// <param name="builder">Instância para configurar serviços.</param>
         private static void AddRedis(this WebApplicationBuilder builder)
         {
             var databaseSettings = builder.Configuration

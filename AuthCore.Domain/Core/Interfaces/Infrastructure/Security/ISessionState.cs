@@ -4,42 +4,42 @@ using AuthCore.Domain.Aggregates.UserAggregate;
 namespace AuthCore.Domain.Core.Interfaces.Infrastructure.Security
 {
     /// <summary>
-    /// Define métodos para gerenciar o estado de autenticação e sessões ativas do usuário.
+    /// Define operações para gerenciar autenticação e sessões ativas.
     /// </summary>
     public interface ISessionState
     {
         /// <summary>
-        /// Retorna o identificador da sessão atual.
+        /// Obtém o identificador da sessão atual.
         /// </summary>
         string Session { get; }
 
         /// <summary>
-        /// Retorna o usuário autenticado associado à sessão atual.
+        /// Obtém o usuário autenticado da sessão atual.
         /// </summary>
-        /// <returns>Usuário autenticado e ativo.</returns>
+        /// <returns>Usuário autenticado.</returns>
         Task<User> GetCurrentUser();
 
         /// <summary>
-        /// Retorna a sessão atual do usuário autenticado.
+        /// Obtém a sessão ativa do usuário.
         /// </summary>
-        /// <returns>Instância da sessão ativa e validada.</returns>
+        /// <returns>Sessão atual validada.</returns>
         Task<Session> GetCurrentSession();
 
         /// <summary>
-        /// Retorna todas as outras sessões ativas do mesmo usuário, exceto a atual.
+        /// Obtém as demais sessões ativas do usuário.
         /// </summary>
-        /// <returns>Coleção somente leitura de sessões ativas.</returns>
+        /// <returns>Coleção somente leitura de sessões.</returns>
         Task<IReadOnlyCollection<Session>> GetOtherSessions();
 
         /// <summary>
-        /// Cria ou atualiza os dados de autenticação do usuário.
+        /// Define ou atualiza cookies de autenticação.
         /// </summary>
         /// <param name="rawSession">Identificador da sessão.</param>
-        /// <param name="accessToken">Token de acesso (JWT).</param>
+        /// <param name="accessToken">Token de acesso.</param>
         void SetCookies(string rawSession, string accessToken);
 
         /// <summary>
-        /// Remove os dados de autenticação do usuário.
+        /// Remove cookies de autenticação.
         /// </summary>
         void ClearCookies();
     }

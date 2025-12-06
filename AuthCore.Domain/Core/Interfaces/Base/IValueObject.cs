@@ -1,7 +1,7 @@
 ﻿namespace AuthCore.Domain.Core.Interfaces.Base
 {
     /// <summary>
-    /// Indica que a classe representa um Value Object (imutável e sem identidade própria).
+    /// Define que a classe representa um Value Object.
     /// </summary>
     public interface IValueObject
     { }

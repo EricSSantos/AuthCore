@@ -64,7 +64,7 @@ namespace AuthCore.Infrastructure.Security
 
         public async Task<Session> GetCurrentSession()
         {
-            var session = await _sessionRepository.Get(_secureKeyGenerator.Hash(Session))
+            var session = await _sessionRepository.GetAsync(_secureKeyGenerator.Hash(Session))
                 ?? throw new NotFoundException("Sessão não encontrada.");
 
             EnsureOwnership(session.UserId);
@@ -72,7 +72,7 @@ namespace AuthCore.Infrastructure.Security
             if (session.IsExpired())
             {
                 ClearCookies();
-                await _sessionRepository.Delete(session.Id);
+                await _sessionRepository.DeleteAsync(session.Id);
                 throw new ForbiddenException("Sessão expirada.");
             }
 
@@ -83,7 +83,7 @@ namespace AuthCore.Infrastructure.Security
         {
             var current = await GetCurrentSession();
 
-            var sessions = (await _sessionRepository.GetAllByUserId(current.UserId))
+            var sessions = (await _sessionRepository.GetAllByUserIdAsync(current.UserId))
                 .Where(s => s.Id != current.Id)
                 .ToList();
 

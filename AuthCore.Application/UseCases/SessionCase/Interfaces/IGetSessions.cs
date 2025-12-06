@@ -2,8 +2,15 @@
 
 namespace AuthCore.Application.UseCases.SessionCase.Interfaces
 {
+    /// <summary>
+    /// Define operação para listar sessões do usuário.
+    /// </summary>
     public interface IGetSessions
     {
-        Task<IEnumerable<SessionResponse>> OnExecute();
+        /// <summary>
+        /// Obtém todas as sessões ativas do usuário.
+        /// </summary>
+        /// <returns>Coleção de sessões.</returns>
+        Task<IEnumerable<SessionResponse>> OnExecuteAsync();
     }
 }

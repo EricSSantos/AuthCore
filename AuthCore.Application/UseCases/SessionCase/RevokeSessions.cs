@@ -17,10 +17,10 @@ namespace AuthCore.Application.UseCases.SessionCase
             _sessionRepository = sessionRepository;
         }
 
-        public async Task OnExecute()
+        public async Task OnExecuteAsyc()
         {
             var otherSessions = await _sessionState.GetOtherSessions();
-            var deleteTasks = otherSessions.Select(s => _sessionRepository.Delete(s.Id));
+            var deleteTasks = otherSessions.Select(s => _sessionRepository.DeleteAsync(s.Id));
             await Task.WhenAll(deleteTasks);
         }
     }

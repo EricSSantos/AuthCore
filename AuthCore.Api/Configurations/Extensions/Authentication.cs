@@ -12,10 +12,9 @@ namespace AuthCore.Api.Configurations.Extensions
     public static class AuthenticationExtensions
     {
         /// <summary>
-        /// Adiciona e configura a autenticação JWT.
+        /// Adiciona e configura autenticação JWT.
         /// </summary>
-        /// <param name="builder">Instância usada para configurar os serviços da aplicação.</param>
-        /// <exception cref="InvalidOperationException">Lançada quando as configurações de segurança não estão definidas.</exception>
+        /// <param name="builder">Instância para configurar serviços.</param>
         public static void AddAuthentication(this WebApplicationBuilder builder)
         {
             var services = builder.Services;
@@ -29,11 +28,10 @@ namespace AuthCore.Api.Configurations.Extensions
         #region Helpers
 
         /// <summary>
-        /// Carrega a chave pública ECDSA usada para validar os tokens JWT.
+        /// Carrega a chave pública usada na validação JWT.
         /// </summary>
-        /// <param name="securitySettings">Configurações de segurança da aplicação.</param>
-        /// <returns>Chave pública para validação de tokens.</returns>
-        /// <exception cref="FileNotFoundException">Lançada quando a chave pública não é encontrada.</exception>
+        /// <param name="securitySettings">Configurações de segurança.</param>
+        /// <returns>Chave pública ECDSA.</returns>
         private static ECDsaSecurityKey GetPublicKey(SecuritySettings securitySettings)
         {
             var keyPath = securitySettings.Keys.Asymmetric.PublicKeyPath
@@ -50,11 +48,11 @@ namespace AuthCore.Api.Configurations.Extensions
         }
 
         /// <summary>
-        /// Configura o esquema de autenticação JWT e os parâmetros de validação.
+        /// Configura o esquema e validação JWT.
         /// </summary>
-        /// <param name="services">Coleção de serviços da aplicação.</param>
-        /// <param name="settings">Configurações de segurança carregadas do appsettings.</param>
-        /// <param name="publicKey">Chave pública usada para validar tokens.</param>
+        /// <param name="services">Coleção de serviços.</param>
+        /// <param name="settings">Configurações carregadas.</param>
+        /// <param name="publicKey">Chave pública de validação.</param>
         private static void ConfigureJwtAuthentication(IServiceCollection services, SecuritySettings settings, ECDsaSecurityKey publicKey)
         {
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();

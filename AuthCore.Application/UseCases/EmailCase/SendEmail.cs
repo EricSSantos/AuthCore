@@ -26,9 +26,9 @@ namespace AuthCore.Application.UseCases.EmailCase
             _confirmCodeRepository = confirmCodeRepository;
         }
 
-        public async Task OnExecute(SendEmailRequest request)
+        public async Task OnExecuteAsync(SendEmailRequest request)
         {
-            var user = await _userRepository.GetByEmail(request.Email);
+            var user = await _userRepository.GetByEmailAsync(request.Email);
             if (user is null)
                 return;
 
@@ -43,8 +43,8 @@ namespace AuthCore.Application.UseCases.EmailCase
 
             var code = CreateConfirmCode(email);
 
-            await _confirmCodeRepository.Set(user.Id, code);
-            await _emailService.Send(email);
+            await _confirmCodeRepository.SetAsync(user.Id, code);
+            await _emailService.SendAsync(email);
         }
 
         #region Helpers

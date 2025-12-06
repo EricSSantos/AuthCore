@@ -1,102 +1,102 @@
 ﻿namespace AuthCore.Domain.Core.Settings
 {
     /// <summary>
-    /// Define as configurações gerais de segurança da aplicação.
+    /// Define configurações gerais de segurança da aplicação.
     /// </summary>
     public sealed class SecuritySettings
     {
         /// <summary>
-        /// Configurações relacionadas à geração e validação de tokens JWT.
+        /// Define parâmetros do JWT.
         /// </summary>
         public JwtSettings Jwt { get; set; } = new();
 
         /// <summary>
-        /// Configurações relacionadas à duração e controle das sessões de usuário.
+        /// Define parâmetros de sessão do usuário.
         /// </summary>
         public SessionSettings Session { get; set; } = new();
 
         /// <summary>
-        /// Configurações das chaves criptográficas usadas para assinatura e verificação.
+        /// Define configurações das chaves criptográficas.
         /// </summary>
         public SecurityKeysSettings Keys { get; set; } = new();
     }
 
     /// <summary>
-    /// Define as informações de configuração do JWT.
+    /// Define configurações do JWT.
     /// </summary>
     public sealed class JwtSettings
     {
         /// <summary>
-        /// Identifica o emissor dos tokens JWT.
+        /// Define o emissor dos tokens.
         /// </summary>
         public string Issuer { get; set; } = string.Empty;
 
         /// <summary>
-        /// Identifica o público-alvo dos tokens JWT.
+        /// Define o público dos tokens.
         /// </summary>
         public string Audience { get; set; } = string.Empty;
 
         /// <summary>
-        /// Tempo de expiração do token JWT em minutos.
+        /// Define o tempo de expiração em minutos.
         /// </summary>
         public int ExpiresInMinutes { get; set; } = 30;
     }
 
     /// <summary>
-    /// Define as configurações relacionadas à sessão do usuário.
+    /// Define configurações da sessão do usuário.
     /// </summary>
     public sealed class SessionSettings
     {
         /// <summary>
-        /// Tempo de expiração padrão da sessão em dias.
+        /// Define expiração padrão da sessão em dias.
         /// </summary>
         public int ExpiresInDays { get; set; } = 7;
 
         /// <summary>
-        /// Tempo máximo de vida útil da sessão em dias.
+        /// Define o tempo máximo de vida útil em dias.
         /// </summary>
         public int MaxLifetimeInDays { get; set; } = 30;
     }
 
     /// <summary>
-    /// Agrupa as configurações das chaves criptográficas.
+    /// Agrupa configurações das chaves criptográficas.
     /// </summary>
     public sealed class SecurityKeysSettings
     {
         /// <summary>
-        /// Configurações da chave simétrica.
+        /// Define configurações da chave simétrica.
         /// </summary>
         public SymmetricKeySettings Symmetric { get; set; } = new();
 
         /// <summary>
-        /// Configurações das chaves assimétricas (pública e privada).
+        /// Define configurações das chaves assimétricas.
         /// </summary>
         public AsymmetricKeySettings Asymmetric { get; set; } = new();
     }
 
     /// <summary>
-    /// Define a chave simétrica usada em algoritmos de criptografia.
+    /// Define configurações da chave simétrica.
     /// </summary>
     public sealed class SymmetricKeySettings
     {
         /// <summary>
-        /// Chave privada utilizada em algoritmos simétricos.
+        /// Define a chave privada simétrica.
         /// </summary>
         public string PrivateKey { get; set; } = string.Empty;
     }
 
     /// <summary>
-    /// Define as chaves assimétricas usadas em ECDSA ou RSA.
+    /// Define configurações das chaves assimétricas.
     /// </summary>
     public sealed class AsymmetricKeySettings
     {
         /// <summary>
-        /// Caminho do arquivo contendo a chave privada.
+        /// Define o caminho da chave privada.
         /// </summary>
         public string PrivateKeyPath { get; set; } = string.Empty;
 
         /// <summary>
-        /// Caminho do arquivo contendo a chave pública.
+        /// Define o caminho da chave pública.
         /// </summary>
         public string PublicKeyPath { get; set; } = string.Empty;
     }

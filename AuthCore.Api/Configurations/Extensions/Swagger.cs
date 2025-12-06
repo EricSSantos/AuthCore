@@ -4,15 +4,14 @@ using Microsoft.OpenApi.Models;
 namespace AuthCore.Api.Configurations.Extensions
 {
     /// <summary>
-    /// Configura e ativa o Swagger na aplicação.
+    /// Configura o Swagger da aplicação.
     /// </summary>
     public static class Swagger
     {
         /// <summary>
-        /// Adiciona o Swagger aos serviços da aplicação.
+        /// Registra o Swagger nos serviços.
         /// </summary>
-        /// <param name="builder">Instância usada para configurar os serviços da aplicação.</param>
-        /// <exception cref="InvalidOperationException">Lançada quando as configurações da API estão ausentes ou inválidas.</exception>
+        /// <param name="builder">Instância usada para configurar os serviços.</param>
         public static void AddSwaggerService(this WebApplicationBuilder builder)
         {
             var settings = builder.Services.BuildServiceProvider().GetRequiredService<ApiSettings>();
@@ -21,7 +20,6 @@ namespace AuthCore.Api.Configurations.Extensions
 
             builder.Services.AddSwaggerGen(c =>
             {
-                // Define as versões da documentação com base nas configurações
                 foreach (var (versionKey, versionInfo) in settings.Versions)
                 {
                     c.SwaggerDoc(versionKey, new OpenApiInfo
@@ -32,25 +30,23 @@ namespace AuthCore.Api.Configurations.Extensions
                     });
                 }
 
-                // Inclui comentários XML do projeto
                 var xmlFiles = Directory.GetFiles(AppContext.BaseDirectory, "*.xml", SearchOption.TopDirectoryOnly);
-                foreach (var xmlFile in xmlFiles)
+                foreach (var xml in xmlFiles)
                 {
-                    c.IncludeXmlComments(xmlFile, includeControllerXmlComments: true);
+                    c.IncludeXmlComments(xml, includeControllerXmlComments: true);
                 }
             });
         }
 
         /// <summary>
-        /// Ativa o Swagger e a interface interativa Swagger UI.
+        /// Ativa o Swagger e a interface Swagger UI.
         /// </summary>
         /// <param name="app">Instância usada para configurar o pipeline HTTP.</param>
-        /// <exception cref="InvalidOperationException">Lançada quando as configurações da API estão ausentes ou inválidas.</exception>
         public static void UseSwaggerDoc(this WebApplication app)
         {
             var settings = app.Services.GetRequiredService<ApiSettings>();
             if (settings is null || settings.Versions is null || settings.Versions.Count == 0)
-                throw new InvalidOperationException("As configurações de API não foram definidas.");
+                throw new InvalidOperationException("As configurações da API não foram definidas.");
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>

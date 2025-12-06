@@ -25,16 +25,16 @@ namespace AuthCore.Application.UseCases.UserCase
             _emailPublisher = emailPublisher;
         }
 
-        public async Task OnExecute(ConfirmEmailRequest request)
+        public async Task OnExecuteAsync(ConfirmEmailRequest request)
         {
-            var user = await _userRepository.GetByEmail(request.Email)
+            var user = await _userRepository.GetByEmailAsync(request.Email)
                 ?? throw new NotFoundException("Usuário não encontrado");
 
-            var confirm = await _confirmCodeRepository.Get(user.Id, CodeType.ConfirmEmail)
+            var confirm = await _confirmCodeRepository.GetAsync(user.Id, CodeType.ConfirmEmail)
                 ?? throw new NotFoundException("Código de confirmação não encontrado");
 
             confirm.Matching(confirm.Code);
-            await _confirmCodeRepository.Delete(user.Id, confirm.Type);
+            await _confirmCodeRepository.DeleteAsync(user.Id, confirm.Type);
 
             user.Confirm();
             _userRepository.Update(user);
@@ -46,7 +46,7 @@ namespace AuthCore.Application.UseCases.UserCase
                 type: MessagingType.Welcome
             );
 
-            await _emailPublisher.Send(email);
+            await _emailPublisher.SendAsync(email);
         }
     }
 }

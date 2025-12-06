@@ -13,14 +13,14 @@ namespace AuthCore.Api.Controllers.v1
     public sealed class SessionsController : ControllerBase
     {
         /// <summary>
-        /// Retorna todas as sessões ativas do usuário.
+        /// Retorna as sessões ativas do usuário.
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(ApiResponse<IEnumerable<SessionResponse>>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<ApiResponse<IEnumerable<SessionResponse>>>> GetAll(
             [FromServices] IGetSessions getSessions)
         {
-            var sessions = await getSessions.OnExecute();
+            var sessions = await getSessions.OnExecuteAsync();
 
             return Ok(ApiResponse<IEnumerable<SessionResponse>>.Success(
                 sessions,
@@ -30,14 +30,14 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>
-        /// Revoga todas as sessões do usuário, mantendo apenas a atual.
+        /// Revoga todas as sessões do usuário exceto a atual.
         /// </summary>
         [HttpDelete]
         [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<ApiResponse<object>>> Revoke(
             [FromServices] IRevokeSession revokeSessions)
         {
-            await revokeSessions.OnExecute();
+            await revokeSessions.OnExecuteAsync();
 
             return Ok(ApiResponse<object>.Success(
                 null!,

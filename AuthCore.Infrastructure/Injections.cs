@@ -19,8 +19,17 @@ namespace AuthCore.Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
-            return services.AddInfrastructureServices()
-                           .AddRepositories();
+            return services.AddRepositories()
+                           .AddInfrastructureServices();
+        }
+
+        private static IServiceCollection AddRepositories(this IServiceCollection services)
+        {
+            services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<ISessionRepository, SessionRepository>();
+            services.AddScoped<IConfirmCodeRepository, ConfirmCodeRepository>();
+            return services;
         }
 
         private static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
@@ -35,15 +44,6 @@ namespace AuthCore.Infrastructure
             services.AddScoped<ISessionState, SessionState>();
             services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
             services.AddSingleton<IEmailPublisher, EmailPublisher>();
-            return services;
-        }
-
-        private static IServiceCollection AddRepositories(this IServiceCollection services)
-        {
-            services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<ISessionRepository, SessionRepository>();
-            services.AddScoped<IConfirmCodeRepository, ConfirmCodeRepository>();
             return services;
         }
     }

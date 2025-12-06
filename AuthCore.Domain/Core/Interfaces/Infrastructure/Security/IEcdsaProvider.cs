@@ -1,17 +1,17 @@
 ﻿namespace AuthCore.Domain.Core.Interfaces.Infrastructure.Security
 {
     /// <summary>
-    /// Define propriedades para fornecer chaves ECDSA usadas em assinaturas digitais.
+    /// Define acesso às chaves ECDSA utilizadas em assinaturas digitais.
     /// </summary>
     public interface IEcdsaProvider
     {
         /// <summary>
-        /// Chave privada usada para assinar tokens.
+        /// Obtém a chave privada para assinatura.
         /// </summary>
         byte[] PrivateKey { get; }
 
         /// <summary>
-        /// Chave pública usada para validar assinaturas.
+        /// Obtém a chave pública para validação.
         /// </summary>
         byte[] PublicKey { get; }
     }

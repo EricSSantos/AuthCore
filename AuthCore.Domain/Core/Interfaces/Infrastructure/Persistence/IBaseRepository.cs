@@ -4,55 +4,63 @@ using System.Linq.Expressions;
 namespace AuthCore.Domain.Core.Interfaces.Infrastructure.Persistence
 {
     /// <summary>
-    /// Define o contrato base para repositórios de agregados persistentes.
+    /// Define o contrato base para repositórios de agregados.
     /// </summary>
     public interface IBaseRepository<T> : IReadRepository<T>, IWriteRepository<T> where T : IAggregateRoot
     { }
 
     /// <summary>
-    /// Define as operações de leitura genéricas para um repositório de agregados.
+    /// Define operações de leitura para repositórios de agregados.
     /// </summary>
     public interface IReadRepository<T> where T : IAggregateRoot
     {
         /// <summary>
-        /// Obtém uma entidade pelo identificador único (<c>Id</c>).
-        /// Retorna <see langword="null"/> caso não seja encontrada.
+        /// Obtém a entidade pelo identificador.
         /// </summary>
+        /// <param name="id">Identificador da entidade.</param>
+        /// <returns>Entidade encontrada ou null.</returns>
         Task<T?> GetById(Guid id);
 
         /// <summary>
-        /// Verifica se existe alguma entidade que atenda ao critério informado.
+        /// Verifica se existe entidade que atenda ao critério.
         /// </summary>
+        /// <param name="predicate">Expressão de filtragem.</param>
+        /// <returns>True quando existir correspondência.</returns>
         Task<bool> Exists(Expression<Func<T, bool>> predicate);
 
         /// <summary>
-        /// Conta quantas entidades atendem ao critério informado.
+        /// Conta quantas entidades atendem ao critério.
         /// </summary>
+        /// <param name="predicate">Expressão de filtragem.</param>
+        /// <returns>Total de entidades encontradas.</returns>
         Task<int> Count(Expression<Func<T, bool>> predicate);
     }
 
     /// <summary>
-    /// Define as operações de escrita genéricas para um repositório de agregados.
+    /// Define operações de escrita para repositórios de agregados.
     /// </summary>
     public interface IWriteRepository<T> where T : IAggregateRoot
     {
         /// <summary>
-        /// Adiciona uma nova entidade ao repositório.
+        /// Adiciona nova entidade ao repositório.
         /// </summary>
+        /// <param name="entity">Entidade a adicionar.</param>
         Task Add(T entity);
 
         /// <summary>
-        /// Atualiza uma entidade existente no repositório.
+        /// Atualiza a entidade existente.
         /// </summary>
+        /// <param name="entity">Entidade a atualizar.</param>
         void Update(T entity);
 
         /// <summary>
-        /// Remove uma entidade existente do repositório.
+        /// Remove a entidade existente.
         /// </summary>
+        /// <param name="entity">Entidade a remover.</param>
         void Delete(T entity);
 
         /// <summary>
-        /// Persiste todas as alterações realizadas no contexto atual.
+        /// Persiste as alterações realizadas.
         /// </summary>
         Task SaveChanges();
     }
