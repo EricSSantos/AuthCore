@@ -13,14 +13,14 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         public string LastName { get; private set; } = null!;
         public string FullName { get { return $"{FirstName} {LastName}"; } }
         public Email Email { get; private set; } = null!;
-        public Password Password { get; private set; }
+        public Password Password { get; private set; } = null!;
         public Role Role { get; private set; }
         public bool Verified { get; private set; } = false;
         public bool Active { get; private set; } = false;
         public DateTime CreatedAt { get; private set; }
         public DateTime? UpdatedAt { get; private set; }
         public DateTime? InactivatedAt { get; private set; }
-        public LoginAttempts LoginAttempts { get; private set; }
+        public LoginAttempts LoginAttempts { get; private set; } = null!;
 
         #region Constructors
 
@@ -105,7 +105,7 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
             bool verified,
             bool active,
             DateTime createdAt,
-            DateTime updatedAt,
+            DateTime? updatedAt,
             DateTime? inactivatedAt,
             LoginAttempts loginAttempts)
         {
@@ -152,7 +152,6 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         /// <summary>
         /// Verifica se o usuário está apto à autenticação.
         /// </summary>
-        /// <returns>True quando ativo, verificado e não bloqueado.</returns>
         public bool IsActive()
         {
             if (LoginAttempts.IsLocked())

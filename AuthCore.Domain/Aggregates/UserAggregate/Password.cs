@@ -1,4 +1,5 @@
-﻿using AuthCore.Domain.Core.Exceptions;
+﻿using System;
+using AuthCore.Domain.Core.Exceptions;
 using AuthCore.Domain.Core.Interfaces.Base;
 using System.Text.RegularExpressions;
 
@@ -32,6 +33,9 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         /// <returns>Instância criada de <see cref="Password"/>.</returns>
         public static Password Create(string hashedPassword)
         {
+            if (string.IsNullOrWhiteSpace(hashedPassword))
+                throw new BadRequestException("A senha criptografada não pode estar vazia.");
+
             return new Password(hashedPassword);
         }
 

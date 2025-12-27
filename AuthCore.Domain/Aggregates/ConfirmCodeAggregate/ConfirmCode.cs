@@ -8,6 +8,13 @@ namespace AuthCore.Domain.Aggregates.ConfirmCodeAggregate
     /// </summary>
     public sealed class ConfirmCode : IAggregateRoot
     {
+        #region Constants
+
+        private const int CODE_MIN = 100000;
+        private const int CODE_MAX = 999999;
+
+        #endregion
+
         public Guid Id { get; private set; }
         public int Code { get; private set; }
         public CodeType Type { get; private set; }
@@ -94,11 +101,14 @@ namespace AuthCore.Domain.Aggregates.ConfirmCodeAggregate
 
         private void Validate()
         {
-            if (Code.ToString().Length != 6)
+            if (Code < CODE_MIN || Code > CODE_MAX)
                 throw new BadRequestException("O código de verificação deve conter 6 dígitos.");
 
             if (!Enum.IsDefined(typeof(CodeType), Type))
                 throw new BadRequestException("O tipo de código informado é inválido.");
+
+            if (CreatedAt == default)
+                throw new BadRequestException("A data de criação do código é obrigatória.");
         }
 
         #endregion

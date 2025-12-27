@@ -1,4 +1,5 @@
 ﻿using AuthCore.Domain.Aggregates.MessagingAggregate.Payloads;
+using AuthCore.Domain.Aggregates.UserAggregate;
 using AuthCore.Domain.Core.Exceptions;
 using AuthCore.Domain.Core.Interfaces.Base;
 
@@ -92,6 +93,8 @@ namespace AuthCore.Domain.Aggregates.MessagingAggregate
         {
             if (string.IsNullOrWhiteSpace(To))
                 throw new BadRequestException("O destinatário é obrigatório.");
+
+            Email.Validate(To);
 
             if (string.IsNullOrWhiteSpace(FullName))
                 throw new BadRequestException("O nome do destinatário é obrigatório.");

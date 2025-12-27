@@ -4,7 +4,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 #region Services
 
-builder.AddDatabases();
 builder.AddDependencyInjections();
 builder.AddAuthentication();
 builder.AddSwaggerService();
