@@ -18,6 +18,8 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         public DateTime? LastFailedAt { get; private set; }
         public DateTime? LockedUntil { get; private set; }
 
+        private LoginAttempts() { }
+
         private LoginAttempts(
             int failedAttempts,
             DateTime? lastFailedAt,
@@ -27,10 +29,6 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
             LastFailedAt = lastFailedAt;
             LockedUntil = lockedUntil;
         }
-
-        private LoginAttempts() { }
-
-        #region Factory
 
         /// <summary>
         /// Cria um novo controle de tentativas.
@@ -55,8 +53,6 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         {
             return new LoginAttempts(failedAttempts, lastFailedAt, lockedUntil);
         }
-
-        #endregion
 
         /// <summary>
         /// Registra falha e aplica bloqueio quando necessário.

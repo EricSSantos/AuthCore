@@ -42,7 +42,7 @@ namespace AuthCore.Application.UseCases.UserCase
                 firstName: request.FirstName,
                 lastName: request.LastName,
                 email: request.Email,
-                passwordHash: _passwordHasher.Hash(request.Password)
+                password: _passwordHasher.Hash(request.Password)
             );
 
             await _userRepository.AddAsync(user);

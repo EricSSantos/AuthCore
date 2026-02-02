@@ -33,7 +33,7 @@ namespace AuthCore.Application.UseCases.UserCase
             var confirm = await _confirmCodeRepository.GetAsync(user.Id, CodeType.ConfirmEmail)
                 ?? throw new NotFoundException("Código de confirmação não encontrado");
 
-            confirm.Matching(confirm.Code);
+            confirm.Matching(request.Code);
             await _confirmCodeRepository.DeleteAsync(user.Id, confirm.Type);
 
             user.Confirm();

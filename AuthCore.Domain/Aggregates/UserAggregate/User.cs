@@ -1,5 +1,6 @@
 ﻿using AuthCore.Domain.Core.Exceptions;
 using AuthCore.Domain.Core.Interfaces.Base;
+using AuthCore.Domain.Core.Interfaces.Infrastructure.Security;
 
 namespace AuthCore.Domain.Aggregates.UserAggregate
 {
@@ -15,8 +16,8 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         public Email Email { get; private set; } = null!;
         public Password Password { get; private set; } = null!;
         public Role Role { get; private set; }
-        public bool Verified { get; private set; } = false;
-        public bool Active { get; private set; } = false;
+        public bool Verified { get; private set; }
+        public bool Active { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime? UpdatedAt { get; private set; }
         public DateTime? InactivatedAt { get; private set; }
@@ -30,8 +31,8 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
             Guid id,
             string firstName,
             string lastName,
-            Email email,
-            string passwordHash,
+            string email,
+            string password,
             Role role,
             bool verified,
             bool active,
@@ -43,8 +44,8 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
             Id = id;
             FirstName = firstName.Trim();
             LastName = lastName.Trim();
-            Email = email;
-            Password = Password.Create(passwordHash);
+            Email = Email.Create(email);
+            Password = Password.Create(password);
             Role = role;
             Verified = verified;
             Active = active;
@@ -59,28 +60,19 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
 
         #region Factory
 
-        /// <summary>
-        /// Cria um novo usuário.
-        /// </summary>
-        /// <param name="firstName">Nome do usuário.</param>
-        /// <param name="lastName">Sobrenome do usuário.</param>
-        /// <param name="email">E-mail do usuário.</param>
-        /// <param name="passwordHash">Senha criptografada.</param>
-        /// <param name="role">Perfil do usuário.</param>
-        /// <returns>Instância criada de <see cref="User"/>.</returns>
         public static User Create(
             string firstName,
             string lastName,
             string email,
-            string passwordHash,
+            string password,
             Role role = Role.User)
         {
             return new User(
                 Guid.NewGuid(),
                 firstName,
                 lastName,
-                Email.Create(email),
-                passwordHash,
+                email,
+                password,
                 role,
                 verified: false,
                 active: false,
@@ -91,16 +83,12 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
             );
         }
 
-        /// <summary>
-        /// Restaura um usuário persistido.
-        /// </summary>
-        /// <returns>Instância restaurada de <see cref="User"/>.</returns>
         public static User Restore(
             Guid id,
             string firstName,
             string lastName,
             string email,
-            string passwordHash,
+            string password,
             Role role,
             bool verified,
             bool active,
@@ -113,8 +101,8 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
                 id,
                 firstName,
                 lastName,
-                Email.Create(email),
-                passwordHash,
+                email,
+                password,
                 role,
                 verified,
                 active,
@@ -127,21 +115,30 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
 
         #endregion
 
-        #region Behavior
+        public void Authenticate(string rawPassword, IPasswordHasher passwordHasher)
+        {
+            if (!Active || !Verified)
+                throw new ForbiddenException("Usuário inativo ou não verificado.");
 
-        /// <summary>
-        /// Altera a senha do usuário.
-        /// </summary>
-        /// <param name="passwordHash">Nova senha criptografada.</param>
+            if (LoginAttempts.IsLocked())
+                throw new UnauthorizedException(LoginAttempts.GetLockMessage()!);
+
+            if (!passwordHasher.IsValid(rawPassword, Password.Value))
+            {
+                LoginAttempts = LoginAttempts.RegisterFailure();
+                throw new UnauthorizedException("E-mail ou senha inválidos.");
+            }
+
+            if (LoginAttempts.FailedAttempts > 0)
+                LoginAttempts = LoginAttempts.Reset();
+        }
+
         public void ChangePassword(string passwordHash)
         {
             Password = Password.Create(passwordHash);
             UpdatedAt = DateTime.UtcNow;
         }
 
-        /// <summary>
-        /// Confirma e ativa o usuário.
-        /// </summary>
         public void Confirm()
         {
             Verified = true;
@@ -149,60 +146,42 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
             UpdatedAt = DateTime.UtcNow;
         }
 
-        /// <summary>
-        /// Verifica se o usuário está apto à autenticação.
-        /// </summary>
-        public bool IsActive()
-        {
-            if (LoginAttempts.IsLocked())
-                throw new UnauthorizedException(LoginAttempts.GetLockMessage()!);
-
-            if (!Active || !Verified)
-                return false;
-
-            return true;
-        }
-
-        #endregion
-
-        #region Validation
-
-        /// <summary>
-        /// Valida os dados essenciais do usuário.
-        /// </summary>
         private void Validate()
         {
+            List<string> errors = new();
+
             if (Id == Guid.Empty)
-                throw new BadRequestException("Identificador inválido.");
+                errors.Add("Id inválido.");
 
             if (string.IsNullOrWhiteSpace(FirstName))
-                throw new BadRequestException("O nome é obrigatório.");
+                errors.Add("O primeiro nome é obrigatório.");
 
             if (string.IsNullOrWhiteSpace(LastName))
-                throw new BadRequestException("O sobrenome é obrigatório.");
+                errors.Add("O sobrenome é obrigatório.");
 
             if (Email is null)
-                throw new BadRequestException("O e-mail é obrigatório.");
+                errors.Add("O e-mail é obrigatório.");
 
             if (Password is null)
-                throw new BadRequestException("A senha é obrigatória.");
+                errors.Add("A senha é obrigatória.");
 
             if (!Enum.IsDefined(typeof(Role), Role))
-                throw new BadRequestException("Perfil de usuário inválido.");
+                errors.Add("Perfil de usuário inválido.");
 
             if (CreatedAt == default)
-                throw new BadRequestException("A data de criação é obrigatória.");
+                errors.Add("A data de criação é obrigatória.");
 
             if (UpdatedAt.HasValue && UpdatedAt.Value < CreatedAt)
-                throw new BadRequestException("A data de atualização não pode ser anterior à criação.");
+                errors.Add("A data de atualização não pode ser anterior à criação.");
 
             if (InactivatedAt.HasValue && Active)
-                throw new BadRequestException("Usuário ativo não pode ter data de inativação.");
+                errors.Add("Um usuário ativo não pode ter data de inativação.");
 
             if (LoginAttempts is null)
-                throw new BadRequestException("Os dados de tentativas de login são obrigatórios.");
-        }
+                errors.Add("Os dados de tentativas de login são obrigatórios.");
 
-        #endregion
+            if (errors.Count > 0)
+                throw new BadRequestException(errors);
+        }
     }
 }

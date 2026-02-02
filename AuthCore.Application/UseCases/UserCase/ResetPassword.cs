@@ -27,11 +27,9 @@ namespace AuthCore.Application.UseCases.UserCase
 
         public async Task OnExecuteAsync(ResetPasswordRequest request)
         {
-            var user = await _userRepository.GetByEmailAsync(request.Email)
-                ?? throw new NotFoundException("Usuário não encontrado.");
-
-            if (!user.IsActive())
-                throw new ForbiddenException("Usuário inativo.");
+            var user = await _userRepository.GetByEmailAsync(request.Email);
+            if (user is null || !user.Active || !user.Verified)
+                return;
 
             var confirm = await _confirmCodeRepository.GetAsync(user.Id, CodeType.ForgotPassword)
                 ?? throw new NotFoundException("Código de confirmação não encontrado");

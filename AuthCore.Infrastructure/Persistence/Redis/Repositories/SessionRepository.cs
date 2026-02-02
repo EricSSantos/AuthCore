@@ -11,6 +11,7 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
         #region Constants
 
         private const string PREFIX = "sessions:";
+
         private static readonly JsonSerializerOptions JSON_OPTIONS = new()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -66,7 +67,11 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
             var key = BuildKey(session.Id);
             var document = SessionDocument.ToDocument(session);
             var payload = JsonSerializer.Serialize(document, JSON_OPTIONS);
+
             var ttl = session.ExpiresAt - DateTime.UtcNow;
+            if (ttl <= TimeSpan.Zero)
+                return;
+
             await _redis.StringSetAsync(key, payload, ttl);
         }
 
@@ -91,8 +96,13 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
             {
                 var server = _conn.GetServer(endpoint);
 
-                foreach (var key in server.Keys(_redis.Database, pattern: pattern, pageSize: pageSize))
-                    yield return key;
+                foreach (var key in server.Keys(
+                    _redis.Database,
+                    pattern: pattern,
+                    pageSize: pageSize))
+                {
+                    yield return key.ToString();
+                }
 
                 await Task.Yield();
             }

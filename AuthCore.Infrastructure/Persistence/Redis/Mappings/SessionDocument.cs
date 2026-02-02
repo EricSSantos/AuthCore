@@ -20,6 +20,9 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Mappings
         [JsonPropertyName("max_lifetime")]
         public long MaxLifetime { get; set; }
 
+        [JsonPropertyName("revoked_at")]
+        public long? RevokedAt { get; set; }
+
         [JsonPropertyName("device")]
         public DeviceDocument Device { get; set; } = default!;
 
@@ -34,6 +37,7 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Mappings
                 CreatedAt = ToUnix(session.CreatedAt),
                 ExpiresAt = ToUnix(session.ExpiresAt),
                 MaxLifetime = ToUnix(session.MaxLifetime),
+                RevokedAt = ToUnix(session.RevokedAt),
                 Device = new DeviceDocument
                 {
                     Ip = session.DeviceInfo.Ip,
@@ -53,7 +57,8 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Mappings
                 deviceInfo: deviceInfo,
                 createdAt: FromUnix(CreatedAt),
                 expiresAt: FromUnix(ExpiresAt),
-                maxLifetime: FromUnix(MaxLifetime)
+                maxLifetime: FromUnix(MaxLifetime),
+                revokedAt: FromUnix(RevokedAt)
             );
         }
 
@@ -66,9 +71,19 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Mappings
             return new DateTimeOffset(date).ToUnixTimeSeconds();
         }
 
+        private static long? ToUnix(DateTime? date)
+        {
+            return date.HasValue ? new DateTimeOffset(date.Value).ToUnixTimeSeconds() : null;
+        }
+
         private static DateTime FromUnix(long seconds)
         {
             return DateTimeOffset.FromUnixTimeSeconds(seconds).UtcDateTime;
+        }
+
+        private static DateTime? FromUnix(long? seconds)
+        {
+            return seconds.HasValue ? DateTimeOffset.FromUnixTimeSeconds(seconds.Value).UtcDateTime : null;
         }
 
         #endregion

@@ -53,10 +53,11 @@ namespace AuthCore.Infrastructure.Security
             var user = await _userRepository.GetByIdAsync(session.UserId)
                 ?? throw new NotFoundException("Usuário não encontrado.");
 
-            if (!user.IsActive())
+            if (!user.Active || !user.Verified)
             {
                 ClearCookies();
-                throw new ForbiddenException("Usuário inativo.");
+                await _sessionRepository.DeleteAsync(session.Id);
+                throw new ForbiddenException("Usuário inativo ou não verificado.");
             }
 
             return user;
@@ -68,6 +69,13 @@ namespace AuthCore.Infrastructure.Security
                 ?? throw new NotFoundException("Sessão não encontrada.");
 
             EnsureOwnership(session.UserId);
+
+            if (session.IsRevoked())
+            {
+                ClearCookies();
+                await _sessionRepository.DeleteAsync(session.Id);
+                throw new ForbiddenException("Sessão revogada.");
+            }
 
             if (session.IsExpired())
             {
@@ -88,10 +96,10 @@ namespace AuthCore.Infrastructure.Security
                 .ToList();
 
             var activeSessions = sessions
-                .Where(s => !s.IsExpired())
+                .Where(s => !s.IsExpired() && !s.IsRevoked())
                 .ToList();
 
-            if (activeSessions.Count == 0)
+            if (!activeSessions.Any())
                 throw new NotFoundException("Nenhuma sessão encontrada.");
 
             return activeSessions;

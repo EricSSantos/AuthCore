@@ -72,13 +72,17 @@ namespace AuthCore.Domain.Aggregates.UserAggregate
         /// <exception cref="BadRequestException">Lançada quando o formato é inválido.</exception>
         public static void Validate(string email)
         {
-            if (string.IsNullOrWhiteSpace(email))
-                throw new BadRequestException("O e-mail não pode estar vazio.");
-
+            List<string> errors = new();
             var regex = new Regex(@"^[^\s@]+@[^\s@]+\.[^\s@]+$");
 
+            if (string.IsNullOrWhiteSpace(email))
+                errors.Add("O e-mail não pode estar vazio.");
+
             if (!regex.IsMatch(Normalize(email)))
-                throw new BadRequestException("O e-mail informado é inválido.");
+                errors.Add("O e-mail informado é inválido.");
+
+            if (errors.Count > 0)
+                throw new BadRequestException(errors);
         }
     }
 }

@@ -19,7 +19,12 @@ namespace AuthCore.Domain.Aggregates.MessagingAggregate
 
         #region Constructors
 
-        private Messaging(Guid id, string to, string fullName, MessagingType type, Payload? payload = null)
+        private Messaging(
+            Guid id, 
+            string to, 
+            string fullName, 
+            MessagingType type, 
+            Payload? payload = null)
         {
             Id = id;
             To = to.Trim();
@@ -40,9 +45,10 @@ namespace AuthCore.Domain.Aggregates.MessagingAggregate
         /// <param name="to">E-mail do destinatário.</param>
         /// <param name="fullName">Nome completo do destinatário.</param>
         /// <param name="type">Tipo da notificação.</param>
-        /// <returns>Instância criada.</returns>
-        /// <exception cref="BadRequestException">Lançada quando o tipo é inválido.</exception>
-        public static Messaging Create(string to, string fullName, MessagingType type)
+        public static Messaging Create(
+            string to, 
+            string fullName, 
+            MessagingType type)
         {
             Payload payload;
             switch (type)
@@ -60,19 +66,16 @@ namespace AuthCore.Domain.Aggregates.MessagingAggregate
                     throw new BadRequestException("O tipo de notificação informado é inválido.");
             }
 
-            return new Messaging(Guid.NewGuid(), to, fullName, type, payload);
+            return new Messaging(
+                Guid.NewGuid(), 
+                to, fullName, 
+                type, 
+                payload
+            );
         }
 
         #endregion
 
-        #region Behavior
-
-        /// <summary>
-        /// Obtém o payload convertido para o tipo solicitado.
-        /// </summary>
-        /// <typeparam name="TPayload">Tipo esperado do payload.</typeparam>
-        /// <returns>Payload convertido.</returns>
-        /// <exception cref="BadRequestException">Lançada quando o tipo não corresponde.</exception>
         public TPayload GetPayload<TPayload>() where TPayload : Payload
         {
             if (Payload is not TPayload typedPayload)
@@ -82,30 +85,23 @@ namespace AuthCore.Domain.Aggregates.MessagingAggregate
             return typedPayload;
         }
 
-        #endregion
-
-        #region Validation
-
-        /// <summary>
-        /// Valida os campos obrigatórios da notificação.
-        /// </summary>
         private void Validate()
         {
-            if (string.IsNullOrWhiteSpace(To))
-                throw new BadRequestException("O destinatário é obrigatório.");
+            List<string> errors = new();
 
             Email.Validate(To);
 
             if (string.IsNullOrWhiteSpace(FullName))
-                throw new BadRequestException("O nome do destinatário é obrigatório.");
+                errors.Add("O nome do destinatário é obrigatório.");
 
             if (!Enum.IsDefined(typeof(MessagingType), Type))
-                throw new BadRequestException("O tipo de notificação é inválido.");
+                errors.Add("O tipo de notificação é inválido.");
 
             if (Payload is null)
-                throw new BadRequestException("O payload da notificação é obrigatório.");
-        }
+                errors.Add("O conteúdo é obrigatório.");
 
-        #endregion
+            if (errors.Count > 0)
+                throw new BadRequestException(errors);
+        }
     }
 }

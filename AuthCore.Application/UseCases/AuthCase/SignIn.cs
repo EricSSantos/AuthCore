@@ -1,8 +1,6 @@
 ﻿using AuthCore.Application.Models.Requests;
 using AuthCore.Application.UseCases.AuthCase.Interfaces;
-using AuthCore.Domain.Aggregates.SessionAggregate;
 using AuthCore.Domain.Aggregates.SessionAggregate.Interfaces;
-using AuthCore.Domain.Aggregates.UserAggregate;
 using AuthCore.Domain.Aggregates.UserAggregate.Interfaces;
 using AuthCore.Domain.Core.Exceptions;
 using AuthCore.Domain.Core.Interfaces.Infrastructure.Http;
@@ -14,9 +12,8 @@ namespace AuthCore.Application.UseCases.AuthCase
     public sealed class SignIn : ISignIn
     {
         private readonly IUserRepository _userRepository;
-        private readonly ISessionRepository _sessionRepository;
+        private readonly ISessionService _sessionService;
         private readonly IJwtTokenProvider _jwtTokenProvider;
-        private readonly ISecureKeyGenerator _secureKeyGenerator;
         private readonly IPasswordHasher _passwordHasher;
         private readonly ISessionState _sessionState;
         private readonly IDevice _device;
@@ -24,18 +21,16 @@ namespace AuthCore.Application.UseCases.AuthCase
 
         public SignIn(
             IUserRepository userRepository,
-            ISessionRepository sessionRepository,
+            ISessionService sessionService,
             IJwtTokenProvider jwtTokenProvider,
-            ISecureKeyGenerator secureKeyGenerator,
             IPasswordHasher passwordHasher,
             ISessionState sessionState,
             IDevice device,
             SecuritySettings settings)
         {
             _userRepository = userRepository;
-            _sessionRepository = sessionRepository;
+            _sessionService = sessionService;
             _jwtTokenProvider = jwtTokenProvider;
-            _secureKeyGenerator = secureKeyGenerator;
             _passwordHasher = passwordHasher;
             _sessionState = sessionState;
             _device = device;
@@ -44,68 +39,35 @@ namespace AuthCore.Application.UseCases.AuthCase
 
         public async Task OnExecuteAsync(SignInRequest request)
         {
+            // Recupera o usuário sem revelar se o e-mail existe
             var user = await _userRepository.GetByEmailAsync(request.Email)
                 ?? throw new UnauthorizedException("E-mail ou senha inválidos.");
 
-            await ValidateUserCredentials(user, request.Password);
-            await EnforceSessionLimit(user.Id);
+            try
+            {
+                user.Authenticate(request.Password, _passwordHasher);
+            }
+            catch (UnauthorizedException)
+            {
+                await _userRepository.UpdateAsync(user);
+                throw;
+            }
 
-            var session = _secureKeyGenerator.Generate();
-            var sessionHash = _secureKeyGenerator.Hash(session);
+            await _userRepository.UpdateAsync(user);
 
-            var ttl = TimeSpan.FromDays(_settings.Session.ExpiresInDays);
-            var maxLifetime = TimeSpan.FromDays(_settings.Session.MaxLifetimeInDays);
-
-            var newSession = Session.Create(
-                id: sessionHash,
-                userId: user.Id,
-                deviceInfo: _device.Device,
-                ttl: ttl,
-                maxLifetime: maxLifetime
+            // Criação da sessão delegada ao domínio de sessão
+            var sessionResult = await _sessionService.CreateSessionAsync(
+                user.Id,
+                _device.Device,
+                TimeSpan.FromDays(_settings.Session.ExpiresInDays),
+                TimeSpan.FromDays(_settings.Session.MaxLifetimeInDays)
             );
 
-            await _sessionRepository.SetAsync(newSession);
-
+            // Gera um novo access token vinculado ao usuário autenticado
             var accessToken = _jwtTokenProvider.Generate(user.Id);
-            _sessionState.SetCookies(session, accessToken);
+
+            // Define cookies usando a sessão criada e o novo token
+            _sessionState.SetCookies(sessionResult.RawSession, accessToken);
         }
-
-        #region Helpers
-
-        private async Task ValidateUserCredentials(User user, string password)
-        {
-            if (!user.IsActive())
-                throw new ForbiddenException("Usuário inativo.");
-
-            if (!_passwordHasher.IsValid(password, user.Password.Value))
-            {
-                user.LoginAttempts.RegisterFailure();
-
-                await _userRepository.UpdateAsync(user);
-
-                throw new UnauthorizedException("E-mail ou senha inválidos.");
-            }
-
-            if (user.LoginAttempts.FailedAttempts > 0)
-            {
-                user.LoginAttempts.Reset();
-                await _userRepository.UpdateAsync(user);
-            }
-        }
-
-        private async Task EnforceSessionLimit(Guid userId)
-        {
-            var sessions = await _sessionRepository.GetAllByUserIdAsync(userId);
-            if (sessions.Count() < 4)
-                return;
-
-            var oldestSession = sessions
-                .OrderBy(s => s.CreatedAt)
-                .First();
-
-            await _sessionRepository.DeleteAsync(oldestSession.Id);
-        }
-
-        #endregion
     }
 }

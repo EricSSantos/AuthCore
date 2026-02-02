@@ -20,5 +20,9 @@ namespace AuthCore.Domain.Core.Exceptions
         public BadRequestException(string message)
             : base(message)
         { }
+
+        public BadRequestException(IEnumerable<string> errors)
+            : base(errors)
+        { }
     }
 }

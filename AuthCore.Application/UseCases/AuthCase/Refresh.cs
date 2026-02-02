@@ -34,6 +34,7 @@ namespace AuthCore.Application.UseCases.AuthCase
             await _sessionRepository.SetAsync(session);
 
             var newAccessToken = _jwtTokenProvider.Generate(user.Id);
+
             _sessionState.SetCookies(_sessionState.Session, newAccessToken);
         }
     }

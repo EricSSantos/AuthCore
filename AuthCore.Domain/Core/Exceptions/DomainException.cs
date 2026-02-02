@@ -11,7 +11,6 @@ namespace AuthCore.Domain.Core.Exceptions
         /// Lista de mensagens de erro associadas à exceção.
         /// </summary>
         public IReadOnlyCollection<string> Errors { get; }
-
         private readonly HttpStatusCode _statusCode = HttpStatusCode.BadRequest;
         private readonly string _title = "Violação na regra de negócio.";
 
