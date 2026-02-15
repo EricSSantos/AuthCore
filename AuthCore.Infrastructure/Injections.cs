@@ -27,7 +27,6 @@ namespace AuthCore.Infrastructure
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<DatabaseSettings>(configuration.GetSection("Database"));
-
             return services
                 .AddPostgreSqlConnection()
                 .AddRedis(configuration)
@@ -41,7 +40,6 @@ namespace AuthCore.Infrastructure
         private static IServiceCollection AddPostgreSqlConnection(this IServiceCollection services)
         {
             services.AddSingleton<AdoDbContext>();
-
             return services;
         }
 
