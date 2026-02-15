@@ -2,9 +2,7 @@
 
 namespace AuthCore.Domain.Core.Exceptions
 {
-    /// <summary>
-    /// Representa um erro de conflito de recurso (HTTP 409).
-    /// </summary>
+    /// <summary>Representa um erro de conflito de recurso.</summary>
     public sealed class ConflictException : DomainException
     {
         public override HttpStatusCode StatusCode
@@ -17,10 +15,13 @@ namespace AuthCore.Domain.Core.Exceptions
             get { return "Conflito de recurso."; }
         }
 
+        /// <summary>Operação para criar instância de exceção.</summary>
         public ConflictException()
             : base("O recurso já existe.")
         { }
 
+        /// <summary>Operação para criar instância de exceção.</summary>
+        /// <param name="message">Mensagem do erro.</param>
         public ConflictException(string message)
             : base(message)
         { }

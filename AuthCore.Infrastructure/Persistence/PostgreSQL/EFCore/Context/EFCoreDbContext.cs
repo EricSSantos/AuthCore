@@ -1,37 +1,28 @@
-﻿using AuthCore.Domain.Aggregates.UserAggregate;
+﻿using AuthCore.Domain.Aggregates.Users;
 using AuthCore.Domain.Core.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace AuthCore.Infrastructure.Persistence.PostgreSQL.EFCore.Context
 {
-    /// <summary>
-    /// Representa o contexto de dados da aplicação.
-    /// </summary>
+    /// <summary>Representa o contexto de dados da aplicação.</summary>
     public sealed partial class EFCoreDbContext : DbContext
     {
         #region DbSets
 
-        /// <summary>
-        /// Mapeia a entidade User no banco de dados.
-        /// </summary>
         public DbSet<User> Users { get; set; } = null!;
 
         #endregion
 
         #region Constructors
 
-        /// <summary>
-        /// Construtor usado em cenários onde as opções são fornecidas externamente (tests, etc.).
-        /// </summary>
+        /// <summary>Operação para criar instância usando opções fornecidas externamente (tests, etc.).</summary>
         public EFCoreDbContext(DbContextOptions<EFCoreDbContext> options)
             : base(options)
         {
         }
 
-        /// <summary>
-        /// Construtor sem parâmetros usado pelo EF Core em tempo de design (migrations).
-        /// </summary>
+        /// <summary>Operação para criar instância sem parâmetros usada pelo EF Core em tempo de design (migrations).</summary>
         public EFCoreDbContext()
         {
         }
@@ -40,10 +31,7 @@ namespace AuthCore.Infrastructure.Persistence.PostgreSQL.EFCore.Context
 
         #region Configuration
 
-        /// <summary>
-        /// Configura o DbContext quando nenhuma configuração foi fornecida externamente.
-        /// Usado principalmente em tempo de design para migrations.
-        /// </summary>
+        /// <summary>Operação para configurar o DbContext quando nenhuma configuração foi fornecida externamente. Usado principalmente em tempo de design para migrations.</summary>
         /// <param name="optionsBuilder">Builder de opções do contexto.</param>
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -79,9 +67,7 @@ namespace AuthCore.Infrastructure.Persistence.PostgreSQL.EFCore.Context
 
         #region Model Configuration
 
-        /// <summary>
-        /// Configura o modelo aplicando mappings e extensões parciais.
-        /// </summary>
+        /// <summary>Operação para configurar o modelo aplicando mappings e extensões parciais.</summary>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(EFCoreDbContext).Assembly);
@@ -89,9 +75,7 @@ namespace AuthCore.Infrastructure.Persistence.PostgreSQL.EFCore.Context
             base.OnModelCreating(modelBuilder);
         }
 
-        /// <summary>
-        /// Permite acrescentar configurações adicionais ao modelo.
-        /// </summary>
+        /// <summary>Operação para permitir acrescentar configurações adicionais ao modelo.</summary>
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 
         #endregion

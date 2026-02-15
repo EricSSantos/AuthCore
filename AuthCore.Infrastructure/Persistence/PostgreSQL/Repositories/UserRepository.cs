@@ -1,26 +1,27 @@
-﻿using AuthCore.Domain.Aggregates.UserAggregate;
-using AuthCore.Domain.Aggregates.UserAggregate.Interfaces;
+﻿using AuthCore.Domain.Aggregates.Users;
+using AuthCore.Domain.Aggregates.Users.Contracts;
 using AuthCore.Infrastructure.Persistence.PostgreSQL.ADO.Context;
 using Npgsql;
 
 namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Repositories
 {
+    /// <summary>Representa repositório ADO de usuários.</summary>
     public sealed class UserRepository : IUserRepository
     {
         private readonly AdoDbContext _dbContext;
 
+        /// <summary>Operação para criar instância do repositório de usuários.</summary>
+        /// <param name="adoDbContext">Contexto ADO.</param>
         public UserRepository(AdoDbContext adoDbContext)
         {
             _dbContext = adoDbContext;
         }
 
+        /// <summary>Operação para obter usuário por identificador.</summary>
+        /// <param name="id">Identificador do usuário.</param>
         public async Task<User?> GetByIdAsync(Guid id)
         {
-            using (NpgsqlConnection connection = _dbContext.CreateConnection())
-            {
-                await connection.OpenAsync();
-
-                const string sql = @"
+            const string sql = @"
                     select
                         id,
                         first_name,
@@ -39,33 +40,24 @@ namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Repositories
                     from users
                     where id = @id;";
 
-                using (NpgsqlCommand command = new NpgsqlCommand(sql, connection))
+            return await _dbContext.QueryAsync(
+                sql,
+                cmd => cmd.Parameters.AddWithValue("id", id),
+                async reader =>
                 {
-                    command.Parameters.AddWithValue("id", id);
+                    if (!reader.HasRows)
+                        return null;
 
-                    using (NpgsqlDataReader reader = await command.ExecuteReaderAsync())
-                    {
-                        bool hasRows = reader.HasRows;
-                        if (!hasRows)
-                            return null;
-
-                        await reader.ReadAsync();
-
-                        User user = MapUser(reader);
-
-                        return user;
-                    }
-                }
-            }
+                    await reader.ReadAsync();
+                    return MapUser(reader);
+                });
         }
 
+        /// <summary>Operação para obter usuário por e-mail.</summary>
+        /// <param name="email">E-mail do usuário.</param>
         public async Task<User?> GetByEmailAsync(string email)
         {
-            using (NpgsqlConnection connection = _dbContext.CreateConnection())
-            {
-                await connection.OpenAsync();
-
-                const string sql = @"
+            const string sql = @"
                     select
                         id,
                         first_name,
@@ -84,57 +76,41 @@ namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Repositories
                     from users
                     where lower(email) = lower(@email);";
 
-                using (NpgsqlCommand command = new NpgsqlCommand(sql, connection))
+            return await _dbContext.QueryAsync(
+                sql,
+                cmd => cmd.Parameters.AddWithValue("email", email),
+                async reader =>
                 {
-                    command.Parameters.AddWithValue("email", email);
+                    if (!reader.HasRows)
+                        return null;
 
-                    using (NpgsqlDataReader reader = await command.ExecuteReaderAsync())
-                    {
-                        bool hasRows = reader.HasRows;
-                        if (!hasRows)
-                            return null;
-
-                        await reader.ReadAsync();
-
-                        User user = MapUser(reader);
-
-                        return user;
-                    }
-                }
-            }
+                    await reader.ReadAsync();
+                    return MapUser(reader);
+                });
         }
 
+        /// <summary>Operação para verificar e-mail cadastrado.</summary>
+        /// <param name="email">E-mail do usuário.</param>
         public async Task<bool> EmailExistsAsync(string email)
         {
-            using (NpgsqlConnection connection = _dbContext.CreateConnection())
-            {
-                await connection.OpenAsync();
-
-                const string sql = @"
+            const string sql = @"
                     select 1
                     from users
                     where lower(email) = lower(@email)
                     limit 1;";
 
-                using (NpgsqlCommand command = new NpgsqlCommand(sql, connection))
-                {
-                    command.Parameters.AddWithValue("email", email);
+            object? result = await _dbContext.ExecuteScalarAsync(
+                sql,
+                cmd => cmd.Parameters.AddWithValue("email", email));
 
-                    object? result = await command.ExecuteScalarAsync();
-                    bool emailExists = result is not null;
-
-                    return emailExists;
-                }
-            }
+            return result is not null;
         }
 
+        /// <summary>Operação para adicionar usuário.</summary>
+        /// <param name="user">Usuário a ser adicionado.</param>
         public async Task AddAsync(User user)
         {
-            using (NpgsqlConnection connection = _dbContext.CreateConnection())
-            {
-                await connection.OpenAsync();
-
-                const string sql = @"
+            const string sql = @"
                     insert into users
                     (
                         id,
@@ -170,22 +146,16 @@ namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Repositories
                         @locked_until
                     );";
 
-                using (NpgsqlCommand command = new NpgsqlCommand(sql, connection))
-                {
-                    FillUserParameters(command, user);
-
-                    await command.ExecuteNonQueryAsync();
-                }
-            }
+            await _dbContext.ExecuteAsync(
+                sql,
+                cmd => FillUserParameters(cmd, user));
         }
 
+        /// <summary>Operação para atualizar usuário.</summary>
+        /// <param name="user">Usuário a ser atualizado.</param>
         public async Task UpdateAsync(User user)
         {
-            using (NpgsqlConnection connection = _dbContext.CreateConnection())
-            {
-                await connection.OpenAsync();
-
-                const string sql = @"
+            const string sql = @"
                     update users
                     set
                         first_name      = @first_name,
@@ -203,31 +173,25 @@ namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Repositories
                         locked_until    = @locked_until
                     where id = @id;";
 
-                using (NpgsqlCommand command = new NpgsqlCommand(sql, connection))
-                {
-                    FillUserParameters(command, user);
-
-                    await command.ExecuteNonQueryAsync();
-                }
-            }
+            await _dbContext.ExecuteAsync(
+                sql,
+                cmd => FillUserParameters(cmd, user));
         }
 
+        /// <summary>Operação para remover usuário.</summary>
+        /// <param name="user">Usuário a ser removido.</param>
         public async Task DeleteAsync(User user)
         {
-            using (NpgsqlConnection connection = _dbContext.CreateConnection())
-            {
-                await connection.OpenAsync();
+            const string sql = @"delete from users where id = @id;";
 
-                const string sql = @"delete from users where id = @id;";
-
-                using (NpgsqlCommand command = new NpgsqlCommand(sql, connection))
-                {
-                    command.Parameters.AddWithValue("id", user.Id);
-                    await command.ExecuteNonQueryAsync();
-                }
-            }
+            await _dbContext.ExecuteAsync(
+                sql,
+                cmd => cmd.Parameters.AddWithValue("id", user.Id));
         }
 
+        /// <summary>Operação para preencher parâmetros de usuário.</summary>
+        /// <param name="command">Comando SQL.</param>
+        /// <param name="user">Usuário a persistir.</param>
         private static void FillUserParameters(NpgsqlCommand command, User user)
         {
             command.Parameters.AddWithValue("id", user.Id);
@@ -249,6 +213,8 @@ namespace AuthCore.Infrastructure.Persistence.PostgreSQL.Repositories
             command.Parameters.AddWithValue("locked_until", (object?)user.LoginAttempts.LockedUntil ?? DBNull.Value);
         }
 
+        /// <summary>Operação para mapear usuário a partir do leitor.</summary>
+        /// <param name="reader">Leitor de dados.</param>
         private static User MapUser(NpgsqlDataReader reader)
         {
             Guid id = reader.GetGuid(reader.GetOrdinal("id"));

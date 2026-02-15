@@ -1,103 +1,70 @@
 ﻿namespace AuthCore.Domain.Core.Settings
 {
-    /// <summary>
-    /// Define configurações gerais de segurança da aplicação.
-    /// </summary>
+    /// <summary>Representa configurações gerais de segurança da aplicação.</summary>
     public sealed class SecuritySettings
     {
-        /// <summary>
-        /// Define parâmetros do JWT.
-        /// </summary>
         public JwtSettings Jwt { get; set; } = new();
-
-        /// <summary>
-        /// Define parâmetros de sessão do usuário.
-        /// </summary>
         public SessionSettings Session { get; set; } = new();
-
-        /// <summary>
-        /// Define configurações das chaves criptográficas.
-        /// </summary>
+        public CookieSettings Cookies { get; set; } = new();
+        public LoginAttemptsSettings LoginAttempts { get; set; } = new();
+        public ConfirmCodeSettings ConfirmCode { get; set; } = new();
         public SecurityKeysSettings Keys { get; set; } = new();
     }
 
-    /// <summary>
-    /// Define configurações do JWT.
-    /// </summary>
+    /// <summary>Representa configurações do JWT.</summary>
     public sealed class JwtSettings
     {
-        /// <summary>
-        /// Define o emissor dos tokens.
-        /// </summary>
         public string Issuer { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Define o público dos tokens.
-        /// </summary>
         public string Audience { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Define o tempo de expiração em minutos.
-        /// </summary>
         public int ExpiresInMinutes { get; set; } = 30;
     }
 
-    /// <summary>
-    /// Define configurações da sessão do usuário.
-    /// </summary>
+    /// <summary>Representa configurações da sessão do usuário.</summary>
     public sealed class SessionSettings
     {
-        /// <summary>
-        /// Define expiração padrão da sessão em dias.
-        /// </summary>
         public int ExpiresInDays { get; set; } = 7;
-
-        /// <summary>
-        /// Define o tempo máximo de vida útil em dias.
-        /// </summary>
         public int MaxLifetimeInDays { get; set; } = 30;
+        public int MaxSessionsPerUser { get; set; } = 4;
     }
 
-    /// <summary>
-    /// Agrupa configurações das chaves criptográficas.
-    /// </summary>
+    /// <summary>Representa configurações de tentativas de login.</summary>
+    public sealed class LoginAttemptsSettings
+    {
+        public int MaxAttempts { get; set; } = 5;
+        public int LockDurationMinutes { get; set; } = 15;
+    }
+
+    /// <summary>Representa configurações de códigos de confirmação.</summary>
+    public sealed class ConfirmCodeSettings
+    {
+        public int ExpiresInMinutes { get; set; } = 10;
+        public int MaxAttempts { get; set; } = 5;
+    }
+
+    /// <summary>Representa configurações de cookies de segurança.</summary>
+    public sealed class CookieSettings
+    {
+        public string SessionKey { get; set; } = "__Host-session";
+        public string AccessTokenKey { get; set; } = "__Host-access_token";
+    }
+
+    /// <summary>Representa configurações das chaves criptográficas.</summary>
     public sealed class SecurityKeysSettings
     {
-        /// <summary>
-        /// Define configurações da chave simétrica.
-        /// </summary>
         public SymmetricKeySettings Symmetric { get; set; } = new();
-
-        /// <summary>
-        /// Define configurações das chaves assimétricas.
-        /// </summary>
         public AsymmetricKeySettings Asymmetric { get; set; } = new();
     }
 
-    /// <summary>
-    /// Define configurações da chave simétrica.
-    /// </summary>
+    /// <summary>Representa configurações da chave simétrica.</summary>
     public sealed class SymmetricKeySettings
     {
-        /// <summary>
-        /// Define a chave privada simétrica.
-        /// </summary>
         public string PrivateKey { get; set; } = string.Empty;
     }
 
-    /// <summary>
-    /// Define configurações das chaves assimétricas.
-    /// </summary>
+    /// <summary>Representa configurações das chaves assimétricas.</summary>
     public sealed class AsymmetricKeySettings
     {
-        /// <summary>
-        /// Define o caminho da chave privada.
-        /// </summary>
         public string PrivateKeyPath { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Define o caminho da chave pública.
-        /// </summary>
         public string PublicKeyPath { get; set; } = string.Empty;
     }
 }

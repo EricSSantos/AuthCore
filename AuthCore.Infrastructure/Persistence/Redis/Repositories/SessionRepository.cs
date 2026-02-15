@@ -1,16 +1,17 @@
-﻿using AuthCore.Domain.Aggregates.SessionAggregate;
-using AuthCore.Domain.Aggregates.SessionAggregate.Interfaces;
+﻿using AuthCore.Domain.Aggregates.Sessions;
+using AuthCore.Domain.Aggregates.Sessions.Contracts;
+using AuthCore.Domain.Core.Settings;
 using AuthCore.Infrastructure.Persistence.Redis.Mappings;
+using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using System.Text.Json;
 
 namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
 {
+    /// <summary>Representa repositório Redis de sessões.</summary>
     public sealed class SessionRepository : ISessionRepository
     {
         #region Constants
-
-        private const string PREFIX = "sessions:";
 
         private static readonly JsonSerializerOptions JSON_OPTIONS = new()
         {
@@ -20,15 +21,23 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
 
         #endregion
 
-        private readonly IConnectionMultiplexer _conn;
         private readonly IDatabase _redis;
+        private readonly string _sessionPrefix;
+        private readonly string _userSessionsPrefix;
 
-        public SessionRepository(IConnectionMultiplexer connection)
+        /// <summary>Operação para criar instância do repositório de sessões.</summary>
+        /// <param name="connection">Conexão com Redis.</param>
+        /// <param name="settings">Configurações de banco.</param>
+        public SessionRepository(IConnectionMultiplexer connection, IOptions<DatabaseSettings> settings)
         {
-            _conn = connection;
             _redis = connection.GetDatabase();
+            var prefix = NormalizePrefix(settings.Value.Redis.KeyPrefix);
+            _sessionPrefix = $"{prefix}:session:sessions:";
+            _userSessionsPrefix = $"{prefix}:session:user-sessions:";
         }
 
+        /// <summary>Operação para obter sessão por identificador.</summary>
+        /// <param name="sessionId">Identificador da sessão.</param>
         public async Task<Session?> GetAsync(string sessionId)
         {
             var key = BuildKey(sessionId);
@@ -44,24 +53,43 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
             return doc.ToEntity();
         }
 
+        /// <summary>Operação para obter sessões ativas do usuário.</summary>
+        /// <param name="userId">Identificador do usuário.</param>
         public async Task<IEnumerable<Session>> GetAllByUserIdAsync(Guid userId)
         {
-            var list = new List<Session>();
+            var indexKey = BuildUserSessionsKey(userId);
+            var sessionIds = await _redis.SetMembersAsync(indexKey);
+            if (sessionIds.Length == 0)
+                return Enumerable.Empty<Session>();
 
-            await foreach (var key in EnumerateKeysAsync())
+            var keys = sessionIds.Select(id => (RedisKey)BuildKey(id.ToString())).ToArray();
+            var values = await _redis.StringGetAsync(keys);
+
+            var list = new List<Session>(values.Length);
+            var staleIds = new List<RedisValue>();
+
+            for (var i = 0; i < values.Length; i++)
             {
-                var value = await _redis.StringGetAsync(key);
+                var value = values[i];
                 if (value.IsNullOrEmpty)
+                {
+                    staleIds.Add(sessionIds[i]);
                     continue;
+                }
 
                 var doc = JsonSerializer.Deserialize<SessionDocument>(value!, JSON_OPTIONS);
-                if (doc is not null && doc.UserId == userId)
+                if (doc is not null)
                     list.Add(doc.ToEntity());
             }
+
+            if (staleIds.Count > 0)
+                await _redis.SetRemoveAsync(indexKey, staleIds.ToArray());
 
             return list.OrderByDescending(x => x.CreatedAt);
         }
 
+        /// <summary>Operação para armazenar sessão.</summary>
+        /// <param name="session">Instância da sessão.</param>
         public async Task SetAsync(Session session)
         {
             var key = BuildKey(session.Id);
@@ -73,39 +101,49 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
                 return;
 
             await _redis.StringSetAsync(key, payload, ttl);
+            await _redis.SetAddAsync(BuildUserSessionsKey(session.UserId), session.Id);
         }
 
+        /// <summary>Operação para remover sessão.</summary>
+        /// <param name="sessionId">Identificador da sessão.</param>
         public async Task DeleteAsync(string sessionId)
         {
             var key = BuildKey(sessionId);
+            var value = await _redis.StringGetAsync(key);
+            if (!value.IsNullOrEmpty)
+            {
+                var doc = JsonSerializer.Deserialize<SessionDocument>(value!, JSON_OPTIONS);
+                if (doc is not null)
+                    await _redis.SetRemoveAsync(BuildUserSessionsKey(doc.UserId), sessionId);
+            }
+
             await _redis.KeyDeleteAsync(key);
         }
 
         #region Helpers
 
-        private static string BuildKey(string sessionId)
+        /// <summary>Operação para montar chave da sessão.</summary>
+        /// <param name="sessionId">Identificador da sessão.</param>
+        private string BuildKey(string sessionId)
         {
-            return $"{PREFIX}{sessionId}";
+            return $"{_sessionPrefix}{sessionId}";
         }
 
-        private async IAsyncEnumerable<string> EnumerateKeysAsync(int pageSize = 500)
+        /// <summary>Operação para montar chave do índice por usuário.</summary>
+        /// <param name="userId">Identificador do usuário.</param>
+        private string BuildUserSessionsKey(Guid userId)
         {
-            var pattern = PREFIX + "*";
+            return $"{_userSessionsPrefix}{userId}";
+        }
 
-            foreach (var endpoint in _conn.GetEndPoints(configuredOnly: true))
-            {
-                var server = _conn.GetServer(endpoint);
+        /// <summary>Operação para normalizar prefixo de chave Redis.</summary>
+        /// <param name="prefix">Prefixo informado.</param>
+        private static string NormalizePrefix(string? prefix)
+        {
+            if (string.IsNullOrWhiteSpace(prefix))
+                return "authcore";
 
-                foreach (var key in server.Keys(
-                    _redis.Database,
-                    pattern: pattern,
-                    pageSize: pageSize))
-                {
-                    yield return key.ToString();
-                }
-
-                await Task.Yield();
-            }
+            return prefix.Trim().TrimEnd(':');
         }
 
         #endregion

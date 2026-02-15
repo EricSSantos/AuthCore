@@ -2,9 +2,7 @@
 
 namespace AuthCore.Domain.Core.Exceptions
 {
-    /// <summary>
-    /// Representa um erro de acesso negado (HTTP 403).
-    /// </summary>
+    /// <summary>Representa um erro de acesso negado.</summary>
     public sealed class ForbiddenException : DomainException
     {
         public override HttpStatusCode StatusCode
@@ -17,10 +15,13 @@ namespace AuthCore.Domain.Core.Exceptions
             get { return "Acesso negado."; }
         }
 
+        /// <summary>Operação para criar instância de exceção.</summary>
         public ForbiddenException()
             : base("Você não tem permissão para acessar este recurso.")
         { }
 
+        /// <summary>Operação para criar instância de exceção.</summary>
+        /// <param name="message">Mensagem do erro.</param>
         public ForbiddenException(string message)
             : base(message)
         { }

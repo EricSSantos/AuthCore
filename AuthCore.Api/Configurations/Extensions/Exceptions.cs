@@ -6,32 +6,24 @@ using System.Text.Json.Serialization;
 
 namespace AuthCore.Api.Configurations.Extensions
 {
-    /// <summary>
-    /// Configura o tratamento global de exceções da aplicação.
-    /// </summary>
+    /// <summary>Configura o tratamento global de exceções da aplicação.</summary>
     public static class Exceptions
     {
-        /// <summary>
-        /// Ativa o middleware global de erros.
-        /// </summary>
+        /// <summary>Operação para ativar o middleware global de erros.</summary>
         /// <param name="app">Instância atual da aplicação.</param>
         public static void UseExceptionsHandling(this WebApplication app)
         {
             app.UseMiddleware<ExceptionMiddleware>();
         }
 
-        /// <summary>
-        /// Middleware que captura exceções e retorna respostas padronizadas.
-        /// </summary>
+        /// <summary>Middleware que captura exceções e retorna respostas padronizadas.</summary>
         private sealed class ExceptionMiddleware
         {
             private readonly RequestDelegate _next;
             private readonly ILogger<ExceptionMiddleware> _logger;
             private readonly IHostEnvironment _env;
 
-            /// <summary>
-            /// Inicializa o middleware de exceções.
-            /// </summary>
+            /// <summary>Operação para inicializar o middleware de exceções.</summary>
             /// <param name="next">Próximo middleware do pipeline.</param>
             /// <param name="logger">Logger para registrar erros.</param>
             /// <param name="env">Ambiente de execução.</param>
@@ -45,9 +37,7 @@ namespace AuthCore.Api.Configurations.Extensions
                 _env = env;
             }
 
-            /// <summary>
-            /// Processa a requisição e trata erros não capturados.
-            /// </summary>
+            /// <summary>Operação para processar a requisição e trata erros não capturados.</summary>
             /// <param name="context">Contexto HTTP atual.</param>
             public async Task InvokeAsync(HttpContext context)
             {

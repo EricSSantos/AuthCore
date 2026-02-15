@@ -1,6 +1,6 @@
 ﻿using AuthCore.Application.Models;
 using AuthCore.Application.Models.Requests;
-using AuthCore.Application.UseCases.AuthCase.Interfaces;
+using AuthCore.Application.UseCases.Auth.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -11,9 +11,7 @@ namespace AuthCore.Api.Controllers.v1
     [Route("api/v1/auth")]
     public sealed class AuthController : ControllerBase
     {
-        /// <summary>
-        /// Autentica o usuário e inicia sessão.
-        /// </summary>
+        /// <summary>Operação para autenticar o usuário e inicia sessão.</summary>
         [HttpPost("sign-in")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         public async Task<ActionResult<ApiResponse<object>>> SignIn(
@@ -29,9 +27,7 @@ namespace AuthCore.Api.Controllers.v1
             ));
         }
 
-        /// <summary>
-        /// Encerra a sessão atual do usuário.
-        /// </summary>
+        /// <summary>Encerra a sessão atual do usuário.</summary>
         [Authorize]
         [HttpPost("sign-out")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
@@ -47,9 +43,7 @@ namespace AuthCore.Api.Controllers.v1
             ));
         }
 
-        /// <summary>
-        /// Renova o token de acesso do usuário.
-        /// </summary>
+        /// <summary>Operação para renovar o token de acesso do usuário.</summary>
         [HttpPost("refresh-token")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         public async Task<ActionResult<ApiResponse<object>>> RefreshToken(

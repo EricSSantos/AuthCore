@@ -1,15 +1,22 @@
-﻿using AuthCore.Application.UseCases.AuthCase;
-using AuthCore.Application.UseCases.AuthCase.Interfaces;
-using AuthCore.Application.UseCases.EmailCase;
-using AuthCore.Application.UseCases.EmailCase.Interface;
-using AuthCore.Application.UseCases.SessionCase;
-using AuthCore.Application.UseCases.SessionCase.Interfaces;
-using AuthCore.Application.UseCases.UserCase;
-using AuthCore.Application.UseCases.UserCase.Interfaces;
+﻿using AuthCore.Application.UseCases.Auth;
+using AuthCore.Application.UseCases.Auth.Contracts;
+using AuthCore.Application.UseCases.Notifications;
+using AuthCore.Application.UseCases.Notifications.Contracts;
+using AuthCore.Application.UseCases.Sessions;
+using AuthCore.Application.UseCases.Sessions.Contracts;
+using AuthCore.Application.UseCases.Users;
+using AuthCore.Application.UseCases.Users.Contracts;
+using AuthCore.Domain.Aggregates.Sessions;
+using AuthCore.Domain.Aggregates.Sessions.Contracts;
+using AuthCore.Domain.Aggregates.Sessions.Policies;
+using AuthCore.Domain.Aggregates.Notifications.Policies;
+using AuthCore.Domain.Aggregates.ConfirmCodes.Policies;
+using AuthCore.Domain.Aggregates.Users.Policies;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AuthCore.Application
 {
+    /// <summary>Representa registro de casos de uso da aplicação.</summary>
     public static class Injections
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
@@ -22,14 +29,19 @@ namespace AuthCore.Application
             services.AddScoped<ISignIn, SignIn>();
             services.AddScoped<ISignOut, SignOut>();
             services.AddScoped<IRefresh, Refresh>();
-            services.AddScoped<ISendEmail, SendEmail>();
-            services.AddScoped<IGetSessions, GetOtherSessions>();
+            services.AddScoped<ISendNotification, SendNotification>();
+            services.AddScoped<IGetSessions, GetSessions>();
             services.AddScoped<IRevokeSession, RevokeSessions>();
             services.AddScoped<IAddUser, AddUser>();
             services.AddScoped<IGetCurrentUser, GetCurrentUser>();
             services.AddScoped<IConfirmEmail, ConfirmEmail>();
             services.AddScoped<IResetPassword, ResetPassword>();
             services.AddScoped<IChangePassword, ChangePassword>();
+            services.AddScoped<ISessionService, SessionService>();
+            services.AddScoped<ISessionPolicy, DefaultSessionPolicy>();
+            services.AddScoped<IUserAuthenticationPolicy, DefaultUserAuthenticationPolicy>();
+            services.AddScoped<INotificationPolicy, DefaultNotificationPolicy>();
+            services.AddScoped<IConfirmCodePolicy, DefaultConfirmCodePolicy>();
             return services;
         }
     }

@@ -25,6 +25,7 @@
 		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.10" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+		<PackageReference Include="NLog.Web.AspNetCore" Version="5.4.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
 	</ItemGroup>
 
@@ -36,6 +37,7 @@
 
 	<ItemGroup>
 		<None Include="wwwroot\swagger\SwaggerStyle.css" />
+		<None Include="nlog.config" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 
 </Project>

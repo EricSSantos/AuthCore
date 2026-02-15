@@ -2,6 +2,7 @@
 
 namespace AuthCore.Infrastructure.Persistence.Redis.Mappings
 {
+    /// <summary>Representa documento Redis de dispositivo.</summary>
     internal sealed class DeviceDocument
     {
         [JsonPropertyName("ip")]

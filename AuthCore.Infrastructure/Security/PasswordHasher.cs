@@ -2,6 +2,7 @@
 
 namespace AuthCore.Infrastructure.Security
 {
+    /// <summary>Representa serviço de hash de senha.</summary>
     public sealed class PasswordHasher : IPasswordHasher
     {
         public string Hash(string plainText)

@@ -2,9 +2,7 @@
 
 namespace AuthCore.Domain.Core.Exceptions
 {
-    /// <summary>
-    /// Representa um erro de autenticação inválida ou ausência de credenciais (HTTP 401).
-    /// </summary>
+    /// <summary>Representa um erro de autenticação inválida.</summary>
     public sealed class UnauthorizedException : DomainException
     {
         public override HttpStatusCode StatusCode
@@ -17,10 +15,13 @@ namespace AuthCore.Domain.Core.Exceptions
             get { return "Acesso não autorizado."; }
         }
 
+        /// <summary>Operação para criar instância de exceção.</summary>
         public UnauthorizedException()
             : base("Você não tem autorização para acessar este recurso.")
         { }
 
+        /// <summary>Operação para criar instância de exceção.</summary>
+        /// <param name="message">Mensagem do erro.</param>
         public UnauthorizedException(string message)
             : base(message)
         { }

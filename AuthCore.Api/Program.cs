@@ -1,8 +1,12 @@
 ﻿using AuthCore.Api.Configurations.Extensions;
+using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
 #region Services
+
+builder.Logging.ClearProviders();
+builder.Host.UseNLog();
 
 builder.AddDependencyInjections();
 builder.AddAuthentication();
@@ -19,7 +23,6 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 #region Middlewares
-
 app.UseRouting();
 app.UseStaticFiles();
 app.UseSwaggerDoc();

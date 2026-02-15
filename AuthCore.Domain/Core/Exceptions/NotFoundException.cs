@@ -2,9 +2,7 @@
 
 namespace AuthCore.Domain.Core.Exceptions
 {
-    /// <summary>
-    /// Representa um erro quando o recurso solicitado não é encontrado (HTTP 404).
-    /// </summary>
+    /// <summary>Representa um erro de recurso não encontrado.</summary>
     public sealed class NotFoundException : DomainException
     {
         public override HttpStatusCode StatusCode
@@ -17,10 +15,13 @@ namespace AuthCore.Domain.Core.Exceptions
             get { return "Recurso não encontrado."; }
         }
 
+        /// <summary>Operação para criar instância de exceção.</summary>
         public NotFoundException()
             : base("O recurso solicitado não foi encontrado.")
         { }
 
+        /// <summary>Operação para criar instância de exceção.</summary>
+        /// <param name="message">Mensagem do erro.</param>
         public NotFoundException(string message)
             : base(message)
         { }

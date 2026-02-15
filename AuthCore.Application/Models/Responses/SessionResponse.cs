@@ -2,6 +2,7 @@
 
 namespace AuthCore.Application.Models.Responses
 {
+    /// <summary>Representa dados de sessão do usuário.</summary>
     public sealed class SessionResponse
     {
         [JsonPropertyName("id")]
@@ -18,5 +19,8 @@ namespace AuthCore.Application.Models.Responses
 
         [JsonPropertyName("created_at")]
         public DateTime CreatedAt { get; set; }
+
+        [JsonPropertyName("is_current")]
+        public bool IsCurrent { get; set; }
     }
 }

@@ -1,9 +1,10 @@
-﻿using AuthCore.Domain.Aggregates.UserAggregate;
+﻿using AuthCore.Domain.Aggregates.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AuthCore.Infrastructure.Persistence.PostgreSQL.EFCore.Mappings
 {
+    /// <summary>Representa mapeamento EF Core do usuário.</summary>
     internal sealed class UserMap : IEntityTypeConfiguration<User>
     {
         public void Configure(EntityTypeBuilder<User> builder)

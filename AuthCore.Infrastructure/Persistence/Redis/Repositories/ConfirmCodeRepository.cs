@@ -1,27 +1,43 @@
-﻿using AuthCore.Domain.Aggregates.ConfirmCodeAggregate;
-using AuthCore.Domain.Aggregates.ConfirmCodeAggregate.Interfaces;
+﻿using AuthCore.Domain.Aggregates.ConfirmCodes;
+using AuthCore.Domain.Aggregates.ConfirmCodes.Contracts;
+using AuthCore.Domain.Core.Settings;
 using AuthCore.Infrastructure.Persistence.Redis.Mappings;
+using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using System.Text.Json;
 
 namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
 {
+    /// <summary>Representa repositório Redis de códigos de confirmação.</summary>
     public sealed class ConfirmCodeRepository : IConfirmCodeRepository
     {
         #region Constants
 
-        private const string PREFIX = "confirm-code:";
-        private static readonly TimeSpan DEFAULT_TTL = TimeSpan.FromMinutes(5);
+        private static readonly TimeSpan MIN_TTL = TimeSpan.FromSeconds(1);
+        private static readonly JsonSerializerOptions JSON_OPTIONS = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = false
+        };
 
         #endregion
 
         private readonly IDatabase _redis;
+        private readonly string _confirmCodePrefix;
 
-        public ConfirmCodeRepository(IConnectionMultiplexer connection)
+        /// <summary>Operação para criar instância do repositório de códigos.</summary>
+        /// <param name="connection">Conexão com Redis.</param>
+        /// <param name="settings">Configurações de banco.</param>
+        public ConfirmCodeRepository(IConnectionMultiplexer connection, IOptions<DatabaseSettings> settings)
         {
             _redis = connection.GetDatabase();
+            var prefix = NormalizePrefix(settings.Value.Redis.KeyPrefix);
+            _confirmCodePrefix = $"{prefix}:confirm-code:";
         }
 
+        /// <summary>Operação para obter código de confirmação.</summary>
+        /// <param name="userId">Identificador do usuário.</param>
+        /// <param name="type">Tipo do código.</param>
         public async Task<ConfirmCode?> GetAsync(Guid userId, CodeType type)
         {
             var key = BuildKey(userId, type);
@@ -30,23 +46,33 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
             if (value.IsNullOrEmpty)
                 return null;
 
-            var document = JsonSerializer.Deserialize<ConfirmCodeDocument>(value!);
+            var document = JsonSerializer.Deserialize<ConfirmCodeDocument>(value!, JSON_OPTIONS);
             if (document is null)
                 return null;
 
             return document.ToEntity();
         }
 
+        /// <summary>Operação para armazenar código de confirmação.</summary>
+        /// <param name="userId">Identificador do usuário.</param>
+        /// <param name="confirmCode">Instância do código.</param>
         public async Task SetAsync(Guid userId, ConfirmCode confirmCode)
         {
             var key = BuildKey(userId, confirmCode.Type);
 
             var document = ConfirmCodeDocument.ToDocument(confirmCode, userId);
 
-            var json = JsonSerializer.Serialize(document);
-            await _redis.StringSetAsync(key, json, DEFAULT_TTL);
+            var json = JsonSerializer.Serialize(document, JSON_OPTIONS);
+            var ttl = confirmCode.ExpiresAt - DateTime.UtcNow;
+            if (ttl <= TimeSpan.Zero)
+                ttl = MIN_TTL;
+
+            await _redis.StringSetAsync(key, json, ttl);
         }
 
+        /// <summary>Operação para remover código de confirmação.</summary>
+        /// <param name="userId">Identificador do usuário.</param>
+        /// <param name="type">Tipo do código.</param>
         public async Task DeleteAsync(Guid userId, CodeType type)
         {
             var key = BuildKey(userId, type);
@@ -55,9 +81,22 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
 
         #region Helpers
 
-        private static string BuildKey(Guid userId, CodeType type)
+        /// <summary>Operação para montar chave do código.</summary>
+        /// <param name="userId">Identificador do usuário.</param>
+        /// <param name="type">Tipo do código.</param>
+        private string BuildKey(Guid userId, CodeType type)
         {
-            return $"{PREFIX}{type.ToString().ToLower()}:{userId}";
+            return $"{_confirmCodePrefix}{type.ToString().ToLowerInvariant()}:{userId}";
+        }
+
+        /// <summary>Operação para normalizar prefixo de chave Redis.</summary>
+        /// <param name="prefix">Prefixo informado.</param>
+        private static string NormalizePrefix(string? prefix)
+        {
+            if (string.IsNullOrWhiteSpace(prefix))
+                return "authcore";
+
+            return prefix.Trim().TrimEnd(':');
         }
 
         #endregion

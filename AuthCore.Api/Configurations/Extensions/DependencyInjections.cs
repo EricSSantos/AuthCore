@@ -5,14 +5,10 @@ using Microsoft.Extensions.Options;
 
 namespace AuthCore.Api.Configurations.Extensions
 {
-    /// <summary>
-    /// Configura a injeção de dependências da aplicação.
-    /// </summary>
+    /// <summary>Configura a injeção de dependências da aplicação.</summary>
     public static class DependencyInjections
     {
-        /// <summary>
-        /// Registra módulos e serviços principais.
-        /// </summary>
+        /// <summary>Operação para registrar módulos e serviços principais.</summary>
         /// <param name="builder">Instância para configurar serviços.</param>
         public static void AddDependencyInjections(this WebApplicationBuilder builder)
         {
@@ -25,12 +21,9 @@ namespace AuthCore.Api.Configurations.Extensions
 
         #region Settings
 
-        /// <summary>
-        /// Registra configurações tipadas da aplicação.
-        /// </summary>
+        /// <summary>Operação para registrar configurações tipadas da aplicação.</summary>
         /// <param name="services">Coleção de serviços.</param>
         /// <param name="config">Configurações do appsettings.</param>
-        /// <returns>Instância atualizada de serviços.</returns>
         private static IServiceCollection AddSettings(this IServiceCollection services, IConfiguration config)
         {
             services.Configure<ApiSettings>(config.GetSection("Api"));

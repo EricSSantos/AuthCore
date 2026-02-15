@@ -1,40 +1,27 @@
 ﻿namespace AuthCore.Domain.Core.Settings
 {
-    /// <summary>
-    /// Define configurações de conexão com os bancos utilizados.
-    /// </summary>
+    /// <summary>Representa configurações de conexão com bancos.</summary>
     public class DatabaseSettings
     {
-        /// <summary>
-        /// Define conexão com o PostgreSQL.
-        /// </summary>
         public PostgresSettings Postgres { get; set; } = new();
 
-        /// <summary>
-        /// Define conexão com o Redis.
-        /// </summary>
         public RedisSettings Redis { get; set; } = new();
     }
 
-    /// <summary>
-    /// Define parâmetros de conexão para PostgreSQL.
-    /// </summary>
+    /// <summary>Representa parâmetros de conexão do PostgreSQL.</summary>
     public class PostgresSettings
     {
-        /// <summary>
-        /// Define a string de conexão do PostgreSQL.
-        /// </summary>
         public string ConnectionString { get; set; } = string.Empty;
+        public int CommandTimeoutSeconds { get; set; } = 30;
+        public int RetryCount { get; set; } = 3;
+        public int RetryDelayMilliseconds { get; set; } = 200;
     }
 
-    /// <summary>
-    /// Define parâmetros de conexão para Redis.
-    /// </summary>
+    /// <summary>Representa parâmetros de conexão do Redis.</summary>
     public class RedisSettings
     {
-        /// <summary>
-        /// Define a string de conexão do Redis.
-        /// </summary>
         public string ConnectionString { get; set; } = string.Empty;
+
+        public string KeyPrefix { get; set; } = "authcore";
     }
 }

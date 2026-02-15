@@ -1,19 +1,16 @@
 ﻿using AuthCore.Domain.Core.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 
 namespace AuthCore.Api.Configurations.Extensions
 {
-    /// <summary>
-    /// Configura a autenticação JWT da aplicação.
-    /// </summary>
+    /// <summary>Configura a autenticação JWT da aplicação.</summary>
     public static class AuthenticationExtensions
     {
-        /// <summary>
-        /// Adiciona e configura autenticação JWT.
-        /// </summary>
+        /// <summary>Operação para adicionar e configura autenticação JWT.</summary>
         /// <param name="builder">Instância para configurar serviços.</param>
         public static void AddAuthentication(this WebApplicationBuilder builder)
         {
@@ -27,11 +24,8 @@ namespace AuthCore.Api.Configurations.Extensions
 
         #region Helpers
 
-        /// <summary>
-        /// Carrega a chave pública usada na validação JWT.
-        /// </summary>
+        /// <summary>Operação para carregar a chave pública usada na validação JWT.</summary>
         /// <param name="securitySettings">Configurações de segurança.</param>
-        /// <returns>Chave pública ECDSA.</returns>
         private static ECDsaSecurityKey GetPublicKey(SecuritySettings securitySettings)
         {
             var keyPath = securitySettings.Keys.Asymmetric.PublicKeyPath
@@ -47,9 +41,7 @@ namespace AuthCore.Api.Configurations.Extensions
             return new ECDsaSecurityKey(ecdsa);
         }
 
-        /// <summary>
-        /// Configura o esquema e validação JWT.
-        /// </summary>
+        /// <summary>Operação para configurar o esquema e validação JWT.</summary>
         /// <param name="services">Coleção de serviços.</param>
         /// <param name="settings">Configurações carregadas.</param>
         /// <param name="publicKey">Chave pública de validação.</param>
@@ -70,7 +62,9 @@ namespace AuthCore.Api.Configurations.Extensions
                     {
                         OnMessageReceived = context =>
                         {
-                            context.Token = context.Request.Cookies["access_token"];
+                            var settings = context.HttpContext.RequestServices
+                                .GetRequiredService<IOptions<SecuritySettings>>().Value;
+                            context.Token = context.Request.Cookies[settings.Cookies.AccessTokenKey];
                             return Task.CompletedTask;
                         }
                     };

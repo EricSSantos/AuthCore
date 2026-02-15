@@ -4,12 +4,14 @@ using AuthCore.Domain.Core.Settings;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Logging;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 
 namespace AuthCore.Infrastructure.Security
 {
+    /// <summary>Representa provedor de criação e leitura de JWT.</summary>
     public sealed class JwtTokenProvider : IJwtTokenProvider
     {
         private readonly IEcdsaProvider _ecdsa;
@@ -17,16 +19,19 @@ namespace AuthCore.Infrastructure.Security
         private readonly SecuritySettings _settings;
         private readonly SigningCredentials _credentials;
         private readonly JwtSecurityTokenHandler _handler;
+        private readonly ILogger<JwtTokenProvider> _logger;
 
         public JwtTokenProvider(
             IEcdsaProvider ecdsa,
             IHttpContextAccessor httpContext,
-            IOptions<SecuritySettings> settings)
+            IOptions<SecuritySettings> settings,
+            ILogger<JwtTokenProvider> logger)
         {
             _ecdsa = ecdsa;
             _httpContext = httpContext;
             _settings = settings.Value;
             _handler = new JwtSecurityTokenHandler();
+            _logger = logger;
 
             var ecdsaPriv = ECDsa.Create();
             ecdsaPriv.ImportPkcs8PrivateKey(_ecdsa.PrivateKey, out _);
@@ -42,7 +47,10 @@ namespace AuthCore.Infrastructure.Security
                 var claimValue = GetClaimValue(JwtRegisteredClaimNames.Sub, ClaimTypes.NameIdentifier);
 
                 if (string.IsNullOrWhiteSpace(claimValue) || !Guid.TryParse(claimValue, out var userId))
+                {
+                    _logger.LogWarning("Claim 'sub' ausente ou inválido.");
                     throw new UnauthorizedException("Claim 'sub' ausente ou inválido.");
+                }
 
                 return userId;
             }
@@ -64,6 +72,7 @@ namespace AuthCore.Infrastructure.Security
                 signingCredentials: _credentials
             );
 
+            _logger.LogInformation("JWT gerado para usuário {UserId}.", userId);
             return _handler.WriteToken(token);
         }
 
@@ -73,7 +82,10 @@ namespace AuthCore.Infrastructure.Security
         {
             var principal = _httpContext.HttpContext?.User;
             if (principal is null || principal.Identity?.IsAuthenticated is not true)
+            {
+                _logger.LogWarning("Usuário não autenticado ou contexto inválido.");
                 throw new UnauthorizedException("Usuário não autenticado ou contexto inválido.");
+            }
 
             return principal;
         }

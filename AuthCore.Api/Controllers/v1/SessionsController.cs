@@ -1,6 +1,6 @@
 ﻿using AuthCore.Application.Models;
 using AuthCore.Application.Models.Responses;
-using AuthCore.Application.UseCases.SessionCase.Interfaces;
+using AuthCore.Application.UseCases.Sessions.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -12,9 +12,7 @@ namespace AuthCore.Api.Controllers.v1
     [Route("api/v1/sessions")]
     public sealed class SessionsController : ControllerBase
     {
-        /// <summary>
-        /// Retorna as sessões ativas do usuário.
-        /// </summary>
+        /// <summary>Retorna as sessões ativas do usuário.</summary>
         [HttpGet]
         [ProducesResponseType(typeof(ApiResponse<IEnumerable<SessionResponse>>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<ApiResponse<IEnumerable<SessionResponse>>>> GetAll(
@@ -29,9 +27,7 @@ namespace AuthCore.Api.Controllers.v1
             ));
         }
 
-        /// <summary>
-        /// Revoga todas as sessões do usuário exceto a atual.
-        /// </summary>
+        /// <summary>Revoga todas as sessões do usuário exceto a atual.</summary>
         [HttpDelete]
         [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<ApiResponse<object>>> Revoke(

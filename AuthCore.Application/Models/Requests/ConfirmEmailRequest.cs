@@ -2,6 +2,7 @@
 
 namespace AuthCore.Application.Models.Requests
 {
+    /// <summary>Representa dados para confirmação de e-mail.</summary>
     public sealed record ConfirmEmailRequest
     {
         [JsonIgnore]

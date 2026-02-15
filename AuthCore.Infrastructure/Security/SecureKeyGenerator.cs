@@ -7,6 +7,7 @@ using System.Text;
 
 namespace AuthCore.Infrastructure.Security
 {
+    /// <summary>Representa serviço de geração de chaves seguras.</summary>
     public sealed class SecureKeyGenerator : ISecureKeyGenerator
     {
         private readonly byte[] _key;

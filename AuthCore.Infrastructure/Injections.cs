@@ -1,13 +1,13 @@
-﻿using AuthCore.Domain.Aggregates.ConfirmCodeAggregate.Interfaces;
-using AuthCore.Domain.Aggregates.MessagingAggregate.Interfaces;
-using AuthCore.Domain.Aggregates.SessionAggregate.Interfaces;
-using AuthCore.Domain.Aggregates.UserAggregate.Interfaces;
-using AuthCore.Domain.Core.Interfaces.Infrastructure.Http;
-using AuthCore.Domain.Core.Interfaces.Infrastructure.Messaging;
+﻿using AuthCore.Domain.Aggregates.ConfirmCodes.Contracts;
+using AuthCore.Domain.Aggregates.Notifications.Contracts;
+using AuthCore.Domain.Aggregates.Sessions.Contracts;
+using AuthCore.Domain.Aggregates.Users.Contracts;
+using AuthCore.Domain.Core.Interfaces.Infrastructure.Web;
+using AuthCore.Domain.Core.Interfaces.Infrastructure.Notifications;
 using AuthCore.Domain.Core.Interfaces.Infrastructure.Security;
 using AuthCore.Domain.Core.Settings;
-using AuthCore.Infrastructure.Http;
-using AuthCore.Infrastructure.Messaging.RabbitMq;
+using AuthCore.Infrastructure.Web;
+using AuthCore.Infrastructure.Notifications.RabbitMq;
 using AuthCore.Infrastructure.Persistence.PostgreSQL.ADO.Context;
 using AuthCore.Infrastructure.Persistence.PostgreSQL.Repositories;
 using AuthCore.Infrastructure.Persistence.Redis.Repositories;
@@ -19,11 +19,10 @@ using StackExchange.Redis;
 
 namespace AuthCore.Infrastructure
 {
+    /// <summary>Representa registro de dependências da infraestrutura.</summary>
     public static class Injections
     {
-        /// <summary>
-        /// Registra toda a infraestrutura da aplicação.
-        /// </summary>
+        /// <summary>Operação para registrar toda a infraestrutura da aplicação.</summary>
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<DatabaseSettings>(configuration.GetSection("Database"));
@@ -37,22 +36,10 @@ namespace AuthCore.Infrastructure
 
         #region PostgreSQL
 
-        /// <summary>
-        /// Adiciona o contexto ADO para acesso ao PostgreSQL.
-        /// </summary>
+        /// <summary>Operação para adicionar o contexto ADO para acesso ao PostgreSQL.</summary>
         private static IServiceCollection AddPostgreSqlConnection(this IServiceCollection services)
         {
-            services.AddSingleton<AdoDbContext>(sp =>
-            {
-                IOptions<DatabaseSettings> options = sp.GetRequiredService<IOptions<DatabaseSettings>>();
-                DatabaseSettings databaseSettings = options.Value;
-
-                if (databaseSettings.Postgres is null ||
-                    string.IsNullOrWhiteSpace(databaseSettings.Postgres.ConnectionString))
-                    throw new InvalidOperationException("A string de conexão do PostgreSQL não foi definida.");
-
-                return new AdoDbContext(databaseSettings.Postgres.ConnectionString);
-            });
+            services.AddSingleton<AdoDbContext>();
 
             return services;
         }
@@ -61,9 +48,7 @@ namespace AuthCore.Infrastructure
 
         #region Redis
 
-        /// <summary>
-        /// Configura o Redis para cache e armazenamento.
-        /// </summary>
+        /// <summary>Operação para configurar o Redis para cache e armazenamento.</summary>
         private static IServiceCollection AddRedis(this IServiceCollection services, IConfiguration configuration)
         {
             DatabaseSettings databaseSettings = configuration
@@ -90,9 +75,7 @@ namespace AuthCore.Infrastructure
 
         #region Repositories
 
-        /// <summary>
-        /// Registra os repositórios da aplicação.
-        /// </summary>
+        /// <summary>Operação para registrar os repositórios da aplicação.</summary>
         private static IServiceCollection AddRepositories(this IServiceCollection services)
         {
             services.AddScoped<IUserRepository, UserRepository>();
@@ -105,9 +88,7 @@ namespace AuthCore.Infrastructure
 
         #region Infrastructure Services
 
-        /// <summary>
-        /// Registra serviços auxiliares da infraestrutura.
-        /// </summary>
+        /// <summary>Operação para registrar serviços auxiliares da infraestrutura.</summary>
         private static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
         {
             services.AddScoped<ICookie, CookieService>();
@@ -119,7 +100,7 @@ namespace AuthCore.Infrastructure
             services.AddScoped<IJwtTokenProvider, JwtTokenProvider>();
             services.AddScoped<ISessionState, SessionState>();
             services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
-            services.AddSingleton<IEmailPublisher, EmailPublisher>();
+            services.AddSingleton<IEmailSender, EmailSender>();
             return services;
         }
 

@@ -2,9 +2,7 @@
 
 namespace AuthCore.Api.Configurations.Extensions
 {
-    /// <summary>
-    /// Configura as políticas de CORS da aplicação.
-    /// </summary>
+    /// <summary>Configura as políticas de CORS da aplicação.</summary>
     public static class Cors
     {
         #region Constants
@@ -14,9 +12,7 @@ namespace AuthCore.Api.Configurations.Extensions
 
         #endregion
 
-        /// <summary>
-        /// Adiciona políticas de CORS com base nas configurações.
-        /// </summary>
+        /// <summary>Operação para adicionar políticas de CORS com base nas configurações.</summary>
         /// <param name="builder">Instância para configurar serviços.</param>
         public static void AddCorsPolicies(this WebApplicationBuilder builder)
         {
@@ -42,9 +38,7 @@ namespace AuthCore.Api.Configurations.Extensions
             });
         }
 
-        /// <summary>
-        /// Ativa HTTPS, roteamento e aplica a política correta.
-        /// </summary>
+        /// <summary>Operação para ativar hTTPS, roteamento e aplica a política correta.</summary>
         /// <param name="app">Instância para configurar o pipeline.</param>
         public static void UseCorsAndHttps(this WebApplication app)
         {

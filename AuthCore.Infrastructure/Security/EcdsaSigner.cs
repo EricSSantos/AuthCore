@@ -7,6 +7,7 @@ using System.Text;
 
 namespace AuthCore.Infrastructure.Security
 {
+    /// <summary>Representa serviço de assinatura e provedor ECDSA.</summary>
     public sealed class EcdsaSigner : IEcdsaSigner, IEcdsaProvider
     {
         #region Constants

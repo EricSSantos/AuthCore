@@ -3,14 +3,10 @@ using Microsoft.OpenApi.Models;
 
 namespace AuthCore.Api.Configurations.Extensions
 {
-    /// <summary>
-    /// Configura o Swagger da aplicação.
-    /// </summary>
+    /// <summary>Configura o Swagger da aplicação.</summary>
     public static class Swagger
     {
-        /// <summary>
-        /// Registra o Swagger nos serviços.
-        /// </summary>
+        /// <summary>Operação para registrar o Swagger nos serviços.</summary>
         /// <param name="builder">Instância usada para configurar os serviços.</param>
         public static void AddSwaggerService(this WebApplicationBuilder builder)
         {
@@ -38,9 +34,7 @@ namespace AuthCore.Api.Configurations.Extensions
             });
         }
 
-        /// <summary>
-        /// Ativa o Swagger e a interface Swagger UI.
-        /// </summary>
+        /// <summary>Operação para ativar o Swagger e a interface Swagger UI.</summary>
         /// <param name="app">Instância usada para configurar o pipeline HTTP.</param>
         public static void UseSwaggerDoc(this WebApplication app)
         {

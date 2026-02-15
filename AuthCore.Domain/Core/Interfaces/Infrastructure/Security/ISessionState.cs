@@ -1,46 +1,31 @@
-﻿using AuthCore.Domain.Aggregates.SessionAggregate;
-using AuthCore.Domain.Aggregates.UserAggregate;
+﻿using AuthCore.Domain.Aggregates.Sessions;
+using AuthCore.Domain.Aggregates.Users;
 
 namespace AuthCore.Domain.Core.Interfaces.Infrastructure.Security
 {
-    /// <summary>
-    /// Define operações para gerenciar autenticação e sessões ativas.
-    /// </summary>
+    /// <summary>Define operações para gerenciar autenticação e sessões ativas.</summary>
     public interface ISessionState
     {
-        /// <summary>
-        /// Obtém o identificador da sessão atual.
-        /// </summary>
         string Session { get; }
 
-        /// <summary>
-        /// Obtém o usuário autenticado da sessão atual.
-        /// </summary>
-        /// <returns>Usuário autenticado.</returns>
+        /// <summary>Operação para obter usuário autenticado.</summary>
         Task<User> GetCurrentUser();
 
-        /// <summary>
-        /// Obtém a sessão ativa do usuário.
-        /// </summary>
-        /// <returns>Sessão atual validada.</returns>
+        /// <summary>Operação para obter sessão atual.</summary>
         Task<Session> GetCurrentSession();
 
-        /// <summary>
-        /// Obtém as demais sessões ativas do usuário.
-        /// </summary>
-        /// <returns>Coleção somente leitura de sessões.</returns>
-        Task<IReadOnlyCollection<Session>> GetOtherSessions();
+        /// <summary>Operação para obter usuário e sessão atual via cookie.</summary>
+        Task<(User User, Session Session)> GetCurrentUserFromSession();
 
-        /// <summary>
-        /// Define ou atualiza cookies de autenticação.
-        /// </summary>
+        /// <summary>Operação para obter todas as sessões ativas.</summary>
+        Task<IReadOnlyCollection<Session>> GetActiveSessions();
+
+        /// <summary>Operação para definir cookies de autenticação.</summary>
         /// <param name="rawSession">Identificador da sessão.</param>
         /// <param name="accessToken">Token de acesso.</param>
         void SetCookies(string rawSession, string accessToken);
 
-        /// <summary>
-        /// Remove cookies de autenticação.
-        /// </summary>
+        /// <summary>Operação para remover cookies de autenticação.</summary>
         void ClearCookies();
     }
 }
