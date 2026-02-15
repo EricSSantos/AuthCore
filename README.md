@@ -11,8 +11,7 @@ A ideia é transformar este projeto em um boilerplate para iniciar APIs em .NET 
 
 ## Como rodar
 
-1. Configure `appsettings.json` e `appsettings.Development.json` (ou `.env` no Docker)
-2. Build
+1. Build
 
    ```bash
    dotnet build
@@ -20,7 +19,7 @@ A ideia é transformar este projeto em um boilerplate para iniciar APIs em .NET 
 3. Criar migration
 
    ```bash
-   dotnet ef migrations add InitialCreate --project AuthCore.Infrastructure --startup-project AuthCore.Api --context EFCoreDbContext
+   dotnet ef migrations add InitialCreate --output-dir Persistence/Migrations --project AuthCore.Infrastructure --startup-project AuthCore.Api --context EFCoreDbContext
    ```
 4. Aplicar migrations
 
@@ -33,7 +32,7 @@ A ideia é transformar este projeto em um boilerplate para iniciar APIs em .NET 
    dotnet run --project AuthCore.Api
    ```
 
-## Configuração
+## Configurações
 
 ### Local
 
