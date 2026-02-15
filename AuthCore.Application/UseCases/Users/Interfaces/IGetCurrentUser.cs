@@ -1,6 +1,6 @@
 ﻿using AuthCore.Application.Models.Responses;
 
-namespace AuthCore.Application.UseCases.Users.Contracts
+namespace AuthCore.Application.UseCases.Users.Interfaces
 {
     /// <summary>Define operação para obter o usuário autenticado.</summary>
     public interface IGetCurrentUser

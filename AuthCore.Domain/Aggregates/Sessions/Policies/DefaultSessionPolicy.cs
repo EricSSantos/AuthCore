@@ -1,4 +1,5 @@
 using System.Linq;
+using AuthCore.Domain.Aggregates.Sessions.Interfaces;
 using AuthCore.Domain.Core.Settings;
 
 namespace AuthCore.Domain.Aggregates.Sessions.Policies

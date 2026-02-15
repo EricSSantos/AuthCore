@@ -1,6 +1,6 @@
 ﻿using AuthCore.Application.Models;
 using AuthCore.Application.Models.Requests;
-using AuthCore.Application.UseCases.Notifications.Contracts;
+using AuthCore.Application.UseCases.Notifications.Interfaces;
 using AuthCore.Domain.Aggregates.Notifications;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;

@@ -1,4 +1,4 @@
-﻿namespace AuthCore.Domain.Aggregates.Users.Contracts
+﻿namespace AuthCore.Domain.Aggregates.Users.Interfaces
 {
     /// <summary>Define operações de persistência do agregado User.</summary>
     public interface IUserRepository

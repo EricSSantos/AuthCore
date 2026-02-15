@@ -1,5 +1,5 @@
-﻿using AuthCore.Application.UseCases.Auth.Contracts;
-using AuthCore.Domain.Aggregates.Sessions.Contracts;
+﻿using AuthCore.Application.UseCases.Auth.Interfaces;
+using AuthCore.Domain.Aggregates.Sessions.Interfaces;
 using AuthCore.Domain.Core.Interfaces.Infrastructure.Security;
 using Microsoft.Extensions.Logging;
 

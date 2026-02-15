@@ -1,6 +1,6 @@
 ﻿using AuthCore.Application.Models.Requests;
 
-namespace AuthCore.Application.UseCases.Users.Contracts
+namespace AuthCore.Application.UseCases.Users.Interfaces
 {
     /// <summary>Define operação para alterar a senha do usuário.</summary>
     public interface IChangePassword

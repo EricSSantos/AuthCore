@@ -1,7 +1,7 @@
 ﻿using AuthCore.Domain.Aggregates.Sessions;
-using AuthCore.Domain.Aggregates.Sessions.Contracts;
+using AuthCore.Domain.Aggregates.Sessions.Interfaces;
 using AuthCore.Domain.Aggregates.Users;
-using AuthCore.Domain.Aggregates.Users.Contracts;
+using AuthCore.Domain.Aggregates.Users.Interfaces;
 using AuthCore.Domain.Core.Exceptions;
 using AuthCore.Domain.Core.Interfaces.Infrastructure.Web;
 using AuthCore.Domain.Core.Interfaces.Infrastructure.Security;

@@ -1,4 +1,4 @@
-﻿namespace AuthCore.Domain.Aggregates.Sessions.Contracts
+﻿namespace AuthCore.Domain.Aggregates.Sessions.Interfaces
 {
     /// <summary>Define operações de persistência do agregado Session.</summary>
     public interface ISessionRepository

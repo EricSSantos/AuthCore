@@ -1,5 +1,5 @@
-﻿using AuthCore.Application.UseCases.Sessions.Contracts;
-using AuthCore.Domain.Aggregates.Sessions.Contracts;
+﻿using AuthCore.Application.UseCases.Sessions.Interfaces;
+using AuthCore.Domain.Aggregates.Sessions.Interfaces;
 using AuthCore.Domain.Core.Interfaces.Infrastructure.Security;
 
 namespace AuthCore.Application.UseCases.Sessions

@@ -1,13 +1,11 @@
 ﻿using AuthCore.Application.Models.Requests;
-using AuthCore.Application.UseCases.Users.Contracts;
+using AuthCore.Application.UseCases.Users.Interfaces;
 using AuthCore.Domain.Aggregates.ConfirmCodes;
-using AuthCore.Domain.Aggregates.ConfirmCodes.Contracts;
-using AuthCore.Domain.Aggregates.ConfirmCodes.Policies;
+using AuthCore.Domain.Aggregates.ConfirmCodes.Interfaces;
 using AuthCore.Domain.Aggregates.Notifications;
-using AuthCore.Domain.Aggregates.Notifications.Contracts;
-using AuthCore.Domain.Aggregates.Notifications.Policies;
+using AuthCore.Domain.Aggregates.Notifications.Interfaces;
 using AuthCore.Domain.Aggregates.Users;
-using AuthCore.Domain.Aggregates.Users.Contracts;
+using AuthCore.Domain.Aggregates.Users.Interfaces;
 using AuthCore.Domain.Core.Exceptions;
 using AuthCore.Domain.Core.Interfaces.Infrastructure.Security;
 

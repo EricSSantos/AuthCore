@@ -1,7 +1,7 @@
-﻿using AuthCore.Domain.Aggregates.ConfirmCodes.Contracts;
-using AuthCore.Domain.Aggregates.Notifications.Contracts;
-using AuthCore.Domain.Aggregates.Sessions.Contracts;
-using AuthCore.Domain.Aggregates.Users.Contracts;
+﻿using AuthCore.Domain.Aggregates.ConfirmCodes.Interfaces;
+using AuthCore.Domain.Aggregates.Notifications.Interfaces;
+using AuthCore.Domain.Aggregates.Sessions.Interfaces;
+using AuthCore.Domain.Aggregates.Users.Interfaces;
 using AuthCore.Domain.Core.Interfaces.Infrastructure.Web;
 using AuthCore.Domain.Core.Interfaces.Infrastructure.Notifications;
 using AuthCore.Domain.Core.Interfaces.Infrastructure.Security;

@@ -1,4 +1,4 @@
-﻿namespace AuthCore.Application.UseCases.Auth.Contracts
+﻿namespace AuthCore.Application.UseCases.Auth.Interfaces
 {
     /// <summary>Define operação para renovar o token de acesso.</summary>
     public interface IRefresh

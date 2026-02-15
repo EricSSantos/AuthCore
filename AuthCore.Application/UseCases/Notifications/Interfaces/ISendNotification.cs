@@ -1,6 +1,6 @@
 ﻿using AuthCore.Application.Models.Requests;
 
-namespace AuthCore.Application.UseCases.Notifications.Contracts
+namespace AuthCore.Application.UseCases.Notifications.Interfaces
 {
     /// <summary>Define operação para envio de e-mails.</summary>
     public interface ISendNotification

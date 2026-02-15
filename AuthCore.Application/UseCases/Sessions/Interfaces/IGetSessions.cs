@@ -1,6 +1,6 @@
 ﻿using AuthCore.Application.Models.Responses;
 
-namespace AuthCore.Application.UseCases.Sessions.Contracts
+namespace AuthCore.Application.UseCases.Sessions.Interfaces
 {
     /// <summary>Define operação para listar sessões do usuário.</summary>
     public interface IGetSessions

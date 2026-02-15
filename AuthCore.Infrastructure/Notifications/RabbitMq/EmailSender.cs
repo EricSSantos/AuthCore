@@ -1,5 +1,5 @@
 ﻿using AuthCore.Domain.Aggregates.Notifications;
-using AuthCore.Domain.Aggregates.Notifications.Contracts;
+using AuthCore.Domain.Aggregates.Notifications.Interfaces;
 using AuthCore.Domain.Core.Interfaces.Infrastructure.Notifications;
 using AuthCore.Domain.Core.Settings;
 using AuthCore.Infrastructure.Notifications.RabbitMq.Mappings;

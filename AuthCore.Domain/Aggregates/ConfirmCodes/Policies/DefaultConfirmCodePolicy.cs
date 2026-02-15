@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using AuthCore.Domain.Aggregates.ConfirmCodes.Interfaces;
 using AuthCore.Domain.Core.Settings;
 
 namespace AuthCore.Domain.Aggregates.ConfirmCodes.Policies

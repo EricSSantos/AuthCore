@@ -1,5 +1,5 @@
 ﻿using AuthCore.Application.Models.Responses;
-using AuthCore.Application.UseCases.Users.Contracts;
+using AuthCore.Application.UseCases.Users.Interfaces;
 using AuthCore.Domain.Core.Interfaces.Infrastructure.Security;
 
 namespace AuthCore.Application.UseCases.Users

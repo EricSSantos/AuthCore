@@ -1,5 +1,4 @@
-using AuthCore.Domain.Aggregates.Sessions.Contracts;
-using AuthCore.Domain.Aggregates.Sessions.Policies;
+using AuthCore.Domain.Aggregates.Sessions.Interfaces;
 using AuthCore.Domain.Aggregates.Sessions.Results;
 using AuthCore.Domain.Core.Interfaces.Infrastructure.Security;
 

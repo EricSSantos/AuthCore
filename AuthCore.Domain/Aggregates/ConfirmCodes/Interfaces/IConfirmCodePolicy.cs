@@ -1,4 +1,4 @@
-namespace AuthCore.Domain.Aggregates.ConfirmCodes.Policies
+namespace AuthCore.Domain.Aggregates.ConfirmCodes.Interfaces
 {
     /// <summary>Define operações de política de código de confirmação.</summary>
     public interface IConfirmCodePolicy

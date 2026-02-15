@@ -1,6 +1,6 @@
 ﻿using AuthCore.Application.Models;
 using AuthCore.Application.Models.Requests;
-using AuthCore.Application.UseCases.Auth.Contracts;
+using AuthCore.Application.UseCases.Auth.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;

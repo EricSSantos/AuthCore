@@ -1,5 +1,5 @@
 ﻿using AuthCore.Domain.Aggregates.ConfirmCodes;
-using AuthCore.Domain.Aggregates.ConfirmCodes.Contracts;
+using AuthCore.Domain.Aggregates.ConfirmCodes.Interfaces;
 using AuthCore.Domain.Core.Settings;
 using AuthCore.Infrastructure.Persistence.Redis.Mappings;
 using Microsoft.Extensions.Options;

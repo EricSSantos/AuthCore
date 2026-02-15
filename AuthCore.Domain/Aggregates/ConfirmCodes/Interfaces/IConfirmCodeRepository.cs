@@ -1,4 +1,4 @@
-﻿namespace AuthCore.Domain.Aggregates.ConfirmCodes.Contracts
+﻿namespace AuthCore.Domain.Aggregates.ConfirmCodes.Interfaces
 {
     /// <summary>Define operações de persistência do agregado ConfirmCode.</summary>
     public interface IConfirmCodeRepository

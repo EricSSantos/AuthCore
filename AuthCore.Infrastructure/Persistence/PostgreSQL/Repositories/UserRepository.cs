@@ -1,5 +1,5 @@
 ﻿using AuthCore.Domain.Aggregates.Users;
-using AuthCore.Domain.Aggregates.Users.Contracts;
+using AuthCore.Domain.Aggregates.Users.Interfaces;
 using AuthCore.Infrastructure.Persistence.PostgreSQL.ADO.Context;
 using Npgsql;
 

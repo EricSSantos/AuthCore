@@ -1,5 +1,5 @@
 ﻿using AuthCore.Domain.Aggregates.Sessions;
-using AuthCore.Domain.Aggregates.Sessions.Contracts;
+using AuthCore.Domain.Aggregates.Sessions.Interfaces;
 using AuthCore.Domain.Core.Settings;
 using AuthCore.Infrastructure.Persistence.Redis.Mappings;
 using Microsoft.Extensions.Options;

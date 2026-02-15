@@ -1,6 +1,6 @@
 ﻿using AuthCore.Application.Models.Requests;
 
-namespace AuthCore.Application.UseCases.Users.Contracts
+namespace AuthCore.Application.UseCases.Users.Interfaces
 {
     /// <summary>Define operação para redefinir a senha do usuário.</summary>
     public interface IResetPassword

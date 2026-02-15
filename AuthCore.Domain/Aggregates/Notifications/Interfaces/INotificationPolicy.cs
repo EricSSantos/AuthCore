@@ -1,6 +1,6 @@
 using AuthCore.Domain.Aggregates.Notifications.Payloads;
 
-namespace AuthCore.Domain.Aggregates.Notifications.Policies
+namespace AuthCore.Domain.Aggregates.Notifications.Interfaces
 {
     /// <summary>Define operações de política de notificação.</summary>
     public interface INotificationPolicy

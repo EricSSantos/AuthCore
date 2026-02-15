@@ -1,4 +1,4 @@
-namespace AuthCore.Domain.Aggregates.Users.Policies
+namespace AuthCore.Domain.Aggregates.Users.Interfaces
 {
     /// <summary>Define operações de política de autenticação de usuário.</summary>
     public interface IUserAuthenticationPolicy

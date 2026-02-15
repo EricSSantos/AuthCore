@@ -1,4 +1,4 @@
-﻿namespace AuthCore.Domain.Aggregates.Notifications.Contracts
+﻿namespace AuthCore.Domain.Aggregates.Notifications.Interfaces
 {
     /// <summary>Define operações para envio de notificações por e-mail.</summary>
     public interface IEmailSender

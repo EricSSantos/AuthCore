@@ -1,5 +1,5 @@
 ﻿using AuthCore.Domain.Aggregates.Notifications.Payloads;
-using AuthCore.Domain.Aggregates.Notifications.Policies;
+using AuthCore.Domain.Aggregates.Notifications.Interfaces;
 using AuthCore.Domain.Aggregates.Users;
 using AuthCore.Domain.Core.Exceptions;
 using AuthCore.Domain.Core.Interfaces.Base;

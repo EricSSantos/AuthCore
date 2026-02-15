@@ -1,4 +1,4 @@
-﻿namespace AuthCore.Application.UseCases.Sessions.Contracts
+﻿namespace AuthCore.Application.UseCases.Sessions.Interfaces
 {
     /// <summary>Define operação para revogar a sessão atual.</summary>
     public interface IRevokeSession

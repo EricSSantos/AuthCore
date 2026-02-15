@@ -1,7 +1,7 @@
 using AuthCore.Domain.Aggregates.Sessions;
 using AuthCore.Domain.Aggregates.Sessions.Results;
 
-namespace AuthCore.Domain.Aggregates.Sessions.Contracts
+namespace AuthCore.Domain.Aggregates.Sessions.Interfaces
 {
     /// <summary>Define operações de domínio relacionadas ao ciclo de vida de sessões.</summary>
     public interface ISessionService

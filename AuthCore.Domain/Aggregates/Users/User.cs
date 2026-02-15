@@ -1,7 +1,7 @@
 ﻿using AuthCore.Domain.Core.Exceptions;
 using AuthCore.Domain.Core.Interfaces.Base;
 using AuthCore.Domain.Core.Interfaces.Infrastructure.Security;
-using AuthCore.Domain.Aggregates.Users.Policies;
+using AuthCore.Domain.Aggregates.Users.Interfaces;
 
 namespace AuthCore.Domain.Aggregates.Users
 {

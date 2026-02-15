@@ -1,4 +1,4 @@
-namespace AuthCore.Domain.Aggregates.Sessions.Policies
+namespace AuthCore.Domain.Aggregates.Sessions.Interfaces
 {
     /// <summary>Define operações de política de sessão.</summary>
     public interface ISessionPolicy

@@ -1,3 +1,4 @@
+using AuthCore.Domain.Aggregates.Users.Interfaces;
 using AuthCore.Domain.Core.Exceptions;
 using AuthCore.Domain.Core.Settings;
 

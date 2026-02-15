@@ -1,6 +1,6 @@
 ﻿using AuthCore.Application.Models.Requests;
 
-namespace AuthCore.Application.UseCases.Auth.Contracts
+namespace AuthCore.Application.UseCases.Auth.Interfaces
 {
     /// <summary>Define operação para autenticar o usuário.</summary>
     public interface ISignIn

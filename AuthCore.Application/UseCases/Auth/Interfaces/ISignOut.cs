@@ -1,4 +1,4 @@
-﻿namespace AuthCore.Application.UseCases.Auth.Contracts
+﻿namespace AuthCore.Application.UseCases.Auth.Interfaces
 {
     /// <summary>Define operação para encerrar a sessão do usuário.</summary>
     public interface ISignOut
