@@ -74,3 +74,9 @@ RABBITMQ__PASSWORD=<RABBITMQ_PASSWORD>
 RABBITMQ__EMAILQUEUE=<RABBITMQ_EMAILQUEUE>
 RABBITMQ__DEADLETTERQUEUE=<RABBITMQ_DEADLETTERQUEUE>
 ```
+
+### Modelagem
+
+<p align="center">
+  <img width="720" height="720" alt="User" src="https://github.com/user-attachments/assets/e8f49f51-5feb-4cd4-948b-388d50295802" />
+</p>
