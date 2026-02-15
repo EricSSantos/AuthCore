@@ -3,7 +3,7 @@
 namespace AuthCore.Domain.Core.Exceptions
 {
     /// <summary>Representa um erro de conflito de recurso.</summary>
-    public sealed class ConflictException : DomainException
+    public class ConflictException : DomainException
     {
         public override HttpStatusCode StatusCode
         {

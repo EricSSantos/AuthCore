@@ -15,6 +15,9 @@ namespace AuthCore.Api.Controllers.v1
         /// <summary>Retorna as sessões ativas do usuário.</summary>
         [HttpGet]
         [ProducesResponseType(typeof(ApiResponse<IEnumerable<SessionResponse>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<ApiResponse<IEnumerable<SessionResponse>>>> GetAll(
             [FromServices] IGetSessions getSessions)
         {
@@ -29,17 +32,16 @@ namespace AuthCore.Api.Controllers.v1
 
         /// <summary>Revoga todas as sessões do usuário exceto a atual.</summary>
         [HttpDelete]
-        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<ApiResponse<object>>> Revoke(
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Revoke(
             [FromServices] IRevokeSession revokeSessions)
         {
             await revokeSessions.OnExecuteAsync();
 
-            return Ok(ApiResponse<object>.Success(
-                null!,
-                "Sessões revogadas com sucesso.",
-                HttpStatusCode.OK
-            ));
+            return NoContent();
         }
     }
 }

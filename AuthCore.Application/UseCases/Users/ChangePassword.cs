@@ -33,7 +33,7 @@ namespace AuthCore.Application.UseCases.Users
             var user = await _sessionState.GetCurrentUser();
 
             if (!_passwordHasher.IsValid(request.CurrentPassword, user.Password.Value))
-                throw new BadRequestException("A senha atual está incorreta.");
+                throw new InvalidPasswordException("A senha atual está incorreta.");
 
             Password.ValidateWithConfirmation(request.NewPassword, request.ConfirmNewPassword);
 

@@ -3,7 +3,7 @@
 namespace AuthCore.Domain.Core.Exceptions
 {
     /// <summary>Representa um erro de requisição inválida.</summary>
-    public sealed class BadRequestException : DomainException
+    public class BadRequestException : DomainException
     {
         public override HttpStatusCode StatusCode
         {

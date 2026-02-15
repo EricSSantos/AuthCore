@@ -13,7 +13,12 @@ namespace AuthCore.Api.Controllers.v1
     {
         /// <summary>Operação para autenticar o usuário e inicia sessão.</summary>
         [HttpPost("sign-in")]
-        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.TooManyRequests)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<ApiResponse<object>>> SignIn(
             [FromBody] SignInRequest request,
             [FromServices] ISignIn signIn)
@@ -23,14 +28,17 @@ namespace AuthCore.Api.Controllers.v1
             return Ok(ApiResponse<object>.Success(
                 null!,
                 "Login realizado com sucesso.",
-                HttpStatusCode.NoContent
+                HttpStatusCode.OK
             ));
         }
 
         /// <summary>Encerra a sessão atual do usuário.</summary>
         [Authorize]
         [HttpPost("sign-out")]
-        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<ApiResponse<object>>> SignOut(
             [FromServices] ISignOut signOut)
         {
@@ -39,13 +47,16 @@ namespace AuthCore.Api.Controllers.v1
             return Ok(ApiResponse<object>.Success(
                 null!,
                 "Logout realizado com sucesso.",
-                HttpStatusCode.NoContent
+                HttpStatusCode.OK
             ));
         }
 
         /// <summary>Operação para renovar o token de acesso do usuário.</summary>
         [HttpPost("refresh-token")]
-        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<ApiResponse<object>>> RefreshToken(
             [FromServices] IRefresh refresh)
         {
@@ -54,7 +65,7 @@ namespace AuthCore.Api.Controllers.v1
             return Ok(ApiResponse<object>.Success(
                 null!,
                 "Sessão atualizada com sucesso.",
-                HttpStatusCode.NoContent
+                HttpStatusCode.OK
             ));
         }
     }

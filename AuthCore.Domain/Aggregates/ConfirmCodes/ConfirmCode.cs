@@ -109,7 +109,7 @@ namespace AuthCore.Domain.Aggregates.ConfirmCodes
         public void Matching(int code, DateTime utcNow, int maxAttempts)
         {
             if (IsExpired(utcNow))
-                throw new BadRequestException("Código inválido ou expirado.");
+                throw new InvalidOrExpiredCodeException();
 
             if (maxAttempts < 1)
                 throw new BadRequestException("O limite de tentativas do código é inválido.");
@@ -117,10 +117,10 @@ namespace AuthCore.Domain.Aggregates.ConfirmCodes
             Attempts += 1;
 
             if (Attempts > maxAttempts)
-                throw new BadRequestException("Código inválido ou expirado.");
+                throw new InvalidOrExpiredCodeException();
 
             if (Code != code)
-                throw new BadRequestException("Código inválido ou expirado.");
+                throw new InvalidOrExpiredCodeException();
         }
 
         #region Validation
@@ -136,7 +136,7 @@ namespace AuthCore.Domain.Aggregates.ConfirmCodes
         private void Validate()
         {
             if (Code < CODE_MIN || Code > CODE_MAX)
-                throw new BadRequestException("O código de verificação deve conter 6 dígitos.");
+                throw new InvalidCodeFormatException("O código de verificação deve conter 6 dígitos.");
 
             if (Attempts < 0)
                 throw new BadRequestException("O total de tentativas é inválido.");

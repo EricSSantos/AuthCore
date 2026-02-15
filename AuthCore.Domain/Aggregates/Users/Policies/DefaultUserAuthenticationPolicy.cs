@@ -29,7 +29,7 @@ namespace AuthCore.Domain.Aggregates.Users.Policies
                 throw new ForbiddenException("Usuário inativo ou não verificado.");
 
             if (user.LoginAttempts.IsLocked(utcNow))
-                throw new UnauthorizedException(user.LoginAttempts.GetLockMessage(utcNow)!);
+                throw new AccountLockedException(user.LoginAttempts.GetLockMessage(utcNow)!);
         }
 
         /// <summary>Operação para registrar falha de autenticação.</summary>

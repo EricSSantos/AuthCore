@@ -55,7 +55,7 @@ namespace AuthCore.Application.UseCases.Users
             if (confirm.IsExpired(utcNow))
             {
                 await _confirmCodeRepository.DeleteAsync(user.Id, confirm.Type);
-                throw new NotFoundException("Código inválido ou expirado.");
+                throw new InvalidOrExpiredCodeException();
             }
 
             try

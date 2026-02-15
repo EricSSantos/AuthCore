@@ -40,7 +40,7 @@ namespace AuthCore.Application.UseCases.Users
         public async Task OnExecuteAsync(AddUserRequest request)
         {
             if (await _userRepository.EmailExistsAsync(request.Email))
-                throw new ConflictException("E-mail já cadastrado.");
+                throw new ConflictException("Não foi possível concluir o cadastro.");
 
             Password.ValidateWithConfirmation(request.Password, request.ConfirmPassword);
             var utcNow = DateTime.UtcNow;

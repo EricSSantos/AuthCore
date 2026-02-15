@@ -3,7 +3,7 @@
 namespace AuthCore.Domain.Core.Exceptions
 {
     /// <summary>Representa excesso de requisições.</summary>
-    public sealed class TooManyRequestsException : DomainException
+    public class TooManyRequestsException : DomainException
     {
         private readonly HttpStatusCode _statusCode = HttpStatusCode.TooManyRequests;
         private readonly string _title = "Muitas requisições.";

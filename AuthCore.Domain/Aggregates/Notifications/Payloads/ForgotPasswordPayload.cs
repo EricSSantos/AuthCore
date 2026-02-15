@@ -1,4 +1,4 @@
-﻿using System;
+﻿using AuthCore.Domain.Core.Exceptions;
 
 namespace AuthCore.Domain.Aggregates.Notifications.Payloads
 {
@@ -32,7 +32,7 @@ namespace AuthCore.Domain.Aggregates.Notifications.Payloads
         private void Validate()
         {
             if (Code < CODE_MIN || Code > CODE_MAX)
-                throw new ArgumentOutOfRangeException(nameof(Code));
+                throw new InvalidCodeFormatException("O código de recuperação deve conter 6 dígitos.");
         }
 
         #endregion

@@ -46,12 +46,12 @@ namespace AuthCore.Application.UseCases.Users
                 return;
 
             var confirm = await _confirmCodeRepository.GetAsync(user.Id, CodeType.ForgotPassword)
-                ?? throw new NotFoundException("Código de confirmação não encontrado");
+                ?? throw new InvalidOrExpiredCodeException();
 
             if (confirm.IsExpired(utcNow))
             {
                 await _confirmCodeRepository.DeleteAsync(user.Id, confirm.Type);
-                throw new NotFoundException("Código inválido ou expirado.");
+                throw new InvalidOrExpiredCodeException();
             }
 
             try

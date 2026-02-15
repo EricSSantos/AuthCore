@@ -49,7 +49,7 @@ namespace AuthCore.Application.UseCases.Auth
         {
             // Recupera o usuário sem revelar se o e-mail existe
             var user = await _userRepository.GetByEmailAsync(request.Email)
-                ?? throw new UnauthorizedException("E-mail ou senha inválidos.");
+                ?? throw new InvalidCredentialsException();
 
             var utcNow = DateTime.UtcNow;
 

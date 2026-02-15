@@ -14,17 +14,21 @@ namespace AuthCore.Api.Controllers.v1
     {
         /// <summary>Registra um novo usuário.</summary>
         [HttpPost]
-        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Created)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Accepted)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Conflict)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.TooManyRequests)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<ApiResponse<object>>> Register(
             [FromBody] AddUserRequest request,
             [FromServices] IAddUser addUser)
         {
             await addUser.OnExecuteAsync(request);
 
-            return Created(string.Empty, ApiResponse<object>.Success(
+            return Accepted(ApiResponse<object>.Success(
                 null!,
                 "Cadastro realizado com sucesso! Enviamos um e-mail com o código de confirmação da conta.",
-                HttpStatusCode.Created
+                HttpStatusCode.Accepted
             ));
         }
 
@@ -32,6 +36,9 @@ namespace AuthCore.Api.Controllers.v1
         [Authorize]
         [HttpGet("me")]
         [ProducesResponseType(typeof(ApiResponse<UserResponse>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<ApiResponse<UserResponse>>> GetCurrent(
             [FromServices] IGetCurrentUser getCurrentUser)
         {
@@ -48,6 +55,10 @@ namespace AuthCore.Api.Controllers.v1
         [Authorize]
         [HttpPatch("me/change-password")]
         [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Forbidden)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<ApiResponse<object>>> UpdatePassword(
             [FromBody] ChangePasswordRequest request,
             [FromServices] IChangePassword changePassword)
@@ -62,40 +73,42 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>Operação para confirmar o e-mail do usuário.</summary>
-        [HttpPatch("{email}/confirm")]
-        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.OK)]
+        /// <remarks>Retorna 202 mesmo quando o e-mail não existe para evitar enumeração.</remarks>
+        [HttpPatch("confirm-email")]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Accepted)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.TooManyRequests)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<ApiResponse<object>>> ConfirmEmail(
-            [FromRoute] string email,
             [FromBody] ConfirmEmailRequest request,
             [FromServices] IConfirmEmail confirmEmail)
         {
-            request.Email = email;
-
             await confirmEmail.OnExecuteAsync(request);
 
-            return Ok(ApiResponse<object>.Success(
+            return Accepted(ApiResponse<object>.Success(
                 null!,
                 "E-mail confirmado com sucesso.",
-                HttpStatusCode.OK
+                HttpStatusCode.Accepted
             ));
         }
 
         /// <summary>Operação para redefinir a senha do usuário.</summary>
-        [HttpPatch("{email}/reset-password")]
-        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.OK)]
+        /// <remarks>Retorna 202 mesmo quando o e-mail não existe para evitar enumeração.</remarks>
+        [HttpPatch("reset-password")]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Accepted)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.TooManyRequests)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<ApiResponse<object>>> ResetPassword(
-            [FromRoute] string email,
             [FromBody] ResetPasswordRequest request,
             [FromServices] IResetPassword resetPassword)
         {
-            request.Email = email;
-
             await resetPassword.OnExecuteAsync(request);
 
-            return Ok(ApiResponse<object>.Success(
+            return Accepted(ApiResponse<object>.Success(
                 null!,
                 "Senha redefinida com sucesso.",
-                HttpStatusCode.OK
+                HttpStatusCode.Accepted
             ));
         }
     }

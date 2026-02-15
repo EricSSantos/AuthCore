@@ -3,7 +3,7 @@
 namespace AuthCore.Domain.Core.Exceptions
 {
     /// <summary>Representa um erro de autenticação inválida.</summary>
-    public sealed class UnauthorizedException : DomainException
+    public class UnauthorizedException : DomainException
     {
         public override HttpStatusCode StatusCode
         {

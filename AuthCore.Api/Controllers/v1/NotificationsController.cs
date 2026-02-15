@@ -12,15 +12,19 @@ namespace AuthCore.Api.Controllers.v1
     public sealed class NotificationsController : ControllerBase
     {
         /// <summary>Operação para enviar o e-mail de confirmação de conta.</summary>
-        [HttpPost("{email}/confirmation")]
+        /// <remarks>Retorna 202 mesmo quando o e-mail não existe para evitar enumeração.</remarks>
+        [HttpPost("confirmation")]
         [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Accepted)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.TooManyRequests)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<ApiResponse<object>>> SendConfirmationEmail(
-            [FromRoute] string email,
+            [FromBody] EmailRequest request,
             [FromServices] ISendNotification sendNotification)
         {
             var input = new SendNotificationRequest
             {
-                Email = email,
+                Email = request.Email,
                 Type = NotificationType.ConfirmEmail,
                 IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString()
             };
@@ -35,15 +39,19 @@ namespace AuthCore.Api.Controllers.v1
         }
 
         /// <summary>Operação para enviar o e-mail de recuperação de senha.</summary>
-        [HttpPost("{email}/forgot-password")]
+        /// <remarks>Retorna 202 mesmo quando o e-mail não existe para evitar enumeração.</remarks>
+        [HttpPost("forgot-password")]
         [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Accepted)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.TooManyRequests)]
+        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<ApiResponse<object>>> SendPasswordRecoveryEmail(
-            [FromRoute] string email,
+            [FromBody] EmailRequest request,
             [FromServices] ISendNotification sendNotification)
         {
             var input = new SendNotificationRequest
             {
-                Email = email,
+                Email = request.Email,
                 Type = NotificationType.ForgotPassword,
                 IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString()
             };

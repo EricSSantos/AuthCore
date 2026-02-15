@@ -1,4 +1,5 @@
-﻿using AuthCore.Domain.Core.Interfaces.Base;
+﻿using AuthCore.Domain.Core.Exceptions;
+using AuthCore.Domain.Core.Interfaces.Base;
 
 namespace AuthCore.Domain.Aggregates.Users
 {
@@ -66,10 +67,10 @@ namespace AuthCore.Domain.Aggregates.Users
         public LoginAttempts RegisterFailure(DateTime utcNow, int maxAttempts, TimeSpan lockDuration)
         {
             if (maxAttempts < MIN_ATTEMPTS)
-                throw new ArgumentOutOfRangeException(nameof(maxAttempts));
+                throw new BadRequestException("A configuração de tentativas é inválida.");
 
             if (lockDuration <= TimeSpan.Zero)
-                throw new ArgumentOutOfRangeException(nameof(lockDuration));
+                throw new BadRequestException("A configuração de bloqueio é inválida.");
 
             var failed = FailedAttempts + 1;
 
@@ -114,16 +115,16 @@ namespace AuthCore.Domain.Aggregates.Users
         private void Validate()
         {
             if (FailedAttempts < 0)
-                throw new ArgumentOutOfRangeException(nameof(FailedAttempts));
+                throw new BadRequestException("O total de tentativas é inválido.");
 
             if (LastFailedAt.HasValue && LastFailedAt.Value == default)
-                throw new ArgumentOutOfRangeException(nameof(LastFailedAt));
+                throw new BadRequestException("A data da última falha é inválida.");
 
             if (LockedUntil.HasValue && LockedUntil.Value == default)
-                throw new ArgumentOutOfRangeException(nameof(LockedUntil));
+                throw new BadRequestException("A data de bloqueio é inválida.");
 
             if (LastFailedAt.HasValue && LockedUntil.HasValue && LockedUntil < LastFailedAt)
-                throw new ArgumentOutOfRangeException(nameof(LockedUntil));
+                throw new BadRequestException("A data de bloqueio é inválida.");
         }
 
         #endregion

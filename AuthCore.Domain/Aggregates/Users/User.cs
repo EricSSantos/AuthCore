@@ -172,7 +172,7 @@ namespace AuthCore.Domain.Aggregates.Users
             {
                 LoginAttempts = authenticationPolicy.RegisterFailure(LoginAttempts, utcNow);
                 UpdatedAt = utcNow;
-                throw new UnauthorizedException("E-mail ou senha inválidos.");
+                throw new InvalidCredentialsException();
             }
 
             if (LoginAttempts.FailedAttempts > 0)

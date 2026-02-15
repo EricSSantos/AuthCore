@@ -3,7 +3,7 @@
 namespace AuthCore.Domain.Core.Exceptions
 {
     /// <summary>Representa um erro de recurso não encontrado.</summary>
-    public sealed class NotFoundException : DomainException
+    public class NotFoundException : DomainException
     {
         public override HttpStatusCode StatusCode
         {

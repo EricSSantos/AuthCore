@@ -3,7 +3,7 @@
 namespace AuthCore.Domain.Core.Exceptions
 {
     /// <summary>Representa um erro de acesso negado.</summary>
-    public sealed class ForbiddenException : DomainException
+    public class ForbiddenException : DomainException
     {
         public override HttpStatusCode StatusCode
         {

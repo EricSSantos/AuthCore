@@ -41,7 +41,7 @@ namespace AuthCore.Domain.Aggregates.Users
         public static Password Create(string hashedPassword)
         {
             if (string.IsNullOrWhiteSpace(hashedPassword))
-                throw new BadRequestException("A senha criptografada não pode estar vazia.");
+                throw new InvalidPasswordException("A senha criptografada não pode estar vazia.");
 
             return new Password(hashedPassword);
         }
@@ -55,15 +55,15 @@ namespace AuthCore.Domain.Aggregates.Users
         public static void Validate(string password)
         {
             if (string.IsNullOrWhiteSpace(password))
-                throw new BadRequestException("A senha não pode estar vazia.");
+                throw new InvalidPasswordException("A senha não pode estar vazia.");
 
             if (password.Length < MIN_LENGTH || password.Length > MAX_LENGTH)
-                throw new BadRequestException($"A senha deve conter entre {MIN_LENGTH} e {MAX_LENGTH} caracteres.");
+                throw new InvalidPasswordException($"A senha deve conter entre {MIN_LENGTH} e {MAX_LENGTH} caracteres.");
 
             var regex = new Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,24}$");
 
             if (!regex.IsMatch(password))
-                throw new BadRequestException("A senha deve conter letras maiúsculas, minúsculas, números e caracteres especiais.");
+                throw new InvalidPasswordException("A senha deve conter letras maiúsculas, minúsculas, números e caracteres especiais.");
         }
 
         /// <summary>Operação para validar e confirmar senha.</summary>
@@ -74,10 +74,10 @@ namespace AuthCore.Domain.Aggregates.Users
             Validate(password);
 
             if (string.IsNullOrWhiteSpace(confirmPassword))
-                throw new BadRequestException("A confirmação de senha não pode estar vazia.");
+                throw new InvalidPasswordException("A confirmação de senha não pode estar vazia.");
 
             if (password != confirmPassword)
-                throw new BadRequestException("As senhas não correspondem.");
+                throw new InvalidPasswordException("As senhas não correspondem.");
         }
 
         #endregion
