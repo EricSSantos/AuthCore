@@ -11,5 +11,8 @@ namespace AuthCore.Application.Models.Requests
 
         [JsonPropertyName("type")]
         public required NotificationType Type { get; set; }
+
+        [JsonPropertyName("ipAddress")]
+        public string? IpAddress { get; set; }
     }
 }

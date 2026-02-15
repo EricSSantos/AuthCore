@@ -21,7 +21,8 @@ namespace AuthCore.Api.Controllers.v1
             var input = new SendNotificationRequest
             {
                 Email = email,
-                Type = NotificationType.ConfirmEmail
+                Type = NotificationType.ConfirmEmail,
+                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString()
             };
 
             await sendNotification.OnExecuteAsync(input);
@@ -43,7 +44,8 @@ namespace AuthCore.Api.Controllers.v1
             var input = new SendNotificationRequest
             {
                 Email = email,
-                Type = NotificationType.ForgotPassword
+                Type = NotificationType.ForgotPassword,
+                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString()
             };
 
             await sendNotification.OnExecuteAsync(input);

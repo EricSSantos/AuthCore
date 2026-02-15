@@ -6,6 +6,7 @@ using AuthCore.Domain.Aggregates.Notifications;
 using AuthCore.Domain.Aggregates.Notifications.Interfaces;
 using AuthCore.Domain.Aggregates.Users.Interfaces;
 using AuthCore.Domain.Core.Exceptions;
+using AuthCore.Domain.Core.Interfaces.Infrastructure.Security;
 
 namespace AuthCore.Application.UseCases.Notifications
 {
@@ -17,24 +18,29 @@ namespace AuthCore.Application.UseCases.Notifications
         private readonly IConfirmCodeRepository _confirmCodeRepository;
         private readonly IConfirmCodePolicy _confirmCodePolicy;
         private readonly INotificationPolicy _notificationPolicy;
+        private readonly IConfirmCodeAbuseGuard _confirmCodeAbuseGuard;
 
         public SendNotification(
             IUserRepository userRepository,
             IEmailSender emailSender,
             IConfirmCodeRepository confirmCodeRepository,
             IConfirmCodePolicy confirmCodePolicy,
-            INotificationPolicy notificationPolicy)
+            INotificationPolicy notificationPolicy,
+            IConfirmCodeAbuseGuard confirmCodeAbuseGuard)
         {
             _userRepository = userRepository;
             _emailSender = emailSender;
             _confirmCodeRepository = confirmCodeRepository;
             _confirmCodePolicy = confirmCodePolicy;
             _notificationPolicy = notificationPolicy;
+            _confirmCodeAbuseGuard = confirmCodeAbuseGuard;
         }
 
         public async Task OnExecuteAsync(SendNotificationRequest request)
         {
             var utcNow = DateTime.UtcNow;
+            await _confirmCodeAbuseGuard.EnsureIpAllowedAsync(request.IpAddress, request.Type, utcNow);
+
             var user = await _userRepository.GetByEmailAsync(request.Email);
             if (user is null)
                 return;
@@ -42,14 +48,17 @@ namespace AuthCore.Application.UseCases.Notifications
             if (request.Type == NotificationType.ConfirmEmail && user.Verified)
                 return;
 
+            await _confirmCodeAbuseGuard.CheckAndRegisterUserAsync(user.Id, request.Type, utcNow);
+
             var codeValue = GetCodeValue(request.Type, utcNow);
+            var payload = _notificationPolicy.CreatePayload(request.Type, codeValue);
+            
             var email = Notification.Create(
                 to: user.Email.Value,
                 fullName: user.FullName,
                 type: request.Type,
                 utcNow: utcNow,
-                code: codeValue,
-                notificationPolicy: _notificationPolicy
+                payload: payload
             );
 
             var code = CreateConfirmCode(email, codeValue, utcNow);

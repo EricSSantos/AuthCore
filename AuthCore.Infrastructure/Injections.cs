@@ -11,6 +11,7 @@ using AuthCore.Infrastructure.Notifications.RabbitMq;
 using AuthCore.Infrastructure.Persistence.PostgreSQL.ADO.Context;
 using AuthCore.Infrastructure.Persistence.PostgreSQL.Repositories;
 using AuthCore.Infrastructure.Persistence.Redis.Repositories;
+using AuthCore.Infrastructure.Persistence.Redis.Services;
 using AuthCore.Infrastructure.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -99,6 +100,7 @@ namespace AuthCore.Infrastructure
             services.AddScoped<IEcdsaProvider, EcdsaSigner>();
             services.AddScoped<IJwtTokenProvider, JwtTokenProvider>();
             services.AddScoped<ISessionState, SessionState>();
+            services.AddSingleton<IConfirmCodeAbuseGuard, ConfirmCodeAbuseGuard>();
             services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
             services.AddSingleton<IEmailSender, EmailSender>();
             return services;

@@ -64,13 +64,14 @@ namespace AuthCore.Application.UseCases.Users
         {
             var codeValue = _confirmCodePolicy.GenerateCode(CodeType.ConfirmEmail, utcNow);
             var expiresAt = utcNow.Add(_confirmCodePolicy.GetExpiration(CodeType.ConfirmEmail));
+            var payload = _notificationPolicy.CreatePayload(NotificationType.ConfirmEmail, codeValue);
+            
             var email = Notification.Create(
                 to: user.Email.Value,
                 fullName: user.FullName,
                 type: NotificationType.ConfirmEmail,
                 utcNow: utcNow,
-                code: codeValue,
-                notificationPolicy: _notificationPolicy
+                payload: payload
             );
 
             var code = ConfirmCode.Create(
