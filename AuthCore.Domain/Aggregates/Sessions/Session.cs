@@ -14,7 +14,7 @@ namespace AuthCore.Domain.Aggregates.Sessions
         public DateTime MaxLifetime { get; private set; }
         public DateTime? RevokedAt { get; private set; }
 
-        #region Constructor
+        #region Constructors
 
         /// <summary>Operação para criar instância de sessão.</summary>
         /// <param name="id">Identificador da sessão.</param>
@@ -104,7 +104,6 @@ namespace AuthCore.Domain.Aggregates.Sessions
 
         #endregion
 
-
         /// <summary>Operação para verificar expiração da sessão.</summary>
         /// <param name="utcNow">Data e hora atuais em UTC.</param>
         public bool IsExpired(DateTime utcNow)
@@ -142,6 +141,8 @@ namespace AuthCore.Domain.Aggregates.Sessions
             RevokedAt = utcNow;
         }
 
+        #region Validation
+
         /// <summary>Operação para validar sessão.</summary>
         private void Validate()
         {
@@ -168,5 +169,7 @@ namespace AuthCore.Domain.Aggregates.Sessions
             if (errors.Count > 0)
                 throw new BadRequestException(errors);
         }
+
+        #endregion
     }
 }

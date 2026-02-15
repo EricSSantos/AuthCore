@@ -9,12 +9,16 @@ namespace AuthCore.Domain.Aggregates.Sessions.Policies
     {
         private readonly SecuritySettings _settings;
 
+        #region Constructors
+
         /// <summary>Operação para criar instância de política.</summary>
         /// <param name="settings">Configurações de segurança.</param>
         public DefaultSessionPolicy(SecuritySettings settings)
         {
             _settings = settings;
         }
+
+        #endregion
 
         /// <summary>Operação para selecionar sessões a revogar.</summary>
         /// <param name="sessions">Coleção de sessões do usuário.</param>

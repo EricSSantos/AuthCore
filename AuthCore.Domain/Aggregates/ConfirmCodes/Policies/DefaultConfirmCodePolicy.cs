@@ -7,9 +7,16 @@ namespace AuthCore.Domain.Aggregates.ConfirmCodes.Policies
     /// <summary>Representa a política padrão de códigos de confirmação.</summary>
     public sealed class DefaultConfirmCodePolicy : IConfirmCodePolicy
     {
+        #region Constants
+
         private const int CODE_MIN = 100_000;
         private const int CODE_MAX = 1_000_000;
+
+        #endregion
+
         private readonly SecuritySettings _settings;
+
+        #region Constructors
 
         /// <summary>Operação para criar instância de política.</summary>
         /// <param name="settings">Configurações de segurança.</param>
@@ -17,6 +24,8 @@ namespace AuthCore.Domain.Aggregates.ConfirmCodes.Policies
         {
             _settings = settings;
         }
+
+        #endregion
 
         /// <summary>Operação para gerar código de confirmação.</summary>
         /// <param name="type">Tipo do código.</param>

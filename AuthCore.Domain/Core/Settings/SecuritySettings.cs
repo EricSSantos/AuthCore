@@ -8,6 +8,7 @@
         public CookieSettings Cookies { get; set; } = new();
         public LoginAttemptsSettings LoginAttempts { get; set; } = new();
         public ConfirmCodeSettings ConfirmCode { get; set; } = new();
+        public ConfirmCodeAbuseSettings ConfirmCodeAbuse { get; set; } = new();
         public SecurityKeysSettings Keys { get; set; } = new();
     }
 
@@ -39,6 +40,17 @@
     {
         public int ExpiresInMinutes { get; set; } = 10;
         public int MaxAttempts { get; set; } = 5;
+    }
+
+    /// <summary>Representa configurações de mitigação de abuso para códigos de confirmação.</summary>
+    public sealed class ConfirmCodeAbuseSettings
+    {
+        public int ResendCooldownMinutes { get; set; } = 2;
+        public int WindowMinutes { get; set; } = 1440;
+        public int MaxCodesPerWindow { get; set; } = 3;
+        public int LockoutMinutes { get; set; } = 30;
+        public int IpPerMinute { get; set; } = 60;
+        public int IpPerMinutePerEndpoint { get; set; } = 20;
     }
 
     /// <summary>Representa configurações de cookies de segurança.</summary>

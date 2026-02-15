@@ -11,6 +11,8 @@ namespace AuthCore.Domain.Aggregates.Sessions
         public string Platform { get; private set; } = null!;
         public string Browser { get; private set; } = null!;
 
+        #region Constructors
+
         /// <summary>Operação para criar instância de dispositivo.</summary>
         /// <param name="ip">Endereço IP do dispositivo.</param>
         /// <param name="platform">Plataforma do dispositivo.</param>
@@ -21,6 +23,10 @@ namespace AuthCore.Domain.Aggregates.Sessions
             Platform = platform;
             Browser = browser;
         }
+
+        #endregion
+
+        #region Factory
 
         /// <summary>Operação para criar dispositivo.</summary>
         /// <param name="ip">Endereço IP do dispositivo.</param>
@@ -45,11 +51,17 @@ namespace AuthCore.Domain.Aggregates.Sessions
             return new DeviceInfo(ip.Trim(), platform, browser);
         }
 
+        #endregion
+
+        #region Validation
+
         /// <summary>Operação para validar endereço IP.</summary>
         /// <param name="ip">Endereço IP do dispositivo.</param>
         private static bool IsValidIp(string ip)
         {
             return IPAddress.TryParse(ip, out _);
         }
+
+        #endregion
     }
 }

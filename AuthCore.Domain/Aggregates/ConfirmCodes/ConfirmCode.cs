@@ -103,8 +103,6 @@ namespace AuthCore.Domain.Aggregates.ConfirmCodes
 
         #endregion
 
-        #region Behavior
-
         /// <summary>Operação para validar código informado.</summary>
         /// <param name="code">Código a validar.</param>
         /// <param name="utcNow">Data e hora atuais em UTC.</param>
@@ -124,8 +122,6 @@ namespace AuthCore.Domain.Aggregates.ConfirmCodes
             if (Code != code)
                 throw new BadRequestException("Código inválido ou expirado.");
         }
-
-        #endregion
 
         #region Validation
 

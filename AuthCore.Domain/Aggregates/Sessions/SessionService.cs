@@ -11,6 +11,8 @@ namespace AuthCore.Domain.Aggregates.Sessions
         private readonly ISecureKeyGenerator _secureKeyGenerator;
         private readonly ISessionPolicy _sessionPolicy;
 
+        #region Constructors
+
         /// <summary>Operação para criar instância de serviço de sessões.</summary>
         /// <param name="sessionRepository">Repositório de sessões.</param>
         /// <param name="secureKeyGenerator">Gerador de chaves seguras.</param>
@@ -24,6 +26,8 @@ namespace AuthCore.Domain.Aggregates.Sessions
             _secureKeyGenerator = secureKeyGenerator;
             _sessionPolicy = sessionPolicy;
         }
+
+        #endregion
 
         /// <summary>Operação para criar sessão.</summary>
         /// <param name="userId">Identificador do usuário.</param>

@@ -9,6 +9,8 @@ namespace AuthCore.Domain.Aggregates.Users
     {
         public string Value { get; }
 
+        #region Constructors
+
         /// <summary>Operação para criar instância de e-mail.</summary>
         /// <param name="value">Valor do e-mail.</param>
         private Email(string value)
@@ -22,6 +24,10 @@ namespace AuthCore.Domain.Aggregates.Users
             Value = string.Empty;
         }
 
+        #endregion
+
+        #region Factory
+
         /// <summary>Operação para criar e-mail.</summary>
         /// <param name="email">Endereço de e-mail informado.</param>
         public static Email Create(string email)
@@ -29,6 +35,8 @@ namespace AuthCore.Domain.Aggregates.Users
             Validate(email);
             return new Email(Normalize(email));
         }
+
+        #endregion
 
         /// <summary>Operação para mascarar e-mail.</summary>
         public string Mask()
@@ -57,6 +65,8 @@ namespace AuthCore.Domain.Aggregates.Users
             return email.Trim().ToLowerInvariant();
         }
 
+        #region Validation
+
         /// <summary>Operação para validar e-mail.</summary>
         /// <param name="email">E-mail a validar.</param>
         public static void Validate(string email)
@@ -73,5 +83,7 @@ namespace AuthCore.Domain.Aggregates.Users
             if (errors.Count > 0)
                 throw new BadRequestException(errors);
         }
+
+        #endregion
     }
 }

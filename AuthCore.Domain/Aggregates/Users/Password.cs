@@ -8,10 +8,16 @@ namespace AuthCore.Domain.Aggregates.Users
     /// <summary>Representa uma senha criptografada do usuário.</summary>
     public sealed class Password : IValueObject
     {
+        #region Constants
+
         private const int MIN_LENGTH = 8;
         private const int MAX_LENGTH = 24;
 
+        #endregion
+
         public string Value { get; }
+
+        #region Constructors
 
         /// <summary>Operação para criar instância de senha.</summary>
         /// <param name="hashedPassword">Senha criptografada.</param>
@@ -26,6 +32,10 @@ namespace AuthCore.Domain.Aggregates.Users
             Value = string.Empty;
         }
 
+        #endregion
+
+        #region Factory
+
         /// <summary>Operação para criar senha criptografada.</summary>
         /// <param name="hashedPassword">Senha criptografada.</param>
         public static Password Create(string hashedPassword)
@@ -35,6 +45,10 @@ namespace AuthCore.Domain.Aggregates.Users
 
             return new Password(hashedPassword);
         }
+
+        #endregion
+
+        #region Validation
 
         /// <summary>Operação para validar senha.</summary>
         /// <param name="password">Senha a validar.</param>
@@ -65,5 +79,7 @@ namespace AuthCore.Domain.Aggregates.Users
             if (password != confirmPassword)
                 throw new BadRequestException("As senhas não correspondem.");
         }
+
+        #endregion
     }
 }

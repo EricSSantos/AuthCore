@@ -228,6 +228,8 @@ namespace AuthCore.Domain.Aggregates.Users
             UpdatedAt = utcNow;
         }
 
+        #region Validation
+
         /// <summary>Operação para validar usuário.</summary>
         private void Validate()
         {
@@ -266,5 +268,7 @@ namespace AuthCore.Domain.Aggregates.Users
             if (errors.Count > 0)
                 throw new BadRequestException(errors);
         }
+
+        #endregion
     }
 }
