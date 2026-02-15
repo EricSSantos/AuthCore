@@ -14,12 +14,13 @@ namespace AuthCore.Infrastructure.Security
 
         private const string PRIVATE_KEY = "PRIVATE KEY";
         private const string PUBLIC_KEY = "PUBLIC KEY";
-        
         private readonly string _publicKeyPem;
         private readonly string _privateKeyPem;
 
         #endregion
 
+        /// <summary>Operação para criar instância do assinador ECDSA.</summary>
+        /// <param name="settings">Configurações de segurança.</param>
         public EcdsaSigner(IOptions<SecuritySettings> settings)
         {
             var keys = settings.Value.Keys.Asymmetric;
@@ -36,11 +37,13 @@ namespace AuthCore.Infrastructure.Security
 
         #region Provider
 
+        /// <summary>Operação para obter a chave privada em DER.</summary>
         public byte[] PrivateKey
         {
             get { return PemToDer(_privateKeyPem, PRIVATE_KEY); }
         }
 
+        /// <summary>Operação para obter a chave pública em DER.</summary>
         public byte[] PublicKey
         {
             get { return PemToDer(_publicKeyPem, PUBLIC_KEY); }
@@ -50,6 +53,8 @@ namespace AuthCore.Infrastructure.Security
 
         #region Signer
 
+        /// <summary>Operação para assinar texto com ECDSA.</summary>
+        /// <param name="text">Conteúdo a assinar.</param>
         public string Sign(string text)
         {
             var data = Encoding.UTF8.GetBytes(text);
@@ -69,6 +74,9 @@ namespace AuthCore.Infrastructure.Security
             }
         }
 
+        /// <summary>Operação para verificar assinatura ECDSA.</summary>
+        /// <param name="text">Conteúdo assinado.</param>
+        /// <param name="base64Signature">Assinatura em base64url.</param>
         public bool Verify(string text, string base64Signature)
         {
             if (string.IsNullOrWhiteSpace(base64Signature))
@@ -96,6 +104,9 @@ namespace AuthCore.Infrastructure.Security
 
         #region Helpers
 
+        /// <summary>Operação para converter PEM em DER.</summary>
+        /// <param name="pem">Conteúdo PEM.</param>
+        /// <param name="keyType">Tipo de chave.</param>
         private static byte[] PemToDer(string pem, string keyType)
         {
             var header = "-----BEGIN " + keyType + "-----";

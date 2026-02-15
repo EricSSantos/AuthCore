@@ -52,21 +52,21 @@ namespace AuthCore.Infrastructure
         /// <summary>Operação para configurar o Redis para cache e armazenamento.</summary>
         private static IServiceCollection AddRedis(this IServiceCollection services, IConfiguration configuration)
         {
-            DatabaseSettings databaseSettings = configuration
-                .GetSection("Database")
-                .Get<DatabaseSettings>() ?? new DatabaseSettings();
+            services.AddSingleton<IConnectionMultiplexer>(sp =>
+            {
+                var settings = sp.GetRequiredService<IOptions<DatabaseSettings>>().Value;
+                var redis = settings.Redis;
 
-            var redis = databaseSettings.Redis;
+                if (string.IsNullOrWhiteSpace(redis.ConnectionString))
+                    throw new InvalidOperationException("A string de conexão do Redis não foi definida.");
 
-            if (string.IsNullOrWhiteSpace(redis.ConnectionString))
-                throw new InvalidOperationException("A string de conexão do Redis não foi definida.");
+                return ConnectionMultiplexer.Connect(redis.ConnectionString);
+            });
 
-            IConnectionMultiplexer multiplexer = ConnectionMultiplexer.Connect(redis.ConnectionString);
-            services.AddSingleton<IConnectionMultiplexer>(multiplexer);
-
+            var settings = configuration.GetSection("Database").Get<DatabaseSettings>() ?? new DatabaseSettings();
             services.AddStackExchangeRedisCache(options =>
             {
-                options.Configuration = redis.ConnectionString;
+                options.Configuration = settings.Redis.ConnectionString;
             });
 
             return services;

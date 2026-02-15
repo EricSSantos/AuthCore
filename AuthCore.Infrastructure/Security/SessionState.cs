@@ -39,11 +39,13 @@ namespace AuthCore.Infrastructure.Security
             _logger = logger;
         }
 
+        /// <summary>Operação para obter identificador bruto de sessão do cookie.</summary>
         public string Session
         {
             get { return _cookie.Get(_settings.Cookies.SessionKey); }
         }
 
+        /// <summary>Operação para obter usuário atual a partir da sessão.</summary>
         public async Task<User> GetCurrentUser()
         {
             var session = await GetCurrentSession();
@@ -61,6 +63,7 @@ namespace AuthCore.Infrastructure.Security
             return user;
         }
 
+        /// <summary>Operação para obter sessão atual validada.</summary>
         public async Task<Session> GetCurrentSession()
         {
             var session = await _sessionRepository.GetAsync(_secureKeyGenerator.Hash(Session))
@@ -85,6 +88,7 @@ namespace AuthCore.Infrastructure.Security
             return session;
         }
 
+        /// <summary>Operação para obter usuário e sessão atuais.</summary>
         public async Task<(User User, Session Session)> GetCurrentUserFromSession()
         {
             var session = await _sessionRepository.GetAsync(_secureKeyGenerator.Hash(Session))
@@ -120,6 +124,7 @@ namespace AuthCore.Infrastructure.Security
             return (user, session);
         }
 
+        /// <summary>Operação para obter sessões ativas do usuário.</summary>
         public async Task<IReadOnlyCollection<Session>> GetActiveSessions()
         {
             var current = await GetCurrentSession();
@@ -137,6 +142,9 @@ namespace AuthCore.Infrastructure.Security
             return activeSessions;
         }
 
+        /// <summary>Operação para definir cookies de sessão e token.</summary>
+        /// <param name="rawSession">Identificador bruto de sessão.</param>
+        /// <param name="accessToken">Token de acesso.</param>
         public void SetCookies(string rawSession, string accessToken)
         {
             if (string.IsNullOrWhiteSpace(rawSession) || string.IsNullOrWhiteSpace(accessToken))
@@ -150,6 +158,7 @@ namespace AuthCore.Infrastructure.Security
             _logger.LogInformation("Cookies de sessão definidos com sucesso.");
         }
 
+        /// <summary>Operação para remover cookies de sessão e token.</summary>
         public void ClearCookies()
         {
             _cookie.Remove(_settings.Cookies.SessionKey);
@@ -158,6 +167,8 @@ namespace AuthCore.Infrastructure.Security
         }
         #region Helperes
 
+        /// <summary>Operação para validar se o token pertence ao usuário da sessão.</summary>
+        /// <param name="sessionUserId">Identificador do usuário da sessão.</param>
         private void EnsureOwnership(Guid sessionUserId)
         {
             var tokenUserId = _jwtTokenProvider.Sub;

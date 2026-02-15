@@ -12,6 +12,8 @@ namespace AuthCore.Infrastructure.Security
     {
         private readonly byte[] _key;
 
+        /// <summary>Operação para criar instância do gerador de chaves.</summary>
+        /// <param name="settings">Configurações de segurança.</param>
         public SecureKeyGenerator(IOptions<SecuritySettings> settings)
         {
             var symmetricKey = settings.Value.Keys.Symmetric.PrivateKey;
@@ -22,18 +24,25 @@ namespace AuthCore.Infrastructure.Security
             _key = Encoding.UTF8.GetBytes(symmetricKey);
         }
 
+        /// <summary>Operação para gerar chave aleatória em hex.</summary>
+        /// <param name="size">Tamanho em bytes.</param>
         public string Generate(int size = 32)
         {
             var bytes = RandomNumberGenerator.GetBytes(size);
             return Convert.ToHexString(bytes).ToLowerInvariant();
         }
 
+        /// <summary>Operação para gerar hash HMAC da chave.</summary>
+        /// <param name="raw">Chave em hex.</param>
         public string Hash(string raw)
         {
             var bytes = Convert.FromHexString(raw);
             return ComputeHash(bytes);
         }
 
+        /// <summary>Operação para validar hash HMAC da chave.</summary>
+        /// <param name="raw">Chave em hex.</param>
+        /// <param name="hash">Hash esperado.</param>
         public bool Verify(string raw, string hash)
         {
             var bytes = Convert.FromHexString(raw);
@@ -47,6 +56,8 @@ namespace AuthCore.Infrastructure.Security
 
         #region Helpers
 
+        /// <summary>Operação para computar hash HMAC.</summary>
+        /// <param name="data">Bytes de entrada.</param>
         private string ComputeHash(byte[] data)
         {
             using var hmac = new HMACSHA256(_key);

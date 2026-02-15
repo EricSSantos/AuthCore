@@ -9,11 +9,15 @@ namespace AuthCore.Infrastructure.Web
     {
         private readonly IHttpContextAccessor _http;
 
+        /// <summary>Operação para criar instância do serviço de cookies.</summary>
+        /// <param name="http">Acessor de contexto HTTP.</param>
         public CookieService(IHttpContextAccessor http)
         {
             _http = http;
         }
 
+        /// <summary>Operação para obter cookie pelo nome.</summary>
+        /// <param name="key">Nome do cookie.</param>
         public string Get(string key)
         {
             var context = EnsureContext();
@@ -23,6 +27,10 @@ namespace AuthCore.Infrastructure.Web
             return value.Trim();
         }
 
+        /// <summary>Operação para definir cookie com TTL.</summary>
+        /// <param name="key">Nome do cookie.</param>
+        /// <param name="value">Valor do cookie.</param>
+        /// <param name="ttl">Tempo de vida do cookie.</param>
         public void Set(string key, string value, TimeSpan ttl)
         {
             var context = EnsureContext();
@@ -40,6 +48,8 @@ namespace AuthCore.Infrastructure.Web
             context.Response.Cookies.Append(key, value, options);
         }
 
+        /// <summary>Operação para remover cookie.</summary>
+        /// <param name="key">Nome do cookie.</param>
         public void Remove(string key)
         {
             var context = EnsureContext();
@@ -58,6 +68,7 @@ namespace AuthCore.Infrastructure.Web
 
         #region Helpers
 
+        /// <summary>Operação para obter o contexto HTTP atual.</summary>
         private HttpContext EnsureContext()
         {
             return _http.HttpContext

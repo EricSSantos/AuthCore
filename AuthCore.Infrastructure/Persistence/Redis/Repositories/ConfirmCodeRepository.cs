@@ -86,7 +86,20 @@ namespace AuthCore.Infrastructure.Persistence.Redis.Repositories
         /// <param name="type">Tipo do código.</param>
         private string BuildKey(Guid userId, CodeType type)
         {
-            return $"{_confirmCodePrefix}{type.ToString().ToLowerInvariant()}:{userId}";
+            return $"{_confirmCodePrefix}{MapTypeKey(type)}:{userId}";
+        }
+
+        private static string MapTypeKey(CodeType type)
+        {
+            switch (type)
+            {
+                case CodeType.ConfirmEmail:
+                    return "confirm-email";
+                case CodeType.ForgotPassword:
+                    return "forgot-password";
+                default:
+                    return type.ToString().ToLowerInvariant();
+            }
         }
 
         /// <summary>Operação para normalizar prefixo de chave Redis.</summary>
