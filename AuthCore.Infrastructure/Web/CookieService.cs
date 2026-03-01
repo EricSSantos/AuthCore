@@ -16,13 +16,13 @@ namespace AuthCore.Infrastructure.Web
             _http = http;
         }
 
-        /// <summary>Operação para obter cookie pelo nome.</summary>
+        /// <summary>Operação para obter valor de cookie.</summary>
         /// <param name="key">Nome do cookie.</param>
         public string Get(string key)
         {
             var context = EnsureContext();
             if (!context.Request.Cookies.TryGetValue(key, out var value) || string.IsNullOrWhiteSpace(value))
-                throw new UnauthorizedException($"Cookie '{key}' ausente ou inválido.");
+                throw new UnauthorizedException();
 
             return value.Trim();
         }
@@ -33,11 +33,21 @@ namespace AuthCore.Infrastructure.Web
         /// <param name="ttl">Tempo de vida do cookie.</param>
         public void Set(string key, string value, TimeSpan ttl)
         {
+            Set(key, value, ttl, httpOnly: true);
+        }
+
+        /// <summary>Operação para definir cookie com controle de HttpOnly.</summary>
+        /// <param name="key">Nome do cookie.</param>
+        /// <param name="value">Valor do cookie.</param>
+        /// <param name="ttl">Tempo de vida do cookie.</param>
+        /// <param name="httpOnly">Define se o cookie é HttpOnly.</param>
+        public void Set(string key, string value, TimeSpan ttl, bool httpOnly)
+        {
             var context = EnsureContext();
 
             var options = new CookieOptions
             {
-                HttpOnly = true,
+                HttpOnly = httpOnly,
                 Secure = true,
                 SameSite = SameSiteMode.Lax,
                 Expires = DateTime.UtcNow.Add(ttl),
@@ -53,7 +63,6 @@ namespace AuthCore.Infrastructure.Web
         public void Remove(string key)
         {
             var context = EnsureContext();
-
             var options = new CookieOptions
             {
                 HttpOnly = true,
@@ -62,19 +71,13 @@ namespace AuthCore.Infrastructure.Web
                 Expires = DateTime.UtcNow.AddDays(-1),
                 Path = "/"
             };
-
             context.Response.Cookies.Delete(key, options);
         }
-
-        #region Helpers
 
         /// <summary>Operação para obter o contexto HTTP atual.</summary>
         private HttpContext EnsureContext()
         {
-            return _http.HttpContext
-                ?? throw new UnauthorizedException("Contexto HTTP indisponível.");
+            return _http.HttpContext ?? throw new UnauthorizedException();
         }
-
-        #endregion
     }
 }

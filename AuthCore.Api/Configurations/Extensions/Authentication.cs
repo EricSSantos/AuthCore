@@ -10,7 +10,7 @@ namespace AuthCore.Api.Configurations.Extensions
     /// <summary>Configura a autenticação JWT da aplicação.</summary>
     public static class AuthenticationExtensions
     {
-        /// <summary>Operação para adicionar e configura autenticação JWT.</summary>
+        /// <summary>Operação para adicionar e configurar autenticação JWT.</summary>
         /// <param name="builder">Instância para configurar serviços.</param>
         public static void AddAuthentication(this WebApplicationBuilder builder)
         {
@@ -21,8 +21,6 @@ namespace AuthCore.Api.Configurations.Extensions
             var key = GetPublicKey(settings);
             ConfigureJwtAuthentication(services, settings, key);
         }
-
-        #region Helpers
 
         /// <summary>Operação para carregar a chave pública usada na validação JWT.</summary>
         /// <param name="securitySettings">Configurações de segurança.</param>
@@ -71,8 +69,10 @@ namespace AuthCore.Api.Configurations.Extensions
 
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
+                        RequireSignedTokens = true,
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = publicKey,
+                        ValidAlgorithms = new[] { SecurityAlgorithms.EcdsaSha256 },
                         ValidateLifetime = true,
                         ValidateIssuer = true,
                         ValidateAudience = true,
@@ -82,7 +82,5 @@ namespace AuthCore.Api.Configurations.Extensions
                     };
                 });
         }
-
-        #endregion
     }
 }

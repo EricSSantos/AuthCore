@@ -3,8 +3,8 @@ using AuthCore.Domain.Aggregates.Sessions.Interfaces;
 using AuthCore.Domain.Aggregates.Users;
 using AuthCore.Domain.Aggregates.Users.Interfaces;
 using AuthCore.Domain.Core.Exceptions;
-using AuthCore.Domain.Core.Interfaces.Infrastructure.Web;
 using AuthCore.Domain.Core.Interfaces.Infrastructure.Security;
+using AuthCore.Domain.Core.Interfaces.Infrastructure.Web;
 using AuthCore.Domain.Core.Settings;
 using Microsoft.Extensions.Logging;
 
@@ -21,6 +21,14 @@ namespace AuthCore.Infrastructure.Security
         private readonly SecuritySettings _settings;
         private readonly ILogger<SessionState> _logger;
 
+        /// <summary>Operação para criar instância do gerenciador de sessão do usuário.</summary>
+        /// <param name="cookie">Serviço de cookies HTTP.</param>
+        /// <param name="jwtTokenProvider">Provedor de token JWT.</param>
+        /// <param name="sessionRepository">Repositório de sessões.</param>
+        /// <param name="userRepository">Repositório de usuários.</param>
+        /// <param name="secureKeyGenerator">Gerador de chaves seguras.</param>
+        /// <param name="settings">Configurações de segurança.</param>
+        /// <param name="logger">Serviço de logging.</param>
         public SessionState(
             ICookie cookie,
             IJwtTokenProvider jwtTokenProvider,
@@ -48,16 +56,16 @@ namespace AuthCore.Infrastructure.Security
         /// <summary>Operação para obter usuário atual a partir da sessão.</summary>
         public async Task<User> GetCurrentUser()
         {
-            var session = await GetCurrentSession();
+            Session session = await GetCurrentSession();
 
-            var user = await _userRepository.GetByIdAsync(session.UserId)
-                ?? throw new NotFoundException("Usuário não encontrado.");
+            User user = await _userRepository.GetByIdAsync(session.UserId)
+                ?? throw new UnauthorizedException();
 
             if (!user.IsActiveAndVerified())
             {
                 ClearCookies();
                 await _sessionRepository.DeleteAsync(session.Id);
-                throw new ForbiddenException("Usuário inativo ou não verificado.");
+                throw new UnauthorizedException();
             }
 
             return user;
@@ -66,8 +74,10 @@ namespace AuthCore.Infrastructure.Security
         /// <summary>Operação para obter sessão atual validada.</summary>
         public async Task<Session> GetCurrentSession()
         {
-            var session = await _sessionRepository.GetAsync(_secureKeyGenerator.Hash(Session))
-                ?? throw new NotFoundException("Sessão não encontrada.");
+            string hashedSession = GetHashedSessionOrThrow();
+
+            Session session = await _sessionRepository.GetAsync(hashedSession)
+                ?? throw new UnauthorizedException();
 
             EnsureOwnership(session.UserId);
 
@@ -75,14 +85,14 @@ namespace AuthCore.Infrastructure.Security
             {
                 ClearCookies();
                 await _sessionRepository.DeleteAsync(session.Id);
-                throw new ForbiddenException("Sessão revogada.");
+                throw new UnauthorizedException();
             }
 
             if (session.IsExpired(DateTime.UtcNow))
             {
                 ClearCookies();
                 await _sessionRepository.DeleteAsync(session.Id);
-                throw new ForbiddenException("Sessão expirada.");
+                throw new UnauthorizedException();
             }
 
             return session;
@@ -91,15 +101,17 @@ namespace AuthCore.Infrastructure.Security
         /// <summary>Operação para obter usuário e sessão atuais.</summary>
         public async Task<(User User, Session Session)> GetCurrentUserFromSession()
         {
-            var session = await _sessionRepository.GetAsync(_secureKeyGenerator.Hash(Session))
-                ?? throw new NotFoundException("Sessão não encontrada.");
+            string hashedSession = GetHashedSessionOrThrow();
+
+            Session session = await _sessionRepository.GetAsync(hashedSession)
+                ?? throw new UnauthorizedException();
 
             if (session.IsRevoked())
             {
                 _logger.LogWarning("Sessão revogada detectada. SessionId={SessionId}.", session.Id);
                 ClearCookies();
                 await _sessionRepository.DeleteAsync(session.Id);
-                throw new ForbiddenException("Sessão revogada.");
+                throw new UnauthorizedException();
             }
 
             if (session.IsExpired(DateTime.UtcNow))
@@ -107,18 +119,18 @@ namespace AuthCore.Infrastructure.Security
                 _logger.LogWarning("Sessão expirada detectada. SessionId={SessionId}.", session.Id);
                 ClearCookies();
                 await _sessionRepository.DeleteAsync(session.Id);
-                throw new ForbiddenException("Sessão expirada.");
+                throw new UnauthorizedException();
             }
 
-            var user = await _userRepository.GetByIdAsync(session.UserId)
-                ?? throw new NotFoundException("Usuário não encontrado.");
+            User user = await _userRepository.GetByIdAsync(session.UserId)
+                ?? throw new UnauthorizedException();
 
             if (!user.IsActiveAndVerified())
             {
                 _logger.LogWarning("Sessão inválida para usuário {UserId}. Usuário inativo ou não verificado.", user.Id);
                 ClearCookies();
                 await _sessionRepository.DeleteAsync(session.Id);
-                throw new ForbiddenException("Usuário inativo ou não verificado.");
+                throw new UnauthorizedException();
             }
 
             return (user, session);
@@ -127,17 +139,17 @@ namespace AuthCore.Infrastructure.Security
         /// <summary>Operação para obter sessões ativas do usuário.</summary>
         public async Task<IReadOnlyCollection<Session>> GetActiveSessions()
         {
-            var current = await GetCurrentSession();
+            Session currentSession = await GetCurrentSession();
 
-            var sessions = (await _sessionRepository.GetAllByUserIdAsync(current.UserId))
+            List<Session> sessions = (await _sessionRepository.GetAllByUserIdAsync(currentSession.UserId))
                 .ToList();
 
-            var activeSessions = sessions
-                .Where(s => !s.IsExpired(DateTime.UtcNow) && !s.IsRevoked())
+            List<Session> activeSessions = sessions
+                .Where(session => !session.IsExpired(DateTime.UtcNow) && !session.IsRevoked())
                 .ToList();
 
             if (!activeSessions.Any())
-                throw new NotFoundException("Nenhuma sessão encontrada.");
+                throw new UnauthorizedException();
 
             return activeSessions;
         }
@@ -148,13 +160,16 @@ namespace AuthCore.Infrastructure.Security
         public void SetCookies(string rawSession, string accessToken)
         {
             if (string.IsNullOrWhiteSpace(rawSession) || string.IsNullOrWhiteSpace(accessToken))
-                throw new BadRequestException("Sessão ou token inválido.");
+                throw new UnauthorizedException();
 
-            var sessionTtl = TimeSpan.FromDays(_settings.Session.ExpiresInDays);
-            var accessTtl = TimeSpan.FromMinutes(_settings.Jwt.ExpiresInMinutes);
+            TimeSpan sessionTtl = TimeSpan.FromDays(_settings.Session.ExpiresInDays);
+            TimeSpan accessTtl = TimeSpan.FromMinutes(_settings.Jwt.ExpiresInMinutes);
+            TimeSpan csrfTtl = sessionTtl;
+            string csrfToken = _secureKeyGenerator.Generate(32);
 
             _cookie.Set(_settings.Cookies.SessionKey, rawSession, sessionTtl);
             _cookie.Set(_settings.Cookies.AccessTokenKey, accessToken, accessTtl);
+            _cookie.Set(_settings.Cookies.CsrfKey, csrfToken, csrfTtl, httpOnly: false);
             _logger.LogInformation("Cookies de sessão definidos com sucesso.");
         }
 
@@ -163,22 +178,40 @@ namespace AuthCore.Infrastructure.Security
         {
             _cookie.Remove(_settings.Cookies.SessionKey);
             _cookie.Remove(_settings.Cookies.AccessTokenKey);
+            _cookie.Remove(_settings.Cookies.CsrfKey);
             _logger.LogInformation("Cookies de sessão removidos.");
         }
-        #region Helperes
+
+        /// <summary>Operação para obter hash da sessão atual com tratamento de formato inválido.</summary>
+        private string GetHashedSessionOrThrow()
+        {
+            try
+            {
+                return _secureKeyGenerator.Hash(Session);
+            }
+            catch (FormatException ex)
+            {
+                _logger.LogWarning(ex, "Cookie de sessão com formato inválido.");
+                ClearCookies();
+                throw new UnauthorizedException();
+            }
+        }
 
         /// <summary>Operação para validar se o token pertence ao usuário da sessão.</summary>
         /// <param name="sessionUserId">Identificador do usuário da sessão.</param>
         private void EnsureOwnership(Guid sessionUserId)
         {
-            var tokenUserId = _jwtTokenProvider.Sub;
+            Guid tokenUserId = _jwtTokenProvider.Sub;
+
             if (sessionUserId != tokenUserId)
             {
-                _logger.LogWarning("Token não corresponde ao usuário da sessão. SessionUserId={SessionUserId}, TokenUserId={TokenUserId}.", sessionUserId, tokenUserId);
-                throw new ForbiddenException("Token de acesso não corresponde ao usuário da sessão.");
+                _logger.LogWarning(
+                    "Token não corresponde ao usuário da sessão. SessionUserId={SessionUserId}, TokenUserId={TokenUserId}.",
+                    sessionUserId,
+                    tokenUserId);
+
+                throw new UnauthorizedException();
             }
         }
-
-        #endregion
     }
 }

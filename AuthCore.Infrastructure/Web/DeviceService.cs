@@ -1,6 +1,7 @@
 ﻿using AuthCore.Domain.Aggregates.Sessions;
 using AuthCore.Domain.Core.Interfaces.Infrastructure.Web;
 using Microsoft.AspNetCore.Http;
+using System.Net;
 using UAParser;
 
 namespace AuthCore.Infrastructure.Web
@@ -11,43 +12,49 @@ namespace AuthCore.Infrastructure.Web
         private readonly IHttpContextAccessor _http;
         private readonly Parser _parser;
 
+        /// <summary>Operação para criar instância do serviço de identificação de dispositivo.</summary>
+        /// <param name="http">Acessor de contexto HTTP.</param>
         public DeviceService(IHttpContextAccessor http)
         {
             _http = http;
             _parser = Parser.GetDefault();
         }
 
-        public DeviceInfo Device
+        /// <summary>Operação para obter informações do dispositivo atual.</summary>
+        public DeviceInfo Get()
         {
-            get
-            {
-                var context = _http.HttpContext;
-                if (context is null)
-                    return DeviceInfo.Create("unknown", "unknown", "unknown");
+            HttpContext? context = _http.HttpContext;
+            if (context is null)
+                return DeviceInfo.Create("unknown", "unknown", "unknown");
 
-                var userAgent = context.Request.Headers["User-Agent"].FirstOrDefault() ?? "Unknown";
+            string userAgent = context.Request.Headers["User-Agent"].FirstOrDefault() ?? "unknown";
+            string ip = GetIp(context);
+            ClientInfo clientInfo = _parser.Parse(userAgent);
+            string platform = clientInfo.OS.Family.Trim();
+            string browser = $"{clientInfo.UA.Family} {clientInfo.UA.Major}".Trim();
 
-                var ip = GetIp(context);
-                var clientInfo = _parser.Parse(userAgent);
-                var platform = clientInfo.OS.Family.Trim();
-                var browser = $"{clientInfo.UA.Family} {clientInfo.UA.Major}".Trim();
-
-                return DeviceInfo.Create(ip, platform, browser);
-            }
+            return DeviceInfo.Create(ip, platform, browser);
         }
 
-        #region Helpers
-
+        /// <summary>Operação para obter o endereço IP da requisição atual.</summary>
+        /// <param name="context">Contexto HTTP atual.</param>
+        /// <remarks>
+        /// Usa apenas RemoteIpAddress para evitar confiar em cabeçalhos injetáveis pelo cliente.
+        /// Em cenários com proxy reverso, o pipeline deve normalizar isso via ForwardedHeaders.
+        /// </remarks>
         private static string GetIp(HttpContext context)
         {
-            var request = context.Request;
+            IPAddress? ip = context.Connection.RemoteIpAddress;
+            if (ip is null)
+                return "unknown";
 
-            if (request.Headers.TryGetValue("X-Forwarded-For", out var forwardedFor))
-                return forwardedFor.ToString().Split(',')[0].Trim();
+            if (IPAddress.IsLoopback(ip))
+                return "127.0.0.1";
 
-            return context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+            if (ip.IsIPv4MappedToIPv6)
+                return ip.MapToIPv4().ToString();
+
+            return ip.ToString();
         }
-
-        #endregion
     }
 }

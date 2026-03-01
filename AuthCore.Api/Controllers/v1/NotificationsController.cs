@@ -15,9 +15,6 @@ namespace AuthCore.Api.Controllers.v1
         /// <remarks>Retorna 202 mesmo quando o e-mail não existe para evitar enumeração.</remarks>
         [HttpPost("confirmation")]
         [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Accepted)]
-        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.TooManyRequests)]
-        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<ApiResponse<object>>> SendConfirmationEmail(
             [FromBody] EmailRequest request,
             [FromServices] ISendNotification sendNotification)
@@ -32,9 +29,9 @@ namespace AuthCore.Api.Controllers.v1
             await sendNotification.OnExecuteAsync(input);
 
             return Accepted(ApiResponse<object>.Success(
-                null!,
-                "Se o e-mail informado for válido, reenviamos o código de confirmação.",
-                HttpStatusCode.Accepted
+                data: null!,
+                title: "Se o e-mail informado for válido, reenviamos o código de confirmação.",
+                statusCode: HttpStatusCode.Accepted
             ));
         }
 
@@ -42,9 +39,6 @@ namespace AuthCore.Api.Controllers.v1
         /// <remarks>Retorna 202 mesmo quando o e-mail não existe para evitar enumeração.</remarks>
         [HttpPost("forgot-password")]
         [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Accepted)]
-        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.TooManyRequests)]
-        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<ApiResponse<object>>> SendPasswordRecoveryEmail(
             [FromBody] EmailRequest request,
             [FromServices] ISendNotification sendNotification)
@@ -59,9 +53,9 @@ namespace AuthCore.Api.Controllers.v1
             await sendNotification.OnExecuteAsync(input);
 
             return Accepted(ApiResponse<object>.Success(
-                null!,
-                "Se o e-mail informado for válido, reenviamos o código de recuperação.",
-                HttpStatusCode.Accepted
+                data: null!,
+                title: "Se o e-mail informado for válido, reenviamos o código de recuperação.",
+                statusCode: HttpStatusCode.Accepted
             ));
         }
     }

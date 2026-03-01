@@ -6,12 +6,15 @@ namespace AuthCore.Domain.Core.Interfaces.Infrastructure.Security
     public interface IConfirmCodeAbuseGuard
     {
         /// <summary>Operação para validar limite por IP.</summary>
+        /// <param name="ipAddress">Endereço IP da requisição.</param>
+        /// <param name="type">Tipo da notificação/código.</param>
+        /// <param name="utcNow">Data e hora atuais em UTC.</param>
         Task EnsureIpAllowedAsync(string? ipAddress, NotificationType type, DateTime utcNow);
 
         /// <summary>Operação para validar e registrar envio para usuário.</summary>
+        /// <param name="userId">Identificador do usuário.</param>
+        /// <param name="type">Tipo da notificação/código.</param>
+        /// <param name="utcNow">Data e hora atuais em UTC.</param>
         Task CheckAndRegisterUserAsync(Guid userId, NotificationType type, DateTime utcNow);
-
-        /// <summary>Operação para registrar lockout após excesso de tentativas.</summary>
-        Task RegisterLockoutAsync(Guid userId, NotificationType type, DateTime utcNow);
     }
 }

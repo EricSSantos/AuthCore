@@ -7,7 +7,7 @@ using AuthCore.Domain.Core.Interfaces.Infrastructure.Notifications;
 using AuthCore.Domain.Core.Interfaces.Infrastructure.Security;
 using AuthCore.Domain.Core.Settings;
 using AuthCore.Infrastructure.Web;
-using AuthCore.Infrastructure.Notifications.RabbitMq;
+using AuthCore.Infrastructure.Persistence.RabbitMq;
 using AuthCore.Infrastructure.Persistence.PostgreSQL.ADO.Context;
 using AuthCore.Infrastructure.Persistence.PostgreSQL.Repositories;
 using AuthCore.Infrastructure.Persistence.Redis.Repositories;
@@ -29,7 +29,7 @@ namespace AuthCore.Infrastructure
             services.Configure<DatabaseSettings>(configuration.GetSection("Database"));
             return services
                 .AddPostgreSqlConnection()
-                .AddRedis(configuration)
+                .AddRedis()
                 .AddRepositories()
                 .AddInfrastructureServices();
         }
@@ -48,7 +48,7 @@ namespace AuthCore.Infrastructure
         #region Redis
 
         /// <summary>Operação para configurar o Redis para cache e armazenamento.</summary>
-        private static IServiceCollection AddRedis(this IServiceCollection services, IConfiguration configuration)
+        private static IServiceCollection AddRedis(this IServiceCollection services)
         {
             services.AddSingleton<IConnectionMultiplexer>(sp =>
             {
@@ -59,12 +59,6 @@ namespace AuthCore.Infrastructure
                     throw new InvalidOperationException("A string de conexão do Redis não foi definida.");
 
                 return ConnectionMultiplexer.Connect(redis.ConnectionString);
-            });
-
-            var settings = configuration.GetSection("Database").Get<DatabaseSettings>() ?? new DatabaseSettings();
-            services.AddStackExchangeRedisCache(options =>
-            {
-                options.Configuration = settings.Redis.ConnectionString;
             });
 
             return services;
@@ -94,10 +88,10 @@ namespace AuthCore.Infrastructure
             services.AddScoped<IDevice, DeviceService>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<ISecureKeyGenerator, SecureKeyGenerator>();
-            services.AddScoped<IEcdsaSigner, EcdsaSigner>();
             services.AddScoped<IEcdsaProvider, EcdsaSigner>();
             services.AddScoped<IJwtTokenProvider, JwtTokenProvider>();
             services.AddScoped<ISessionState, SessionState>();
+            services.AddSingleton<IRateLimitStore, RedisRateLimitStore>();
             services.AddSingleton<IConfirmCodeAbuseGuard, ConfirmCodeAbuseGuard>();
             services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
             services.AddSingleton<IEmailSender, EmailSender>();

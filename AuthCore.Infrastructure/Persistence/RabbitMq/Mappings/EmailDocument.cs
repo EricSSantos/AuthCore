@@ -1,7 +1,7 @@
 ﻿using AuthCore.Domain.Aggregates.Notifications;
 using System.Text.Json.Serialization;
 
-namespace AuthCore.Infrastructure.Notifications.RabbitMq.Mappings
+namespace AuthCore.Infrastructure.Persistence.RabbitMq.Mappings
 {
     /// <summary>Representa documento de e-mail para fila.</summary>
     public sealed class EmailDocument

@@ -6,13 +6,6 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UserSecretsId>30baaab0-65b1-4a3e-a2e3-15c7336a0723</UserSecretsId>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-		<!-- Gera o arquivo de documentação XML com os comentários ///.
-			 Esse arquivo é utilizado pelo Swagger para exibir descrições detalhadas
-			 de endpoints, parâmetros e retornos na interface interativa. -->
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<!-- Suprime o aviso CS1591, que é exibido quando algum membro público
-			não possui comentário XML. Isso evita poluição no build. -->
-		<NoWarn>$(NoWarn);1591</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>

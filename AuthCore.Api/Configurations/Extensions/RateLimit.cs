@@ -2,10 +2,10 @@
 
 namespace AuthCore.Api.Configurations.Extensions
 {
-    /// <summary>Configura o middleware global de Rate Limiting.</summary>
+    /// <summary>Configura o middleware global de limitação de taxa.</summary>
     public static class RateLimit
     {
-        /// <summary>Operação para registrar o Rate Limiter baseado no IP do cliente.</summary>
+        /// <summary>Operação para registrar o limitador de taxa baseado no IP do cliente.</summary>
         /// <param name="builder">Instância usada para configurar os serviços.</param>
         public static void AddRateLimiting(this WebApplicationBuilder builder)
         {

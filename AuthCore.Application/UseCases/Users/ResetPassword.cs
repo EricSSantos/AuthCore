@@ -20,22 +20,19 @@ namespace AuthCore.Application.UseCases.Users
         private readonly IPasswordHasher _passwordHasher;
         private readonly SecuritySettings _settings;
         private readonly ILogger<ResetPassword> _logger;
-        private readonly IConfirmCodeAbuseGuard _confirmCodeAbuseGuard;
 
         public ResetPassword(
             IUserRepository userRepository,
             IConfirmCodeRepository confirmCodeRepository,
             IPasswordHasher passwordHasher,
             SecuritySettings settings,
-            ILogger<ResetPassword> logger,
-            IConfirmCodeAbuseGuard confirmCodeAbuseGuard)
+            ILogger<ResetPassword> logger)
         {
             _userRepository = userRepository;
             _confirmCodeRepository = confirmCodeRepository;
             _passwordHasher = passwordHasher;
             _settings = settings;
             _logger = logger;
-            _confirmCodeAbuseGuard = confirmCodeAbuseGuard;
         }
 
         public async Task OnExecuteAsync(ResetPasswordRequest request)
@@ -63,7 +60,6 @@ namespace AuthCore.Application.UseCases.Users
                 _logger.LogWarning("Falha na redefinição de senha para usuário {UserId}. Tentativas={Attempts}.", user.Id, confirm.Attempts);
                 if (confirm.Attempts >= _settings.ConfirmCode.MaxAttempts)
                 {
-                    await _confirmCodeAbuseGuard.RegisterLockoutAsync(user.Id, NotificationType.ForgotPassword, utcNow);
                     await _confirmCodeRepository.DeleteAsync(user.Id, confirm.Type);
                 }
                 else

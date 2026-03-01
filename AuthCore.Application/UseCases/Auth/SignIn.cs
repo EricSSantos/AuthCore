@@ -20,6 +20,7 @@ namespace AuthCore.Application.UseCases.Auth
         private readonly IUserAuthenticationPolicy _authenticationPolicy;
         private readonly ISessionState _sessionState;
         private readonly IDevice _device;
+        private readonly IRateLimitStore _rateLimit;
         private readonly SecuritySettings _settings;
         private readonly ILogger<SignIn> _logger;
 
@@ -31,6 +32,7 @@ namespace AuthCore.Application.UseCases.Auth
             IUserAuthenticationPolicy authenticationPolicy,
             ISessionState sessionState,
             IDevice device,
+            IRateLimitStore rateLimit,
             SecuritySettings settings,
             ILogger<SignIn> logger)
         {
@@ -41,12 +43,34 @@ namespace AuthCore.Application.UseCases.Auth
             _authenticationPolicy = authenticationPolicy;
             _sessionState = sessionState;
             _device = device;
+            _rateLimit = rateLimit;
             _settings = settings;
             _logger = logger;
         }
 
         public async Task OnExecuteAsync(SignInRequest request)
         {
+            var deviceInfo = _device.Get();
+            var ip = deviceInfo.Ip;
+            var emailKey = request.Email.Trim().ToLowerInvariant();
+            if (_settings.Abuse.SignInIpPerMinute > 0)
+            {
+                await _rateLimit.EnsureFixedWindowAsync(
+                    key: $"auth:sign-in:ip:{ip}",
+                    limit: _settings.Abuse.SignInIpPerMinute,
+                    window: TimeSpan.FromMinutes(1),
+                    errorMessage: "Muitas tentativas de login. Tente novamente mais tarde.");
+            }
+
+            if (_settings.Abuse.SignInEmailPerMinute > 0)
+            {
+                await _rateLimit.EnsureFixedWindowAsync(
+                    key: $"auth:sign-in:email:{emailKey}",
+                    limit: _settings.Abuse.SignInEmailPerMinute,
+                    window: TimeSpan.FromMinutes(1),
+                    errorMessage: "Muitas tentativas de login. Tente novamente mais tarde.");
+            }
+
             // Recupera o usuário sem revelar se o e-mail existe
             var user = await _userRepository.GetByEmailAsync(request.Email)
                 ?? throw new InvalidCredentialsException();
@@ -69,7 +93,7 @@ namespace AuthCore.Application.UseCases.Auth
             // Criação da sessão delegada ao domínio de sessão
             var sessionResult = await _sessionService.CreateSessionAsync(
                 user.Id,
-                _device.Device,
+                deviceInfo,
                 TimeSpan.FromDays(_settings.Session.ExpiresInDays),
                 TimeSpan.FromDays(_settings.Session.MaxLifetimeInDays),
                 utcNow

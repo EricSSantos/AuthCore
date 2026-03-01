@@ -38,13 +38,11 @@ namespace AuthCore.Api.Configurations.Extensions
             });
         }
 
-        /// <summary>Operação para ativar hTTPS, roteamento e aplica a política correta.</summary>
+        /// <summary>Operação para aplicar a política de CORS correta por ambiente.</summary>
         /// <param name="app">Instância para configurar o pipeline.</param>
-        public static void UseCorsAndHttps(this WebApplication app)
+        public static void UseCorsPolicy(this WebApplication app)
         {
             var env = app.Services.GetRequiredService<IWebHostEnvironment>();
-            app.UseHttpsRedirection();
-            app.UseRouting();
             app.UseCors(env.IsProduction() ? PROD_POLICY : DEV_POLICY);
         }
     }

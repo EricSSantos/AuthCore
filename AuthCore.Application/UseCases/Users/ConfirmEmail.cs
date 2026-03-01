@@ -6,7 +6,6 @@ using AuthCore.Domain.Aggregates.Notifications;
 using AuthCore.Domain.Aggregates.Notifications.Interfaces;
 using AuthCore.Domain.Aggregates.Users.Interfaces;
 using AuthCore.Domain.Core.Exceptions;
-using AuthCore.Domain.Core.Interfaces.Infrastructure.Security;
 using AuthCore.Domain.Core.Settings;
 using Microsoft.Extensions.Logging;
 
@@ -21,7 +20,6 @@ namespace AuthCore.Application.UseCases.Users
         private readonly INotificationPolicy _notificationPolicy;
         private readonly SecuritySettings _settings;
         private readonly ILogger<ConfirmEmail> _logger;
-        private readonly IConfirmCodeAbuseGuard _confirmCodeAbuseGuard;
 
         public ConfirmEmail(
             IUserRepository userRepository,
@@ -29,8 +27,7 @@ namespace AuthCore.Application.UseCases.Users
             IEmailSender emailSender,
             INotificationPolicy notificationPolicy,
             SecuritySettings settings,
-            ILogger<ConfirmEmail> logger,
-            IConfirmCodeAbuseGuard confirmCodeAbuseGuard)
+            ILogger<ConfirmEmail> logger)
         {
             _userRepository = userRepository;
             _confirmCodeRepository = confirmCodeRepository;
@@ -38,7 +35,6 @@ namespace AuthCore.Application.UseCases.Users
             _notificationPolicy = notificationPolicy;
             _settings = settings;
             _logger = logger;
-            _confirmCodeAbuseGuard = confirmCodeAbuseGuard;
         }
 
         public async Task OnExecuteAsync(ConfirmEmailRequest request)
@@ -67,7 +63,6 @@ namespace AuthCore.Application.UseCases.Users
                 _logger.LogWarning("Falha na confirmação de e-mail para usuário {UserId}. Tentativas={Attempts}.", user.Id, confirm.Attempts);
                 if (confirm.Attempts >= _settings.ConfirmCode.MaxAttempts)
                 {
-                    await _confirmCodeAbuseGuard.RegisterLockoutAsync(user.Id, NotificationType.ConfirmEmail, utcNow);
                     await _confirmCodeRepository.DeleteAsync(user.Id, confirm.Type);
                 }
                 else

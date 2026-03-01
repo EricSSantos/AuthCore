@@ -11,14 +11,9 @@ namespace AuthCore.Api.Controllers.v1
     [Route("api/v1/auth")]
     public sealed class AuthController : ControllerBase
     {
-        /// <summary>Operação para autenticar o usuário e inicia sessão.</summary>
+        /// <summary>Operação para autenticar o usuário e iniciar sessão.</summary>
         [HttpPost("sign-in")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Forbidden)]
-        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.TooManyRequests)]
-        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<ApiResponse<object>>> SignIn(
             [FromBody] SignInRequest request,
             [FromServices] ISignIn signIn)
@@ -26,46 +21,40 @@ namespace AuthCore.Api.Controllers.v1
             await signIn.OnExecuteAsync(request);
 
             return Ok(ApiResponse<object>.Success(
-                null!,
-                "Login realizado com sucesso.",
-                HttpStatusCode.OK
+                data: null!,
+                title: "Login realizado com sucesso.",
+                statusCode: HttpStatusCode.OK
             ));
         }
 
-        /// <summary>Encerra a sessão atual do usuário.</summary>
+        /// <summary>Operação para encerrar a sessão atual do usuário.</summary>
         [Authorize]
         [HttpPost("sign-out")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Forbidden)]
-        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<ApiResponse<object>>> SignOut(
             [FromServices] ISignOut signOut)
         {
             await signOut.OnExecuteAsync();
 
             return Ok(ApiResponse<object>.Success(
-                null!,
-                "Logout realizado com sucesso.",
-                HttpStatusCode.OK
+                data: null!,
+                title: "Logout realizado com sucesso.",
+                statusCode: HttpStatusCode.OK
             ));
         }
 
         /// <summary>Operação para renovar o token de acesso do usuário.</summary>
         [HttpPost("refresh-token")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Unauthorized)]
-        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.Forbidden)]
-        [ProducesResponseType(typeof(ApiResponse<object>), (int)HttpStatusCode.InternalServerError)]
         public async Task<ActionResult<ApiResponse<object>>> RefreshToken(
             [FromServices] IRefresh refresh)
         {
             await refresh.OnExecuteAsync();
 
             return Ok(ApiResponse<object>.Success(
-                null!,
-                "Sessão atualizada com sucesso.",
-                HttpStatusCode.OK
+                data: null!,
+                title: "Sessão atualizada com sucesso.",
+                statusCode: HttpStatusCode.OK
             ));
         }
     }

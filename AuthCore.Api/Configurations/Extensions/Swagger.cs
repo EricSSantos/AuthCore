@@ -10,7 +10,7 @@ namespace AuthCore.Api.Configurations.Extensions
         /// <param name="builder">Instância usada para configurar os serviços.</param>
         public static void AddSwaggerService(this WebApplicationBuilder builder)
         {
-            var settings = builder.Services.BuildServiceProvider().GetRequiredService<ApiSettings>();
+            var settings = builder.Configuration.GetSection("Api").Get<ApiSettings>();
             if (settings is null || settings.Versions is null || settings.Versions.Count == 0)
                 throw new InvalidOperationException("As configurações da API não foram definidas.");
 

@@ -6,7 +6,7 @@ using RabbitMQ.Client;
 using System.Text;
 using System.Text.Json;
 
-namespace AuthCore.Infrastructure.Notifications.RabbitMq
+namespace AuthCore.Infrastructure.Persistence.RabbitMq
 {
     /// <summary>Representa cliente RabbitMQ para publicação de mensagens.</summary>
     public sealed class RabbitMqClient : IRabbitMqClient

@@ -2,9 +2,9 @@
 using AuthCore.Domain.Core.Interfaces.Infrastructure.Security;
 using AuthCore.Domain.Core.Settings;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Extensions.Logging;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -21,6 +21,11 @@ namespace AuthCore.Infrastructure.Security
         private readonly JwtSecurityTokenHandler _handler;
         private readonly ILogger<JwtTokenProvider> _logger;
 
+        /// <summary>Operação para criar instância do provedor de criação e leitura de JWT.</summary>
+        /// <param name="ecdsa">Provedor de chaves ECDSA.</param>
+        /// <param name="httpContext">Acessor de contexto HTTP.</param>
+        /// <param name="settings">Configurações de segurança.</param>
+        /// <param name="logger">Serviço de logging.</param>
         public JwtTokenProvider(
             IEcdsaProvider ecdsa,
             IHttpContextAccessor httpContext,
@@ -32,75 +37,77 @@ namespace AuthCore.Infrastructure.Security
             _settings = settings.Value;
             _handler = new JwtSecurityTokenHandler();
             _logger = logger;
-
-            var ecdsaPriv = ECDsa.Create();
-            ecdsaPriv.ImportPkcs8PrivateKey(_ecdsa.PrivateKey, out _);
-            var ecKey = new ECDsaSecurityKey(ecdsaPriv);
-
-            _credentials = new SigningCredentials(ecKey, SecurityAlgorithms.EcdsaSha256);
+            ECDsa ecdsaPrivateKey = ECDsa.Create();
+            ecdsaPrivateKey.ImportPkcs8PrivateKey(_ecdsa.PrivateKey, out _);
+            ECDsaSecurityKey ecdsaSecurityKey = new ECDsaSecurityKey(ecdsaPrivateKey);
+            _credentials = new SigningCredentials(ecdsaSecurityKey, SecurityAlgorithms.EcdsaSha256);
         }
 
+        /// <summary>Operação para obter identificador do usuário autenticado a partir do token JWT.</summary>
         public Guid Sub
         {
             get
             {
-                var claimValue = GetClaimValue(JwtRegisteredClaimNames.Sub, ClaimTypes.NameIdentifier);
+                string? claimValue = GetClaimValue(JwtRegisteredClaimNames.Sub, ClaimTypes.NameIdentifier);
 
-                if (string.IsNullOrWhiteSpace(claimValue) || !Guid.TryParse(claimValue, out var userId))
+                if (string.IsNullOrWhiteSpace(claimValue) || !Guid.TryParse(claimValue, out Guid userId))
                 {
                     _logger.LogWarning("Claim 'sub' ausente ou inválido.");
-                    throw new UnauthorizedException("Claim 'sub' ausente ou inválido.");
+                    throw new UnauthorizedException();
                 }
 
                 return userId;
             }
         }
 
+        /// <summary>Operação para gerar token de acesso.</summary>
+        /// <param name="userId">Identificador do usuário.</param>
         public string Generate(Guid userId)
         {
-            var claims = new List<Claim>
+            List<Claim> claims = new List<Claim>
             {
                 new(JwtRegisteredClaimNames.Sub, userId.ToString()),
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
-            var token = new JwtSecurityToken(
+            JwtSecurityToken token = new JwtSecurityToken(
                 issuer: _settings.Jwt.Issuer,
                 audience: _settings.Jwt.Audience,
                 claims: claims,
                 expires: DateTime.UtcNow.AddMinutes(_settings.Jwt.ExpiresInMinutes),
-                signingCredentials: _credentials
-            );
+                signingCredentials: _credentials);
 
             _logger.LogInformation("JWT gerado para usuário {UserId}.", userId);
+
             return _handler.WriteToken(token);
         }
 
-        #region Helpers
-
-        private ClaimsPrincipal GetPrincipals()
+        /// <summary>Operação para obter usuário autenticado do contexto HTTP atual.</summary>
+        private ClaimsPrincipal GetPrincipal()
         {
-            var principal = _httpContext.HttpContext?.User;
+            ClaimsPrincipal? principal = _httpContext.HttpContext?.User;
+
             if (principal is null || principal.Identity?.IsAuthenticated is not true)
             {
                 _logger.LogWarning("Usuário não autenticado ou contexto inválido.");
-                throw new UnauthorizedException("Usuário não autenticado ou contexto inválido.");
+                throw new UnauthorizedException();
             }
 
             return principal;
         }
 
+        /// <summary>Operação para obter valor de claim do token JWT.</summary>
+        /// <param name="standardClaim">Nome padrão da claim.</param>
+        /// <param name="fallbackClaim">Nome alternativo da claim.</param>
         private string? GetClaimValue(string standardClaim, string fallbackClaim)
         {
-            var principal = GetPrincipals();
+            ClaimsPrincipal principal = GetPrincipal();
 
-            var claim = principal.Claims.FirstOrDefault(c => c.Type == standardClaim);
-            if (claim == null)
+            Claim? claim = principal.Claims.FirstOrDefault(c => c.Type == standardClaim);
+            if (claim is null)
                 claim = principal.Claims.FirstOrDefault(c => c.Type == fallbackClaim);
 
             return claim?.Value;
         }
-
-        #endregion
     }
 }

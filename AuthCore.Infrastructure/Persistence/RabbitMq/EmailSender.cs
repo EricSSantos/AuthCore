@@ -2,11 +2,11 @@
 using AuthCore.Domain.Aggregates.Notifications.Interfaces;
 using AuthCore.Domain.Core.Interfaces.Infrastructure.Notifications;
 using AuthCore.Domain.Core.Settings;
-using AuthCore.Infrastructure.Notifications.RabbitMq.Mappings;
+using AuthCore.Infrastructure.Persistence.RabbitMq.Mappings;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace AuthCore.Infrastructure.Notifications.RabbitMq
+namespace AuthCore.Infrastructure.Persistence.RabbitMq
 {
     /// <summary>Representa serviço de envio de notificações por RabbitMQ.</summary>
     public sealed class EmailSender : IEmailSender

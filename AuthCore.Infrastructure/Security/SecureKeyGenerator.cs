@@ -12,11 +12,11 @@ namespace AuthCore.Infrastructure.Security
     {
         private readonly byte[] _key;
 
-        /// <summary>Operação para criar instância do gerador de chaves.</summary>
+        /// <summary>Operação para criar instância do gerador de chaves seguras.</summary>
         /// <param name="settings">Configurações de segurança.</param>
         public SecureKeyGenerator(IOptions<SecuritySettings> settings)
         {
-            var symmetricKey = settings.Value.Keys.Symmetric.PrivateKey;
+            string symmetricKey = settings.Value.Keys.Symmetric.PrivateKey;
 
             if (string.IsNullOrWhiteSpace(symmetricKey))
                 throw new ArgumentException("A chave simétrica HMAC não foi configurada.");
@@ -24,47 +24,46 @@ namespace AuthCore.Infrastructure.Security
             _key = Encoding.UTF8.GetBytes(symmetricKey);
         }
 
-        /// <summary>Operação para gerar chave aleatória em hex.</summary>
-        /// <param name="size">Tamanho em bytes.</param>
+        /// <summary>Operação para gerar chave aleatória em formato hexadecimal.</summary>
+        /// <param name="size">Tamanho da chave em bytes.</param>
         public string Generate(int size = 32)
         {
-            var bytes = RandomNumberGenerator.GetBytes(size);
+            byte[] bytes = RandomNumberGenerator.GetBytes(size);
             return Convert.ToHexString(bytes).ToLowerInvariant();
         }
 
-        /// <summary>Operação para gerar hash HMAC da chave.</summary>
-        /// <param name="raw">Chave em hex.</param>
+        /// <summary>Operação para gerar hash HMAC da chave informada.</summary>
+        /// <param name="raw">Chave em formato hexadecimal.</param>
         public string Hash(string raw)
         {
-            var bytes = Convert.FromHexString(raw);
+            byte[] bytes = Convert.FromHexString(raw);
+
             return ComputeHash(bytes);
         }
 
-        /// <summary>Operação para validar hash HMAC da chave.</summary>
-        /// <param name="raw">Chave em hex.</param>
+        /// <summary>Operação para validar hash HMAC da chave informada.</summary>
+        /// <param name="raw">Chave em formato hexadecimal.</param>
         /// <param name="hash">Hash esperado.</param>
         public bool Verify(string raw, string hash)
         {
-            var bytes = Convert.FromHexString(raw);
-            var computed = ComputeHash(bytes);
+            byte[] bytes = Convert.FromHexString(raw);
+            string computedHash = ComputeHash(bytes);
 
-            var expected = Base64UrlEncoder.DecodeBytes(hash);
-            var actual = Base64UrlEncoder.DecodeBytes(computed);
+            byte[] expectedHashBytes = Base64UrlEncoder.DecodeBytes(hash);
+            byte[] actualHashBytes = Base64UrlEncoder.DecodeBytes(computedHash);
 
-            return CryptographicOperations.FixedTimeEquals(actual, expected);
+            return CryptographicOperations.FixedTimeEquals(actualHashBytes, expectedHashBytes);
         }
-
-        #region Helpers
 
         /// <summary>Operação para computar hash HMAC.</summary>
         /// <param name="data">Bytes de entrada.</param>
         private string ComputeHash(byte[] data)
         {
-            using var hmac = new HMACSHA256(_key);
-            var hashBytes = hmac.ComputeHash(data);
+            using HMACSHA256 hmac = new HMACSHA256(_key);
+
+            byte[] hashBytes = hmac.ComputeHash(data);
+
             return Base64UrlEncoder.Encode(hashBytes);
         }
-
-        #endregion
     }
 }

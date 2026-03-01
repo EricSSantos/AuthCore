@@ -6,6 +6,7 @@
         public JwtSettings Jwt { get; set; } = new();
         public SessionSettings Session { get; set; } = new();
         public CookieSettings Cookies { get; set; } = new();
+        public AbuseSettings Abuse { get; set; } = new();
         public LoginAttemptsSettings LoginAttempts { get; set; } = new();
         public ConfirmCodeSettings ConfirmCode { get; set; } = new();
         public ConfirmCodeAbuseSettings ConfirmCodeAbuse { get; set; } = new();
@@ -48,7 +49,6 @@
         public int ResendCooldownMinutes { get; set; } = 2;
         public int WindowMinutes { get; set; } = 1440;
         public int MaxCodesPerWindow { get; set; } = 3;
-        public int LockoutMinutes { get; set; } = 30;
         public int IpPerMinute { get; set; } = 60;
         public int IpPerMinutePerEndpoint { get; set; } = 20;
     }
@@ -58,6 +58,15 @@
     {
         public string SessionKey { get; set; } = "__Host-session";
         public string AccessTokenKey { get; set; } = "__Host-access_token";
+        public string CsrfKey { get; set; } = "__Host-csrf";
+    }
+
+    /// <summary>Configurações globais de mitigação de abuso.</summary>
+    public sealed class AbuseSettings
+    {
+        public int SignInIpPerMinute { get; set; } = 20;
+        public int SignInEmailPerMinute { get; set; } = 10;
+        public int RefreshPerMinute { get; set; } = 60;
     }
 
     /// <summary>Representa configurações das chaves criptográficas.</summary>

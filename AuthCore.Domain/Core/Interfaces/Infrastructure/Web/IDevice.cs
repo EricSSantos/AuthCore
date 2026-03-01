@@ -2,9 +2,10 @@
 
 namespace AuthCore.Domain.Core.Interfaces.Infrastructure.Web
 {
-    /// <summary>Define acesso às informações do dispositivo do cliente.</summary>
+    /// <summary>Define operações para obtenção das informações do dispositivo do cliente.</summary>
     public interface IDevice
     {
-        DeviceInfo Device { get; }
+        /// <summary>Operação para obter informações do dispositivo atual.</summary>
+        DeviceInfo Get();
     }
 }

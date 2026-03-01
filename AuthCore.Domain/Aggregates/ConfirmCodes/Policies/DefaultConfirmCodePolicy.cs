@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using AuthCore.Domain.Aggregates.ConfirmCodes;
 using AuthCore.Domain.Aggregates.ConfirmCodes.Interfaces;
 using AuthCore.Domain.Core.Settings;
 
@@ -9,8 +10,8 @@ namespace AuthCore.Domain.Aggregates.ConfirmCodes.Policies
     {
         #region Constants
 
-        private const int CODE_MIN = 100_000;
-        private const int CODE_MAX = 1_000_000;
+        private const int CODE_MIN = DigitCode.MIN_VALUE;
+        private const int CODE_MAX_EXCLUSIVE = DigitCode.MAX_VALUE + 1;
 
         #endregion
 
@@ -32,7 +33,7 @@ namespace AuthCore.Domain.Aggregates.ConfirmCodes.Policies
         /// <param name="utcNow">Data e hora atuais em UTC.</param>
         public int GenerateCode(CodeType type, DateTime utcNow)
         {
-            return RandomNumberGenerator.GetInt32(CODE_MIN, CODE_MAX);
+            return RandomNumberGenerator.GetInt32(CODE_MIN, CODE_MAX_EXCLUSIVE);
         }
 
         /// <summary>Operação para obter expiração do código.</summary>

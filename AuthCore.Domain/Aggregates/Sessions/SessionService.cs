@@ -35,28 +35,16 @@ namespace AuthCore.Domain.Aggregates.Sessions
         /// <param name="ttl">Tempo de expiração da sessão.</param>
         /// <param name="maxLifetime">Tempo máximo de vida útil.</param>
         /// <param name="utcNow">Data e hora atuais em UTC.</param>
-        public async Task<SessionCreationResult> CreateSessionAsync(Guid userId, DeviceInfo deviceInfo, TimeSpan ttl, TimeSpan maxLifetime, DateTime utcNow)
+        public async Task<SessionCreationResult> CreateSessionAsync(
+            Guid userId, 
+            DeviceInfo deviceInfo, 
+            TimeSpan ttl, 
+            TimeSpan maxLifetime, 
+            DateTime utcNow)
         {
-            var sessions = (await _sessionRepository.GetAllByUserIdAsync(userId)).ToList();
-            var sessionsToRevoke = _sessionPolicy.SelectSessionsToRevoke(sessions);
+            await RevokeOverflowSessionsAsync(userId, utcNow);
 
-            foreach (var oldSession in sessionsToRevoke)
-            {
-                oldSession.Revoke(utcNow);
-                await _sessionRepository.SetAsync(oldSession);
-            }
-
-            var rawSession = _secureKeyGenerator.Generate();
-            var sessionHash = _secureKeyGenerator.Hash(rawSession);
-
-            var session = Session.Create(
-                id: sessionHash,
-                userId: userId,
-                deviceInfo: deviceInfo,
-                ttl: ttl,
-                maxLifetime: maxLifetime,
-                utcNow: utcNow
-            );
+            var (session, rawSession) = CreateNewSession(userId, deviceInfo, ttl, maxLifetime, utcNow);
 
             await _sessionRepository.SetAsync(session);
 
@@ -78,6 +66,49 @@ namespace AuthCore.Domain.Aggregates.Sessions
             session.Revoke(utcNow);
 
             await _sessionRepository.SetAsync(session);
+        }
+
+        /// <summary>Operação para revogar sessões excedentes do usuário.</summary>
+        /// <param name="userId">Identificador do usuário.</param>
+        /// <param name="utcNow">Data e hora atuais em UTC.</param>
+        private async Task RevokeOverflowSessionsAsync(Guid userId, DateTime utcNow)
+        {
+            var sessions = (await _sessionRepository.GetAllByUserIdAsync(userId)).ToList();
+            var sessionsToRevoke = _sessionPolicy.SelectSessionsToRevoke(sessions);
+
+            foreach (var oldSession in sessionsToRevoke)
+            {
+                oldSession.Revoke(utcNow);
+                await _sessionRepository.SetAsync(oldSession);
+            }
+        }
+
+        /// <summary>Operação para criar nova sessão com segredo bruto para retorno.</summary>
+        /// <param name="userId">Identificador do usuário.</param>
+        /// <param name="deviceInfo">Dados do dispositivo.</param>
+        /// <param name="ttl">Tempo de expiração da sessão.</param>
+        /// <param name="maxLifetime">Tempo máximo de vida útil.</param>
+        /// <param name="utcNow">Data e hora atuais em UTC.</param>
+        private (Session Session, string RawSession) CreateNewSession(
+            Guid userId,
+            DeviceInfo deviceInfo,
+            TimeSpan ttl,
+            TimeSpan maxLifetime,
+            DateTime utcNow)
+        {
+            var rawSession = _secureKeyGenerator.Generate();
+            var sessionHash = _secureKeyGenerator.Hash(rawSession);
+
+            var session = Session.Create(
+                id: sessionHash,
+                userId: userId,
+                deviceInfo: deviceInfo,
+                ttl: ttl,
+                maxLifetime: maxLifetime,
+                utcNow: utcNow
+            );
+
+            return (session, rawSession);
         }
     }
 }

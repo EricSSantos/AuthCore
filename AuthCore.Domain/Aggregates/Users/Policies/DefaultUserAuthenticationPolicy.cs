@@ -9,16 +9,12 @@ namespace AuthCore.Domain.Aggregates.Users.Policies
     {
         private readonly SecuritySettings _settings;
 
-        #region Constructors
-
         /// <summary>Operação para criar instância de política.</summary>
         /// <param name="settings">Configurações de segurança.</param>
         public DefaultUserAuthenticationPolicy(SecuritySettings settings)
         {
             _settings = settings;
         }
-
-        #endregion
 
         /// <summary>Operação para validar autenticação do usuário.</summary>
         /// <param name="user">Usuário a validar.</param>
@@ -27,7 +23,6 @@ namespace AuthCore.Domain.Aggregates.Users.Policies
         {
             if (!user.IsActiveAndVerified())
                 throw new ForbiddenException("Usuário inativo ou não verificado.");
-
             if (user.LoginAttempts.IsLocked(utcNow))
                 throw new AccountLockedException(user.LoginAttempts.GetLockMessage(utcNow)!);
         }

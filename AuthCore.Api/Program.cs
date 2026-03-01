@@ -16,21 +16,22 @@ builder.AddRateLimiting();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 #endregion
 
 var app = builder.Build();
 
 #region Middlewares
+app.UseHttpsRedirection();
 app.UseRouting();
+app.UseCorsPolicy();
 app.UseStaticFiles();
 app.UseSwaggerDoc();
 app.UseRateLimiter();
 app.UseExceptionsHandling();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseCorsAndHttps();
+app.UseCsrfProtection();
 app.MapControllers();
 
 #endregion

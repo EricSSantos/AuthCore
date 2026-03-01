@@ -37,7 +37,7 @@ namespace AuthCore.Api.Configurations.Extensions
                 _env = env;
             }
 
-            /// <summary>Operação para processar a requisição e trata erros não capturados.</summary>
+            /// <summary>Operação para processar a requisição e tratar erros não capturados.</summary>
             /// <param name="context">Contexto HTTP atual.</param>
             public async Task InvokeAsync(HttpContext context)
             {

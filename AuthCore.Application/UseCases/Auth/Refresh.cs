@@ -12,6 +12,7 @@ namespace AuthCore.Application.UseCases.Auth
         private readonly ISessionService _sessionService;
         private readonly IJwtTokenProvider _jwtTokenProvider;
         private readonly ISessionState _sessionState;
+        private readonly IRateLimitStore _rateLimit;
         private readonly SecuritySettings _settings;
         private readonly ILogger<Refresh> _logger;
 
@@ -19,12 +20,14 @@ namespace AuthCore.Application.UseCases.Auth
             ISessionService sessionService,
             IJwtTokenProvider jwtTokenProvider,
             ISessionState sessionState,
+            IRateLimitStore rateLimit,
             SecuritySettings settings,
             ILogger<Refresh> logger)
         {
             _sessionService = sessionService;
             _jwtTokenProvider = jwtTokenProvider;
             _sessionState = sessionState;
+            _rateLimit = rateLimit;
             _settings = settings;
             _logger = logger;
         }
@@ -35,6 +38,15 @@ namespace AuthCore.Application.UseCases.Auth
             var user = result.User;
             var session = result.Session;
             var utcNow = DateTime.UtcNow;
+
+            if (_settings.Abuse.RefreshPerMinute > 0)
+            {
+                await _rateLimit.EnsureFixedWindowAsync(
+                    key: $"auth:refresh:session:{session.Id}",
+                    limit: _settings.Abuse.RefreshPerMinute,
+                    window: TimeSpan.FromMinutes(1),
+                    errorMessage: "Muitas requisições de refresh. Tente novamente mais tarde.");
+            }
 
             var sessionResult = await _sessionService.CreateSessionAsync(
                 user.Id,

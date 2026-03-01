@@ -52,7 +52,7 @@ namespace AuthCore.Application.UseCases.Notifications
 
             var codeValue = GetCodeValue(request.Type, utcNow);
             var payload = _notificationPolicy.CreatePayload(request.Type, codeValue);
-            
+
             var email = Notification.Create(
                 to: user.Email.Value,
                 fullName: user.FullName,
@@ -66,8 +66,6 @@ namespace AuthCore.Application.UseCases.Notifications
             await _confirmCodeRepository.SetAsync(user.Id, code);
             await _emailSender.SendAsync(email);
         }
-
-        #region Helpers
 
         private ConfirmCode CreateConfirmCode(Notification email, int? codeValue, DateTime utcNow)
         {
@@ -94,7 +92,5 @@ namespace AuthCore.Application.UseCases.Notifications
                     return null;
             }
         }
-
-        #endregion
     }
 }

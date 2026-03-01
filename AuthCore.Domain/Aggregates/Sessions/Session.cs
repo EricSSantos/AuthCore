@@ -108,7 +108,7 @@ namespace AuthCore.Domain.Aggregates.Sessions
         /// <param name="utcNow">Data e hora atuais em UTC.</param>
         public bool IsExpired(DateTime utcNow)
         {
-            return utcNow > ExpiresAt || utcNow > MaxLifetime;
+            return utcNow >= ExpiresAt || utcNow >= MaxLifetime;
         }
 
         /// <summary>Operação para verificar revogação da sessão.</summary>
@@ -122,13 +122,21 @@ namespace AuthCore.Domain.Aggregates.Sessions
         /// <param name="utcNow">Data e hora atuais em UTC.</param>
         public void Refresh(TimeSpan ttl, DateTime utcNow)
         {
+            if (ttl <= TimeSpan.Zero)
+                throw new BadRequestException("O tempo de expiração da sessão é inválido.");
+
             if (IsRevoked())
                 throw new ForbiddenException("Sessão revogada.");
 
-            if (utcNow > MaxLifetime)
+            if (utcNow >= MaxLifetime)
                 throw new ForbiddenException("A sessão atingiu o tempo máximo permitido.");
 
-            ExpiresAt = utcNow.Add(ttl);
+            var newExpiresAt = utcNow.Add(ttl);
+
+            if (newExpiresAt > MaxLifetime)
+                throw new ForbiddenException("A sessão não pode ultrapassar o tempo máximo permitido.");
+
+            ExpiresAt = newExpiresAt;
         }
 
         /// <summary>Operação para revogar sessão.</summary>

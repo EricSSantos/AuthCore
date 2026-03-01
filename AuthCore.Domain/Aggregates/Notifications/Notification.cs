@@ -96,29 +96,11 @@ namespace AuthCore.Domain.Aggregates.Notifications
 
             if (Payload is null)
                 errors.Add("O conteúdo é obrigatório.");
-            else if (!IsValidPayload(Type, Payload))
+            else if (Payload.Type != Type)
                 errors.Add("O conteúdo da notificação não é compatível com o tipo informado.");
 
             if (errors.Count > 0)
                 throw new BadRequestException(errors);
-        }
-
-        /// <summary>Operação para validar compatibilidade do payload.</summary>
-        /// <param name="type">Tipo da notificação.</param>
-        /// <param name="payload">Conteúdo da notificação.</param>
-        private static bool IsValidPayload(NotificationType type, Payload payload)
-        {
-            switch (type)
-            {
-                case NotificationType.ConfirmEmail:
-                    return payload is ConfirmEmailPayload;
-                case NotificationType.Welcome:
-                    return payload is WelcomeEmailPayload;
-                case NotificationType.ForgotPassword:
-                    return payload is ForgotPasswordPayload;
-                default:
-                    return false;
-            }
         }
 
         #endregion

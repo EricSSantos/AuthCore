@@ -3,16 +3,16 @@
     /// <summary>Define operações para gerar chaves e hashes seguros.</summary>
     public interface ISecureKeyGenerator
     {
-        /// <summary>Operação para gerar chave segura.</summary>
-        /// <param name="size">Tamanho do buffer em bytes.</param>
+        /// <summary>Operação para gerar chave segura em formato hexadecimal.</summary>
+        /// <param name="size">Tamanho da chave em bytes.</param>
         string Generate(int size = 32);
 
-        /// <summary>Operação para gerar hash seguro.</summary>
-        /// <param name="raw">Valor original.</param>
+        /// <summary>Operação para gerar hash HMAC da chave informada.</summary>
+        /// <param name="raw">Chave em formato hexadecimal.</param>
         string Hash(string raw);
 
-        /// <summary>Operação para verificar hash seguro.</summary>
-        /// <param name="raw">Valor original.</param>
+        /// <summary>Operação para validar hash HMAC da chave informada.</summary>
+        /// <param name="raw">Chave em formato hexadecimal.</param>
         /// <param name="hash">Hash armazenado.</param>
         bool Verify(string raw, string hash);
     }
