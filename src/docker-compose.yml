@@ -1,0 +1,115 @@
+services:
+  # AuthCore API
+  api:
+    build:
+      context: ./backend
+      dockerfile: AuthCore.Api/Dockerfile
+    ports:
+      - "${API_PORT}:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      # Connection strings
+      - DATABASE__POSTGRES__CONNECTIONSTRING=Host=postgres;Port=${POSTGRES_PORT};Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      - DATABASE__REDIS__CONNECTIONSTRING=redis:${REDIS_PORT},password=${REDIS_PASSWORD},abortConnect=false
+      - DATABASE__REDIS__KEYPREFIX=${DATABASE__REDIS__KEYPREFIX}
+      # CORS
+      - CORS__DEVELOPMENTORIGINS__0=${CORS__DEVELOPMENTORIGINS__0}
+      - CORS__PRODUCTIONORIGINS__0=${CORS__PRODUCTIONORIGINS__0}
+      # JWT
+      - SECURITY__JWT__ISSUER=${SECURITY__JWT__ISSUER}
+      - SECURITY__JWT__AUDIENCE=${SECURITY__JWT__AUDIENCE}
+      - SECURITY__JWT__EXPIRESINMINUTES=${SECURITY__JWT__EXPIRESINMINUTES}
+      # Keys
+      - SECURITY__KEYS__SYMMETRIC__PRIVATEKEY=${SECURITY__KEYS__SYMMETRIC__PRIVATEKEY}
+      - SECURITY__KEYS__ASYMMETRIC__PRIVATEKEYPATH=${SECURITY__KEYS__ASYMMETRIC__PRIVATEKEYPATH}
+      - SECURITY__KEYS__ASYMMETRIC__PUBLICKEYPATH=${SECURITY__KEYS__ASYMMETRIC__PUBLICKEYPATH}
+      # RabbitMQ
+      - RABBITMQ__HOST=rabbitmq
+      - RABBITMQ__PORT=5672
+      - RABBITMQ__USER=${RABBITMQ_USER}
+      - RABBITMQ__PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ__EMAILQUEUE=${RABBITMQ__EMAILQUEUE}
+      - RABBITMQ__DEADLETTERQUEUE=${RABBITMQ__DEADLETTERQUEUE}
+    volumes:
+      # Chaves locais do desenvolvedor fora do repositório
+      - ${HOME}/.authcore/key:/app/key:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - authcore-net
+    restart: unless-stopped
+
+  # PostgreSQL
+  postgres:
+    image: postgres:17-alpine
+    command: postgres -p ${POSTGRES_PORT}
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h localhost -p ${POSTGRES_PORT} -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - authcore-net
+    restart: unless-stopped
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    command: redis-server --port ${REDIS_PORT} --requirepass ${REDIS_PASSWORD} --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "${REDIS_PORT}", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - authcore-net
+    restart: unless-stopped
+
+  # RabbitMQ
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "${RABBITMQ_PORT}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT}:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - authcore-net
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  redis-data:
+  rabbitmq-data:
+
+networks:
+  authcore-net:
+    driver: bridge

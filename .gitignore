@@ -21,3 +21,4 @@ obj/
 # Configurações de editor
 .editorconfig
 .idea/
+src/.env
