@@ -12,7 +12,5 @@ namespace MailCore.Service.Settings
         [Url(ErrorMessage = "A URL da aplicação deve ser válida.")]
         public string AppUrl { get; init; } = string.Empty;
 
-        [Range(1, int.MaxValue, ErrorMessage = "A versão do contrato da aplicação deve ser maior ou igual a 1.")]
-        public int ContractVersion { get; init; } = 1;
     }
 }

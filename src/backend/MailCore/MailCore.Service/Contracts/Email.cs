@@ -22,10 +22,6 @@ namespace MailCore.Service.Contracts
         [JsonPropertyName("type")]
         public EmailType Type { get; init; }
 
-        /// <summary>Versão do contrato serializado da mensagem.</summary>
-        [JsonPropertyName("contract_version")]
-        public int ContractVersion { get; init; }
-
         /// <summary>Payload dinâmico do tipo de notificação.</summary>
         [JsonPropertyName("payload")]
         public JsonElement? Payload { get; init; }
@@ -55,9 +51,6 @@ namespace MailCore.Service.Contracts
 
             if (string.IsNullOrWhiteSpace(FullName))
                 errors.Add("O nome do destinatário é obrigatório.");
-
-            if (ContractVersion < 1)
-                errors.Add("A versão do contrato da mensagem deve ser maior ou igual a 1.");
 
             if (CreatedAt == default)
                 errors.Add("A data de criação da mensagem é obrigatória.");

@@ -16,7 +16,6 @@ namespace MailCore.Service.Services
         private static readonly TimeSpan ConnectionHealthCheckInterval = TimeSpan.FromSeconds(5);
 
         private readonly RabbitMqSettings _settings;
-        private readonly ApplicationSettings _applicationSettings;
         private readonly ILogger<RabbitMqEmailConsumer> _logger;
         private readonly EmailService _mailService;
         private readonly object _lifecycleLock = new();
@@ -36,12 +35,10 @@ namespace MailCore.Service.Services
         /// <param name="logger">Logger do consumidor.</param>
         public RabbitMqEmailConsumer(
             IOptions<RabbitMqSettings> options,
-            IOptions<ApplicationSettings> applicationOptions,
             EmailService mailService,
             ILogger<RabbitMqEmailConsumer> logger)
         {
             _settings = options.Value;
-            _applicationSettings = applicationOptions.Value;
             _mailService = mailService;
             _logger = logger;
         }
@@ -466,13 +463,6 @@ namespace MailCore.Service.Services
             {
                 invalidReason = ex.Message;
                 exception = ex;
-                return false;
-            }
-
-            if (email.ContractVersion != _applicationSettings.ContractVersion)
-            {
-                invalidReason =
-                    $"Versão de contrato incompatível. Recebido={email.ContractVersion}; Suportado={_applicationSettings.ContractVersion}.";
                 return false;
             }
 
