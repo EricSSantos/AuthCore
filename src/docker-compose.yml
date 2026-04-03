@@ -3,7 +3,7 @@ services:
   api:
     build:
       context: ./backend
-      dockerfile: AuthCore.Api/Dockerfile
+      dockerfile: AuthCore/AuthCore.Api/Dockerfile
     ports:
       - "${API_PORT}:8080"
     environment:
@@ -38,6 +38,39 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - authcore-net
+    restart: unless-stopped
+
+  # Mail worker
+  mail-core:
+    build:
+      context: ./backend/MailCore
+      dockerfile: MailCore.Worker/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - DOTNET_RUNNING_IN_CONTAINER=true
+      # Application
+      - APPLICATION__NAME=${APPLICATION__NAME}
+      - APPLICATION__APPURL=${APPLICATION__APPURL}
+      # SMTP
+      - SMTP__HOST=${SMTP__HOST}
+      - SMTP__PORT=${SMTP__PORT}
+      - SMTP__USER=${SMTP__USER}
+      - SMTP__PASSWORD=${SMTP__PASSWORD}
+      - SMTP__FROMEMAIL=${SMTP__FROMEMAIL}
+      - SMTP__FROMNAME=${SMTP__FROMNAME}
+      - SMTP__ENABLESSL=${SMTP__ENABLESSL}
+      # RabbitMQ
+      - RABBITMQ__HOST=rabbitmq
+      - RABBITMQ__PORT=5672
+      - RABBITMQ__USER=${RABBITMQ_USER}
+      - RABBITMQ__PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ__EMAILQUEUE=${RABBITMQ__EMAILQUEUE}
+      - RABBITMQ__DEADLETTERQUEUE=${RABBITMQ__DEADLETTERQUEUE}
+    depends_on:
       rabbitmq:
         condition: service_healthy
     networks:

@@ -12,15 +12,15 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-COPY ["AuthCore.Api/AuthCore.Api.csproj", "AuthCore.Api/"]
-COPY ["AuthCore.Application/AuthCore.Application.csproj", "AuthCore.Application/"]
-COPY ["AuthCore.Domain/AuthCore.Domain.csproj", "AuthCore.Domain/"]
-COPY ["AuthCore.Infrastructure/AuthCore.Infrastructure.csproj", "AuthCore.Infrastructure/"]
-COPY ["AuthCore.sln", "./"]
-COPY ["Directory.Build.props", "./"]
+COPY ["AuthCore/AuthCore.Api/AuthCore.Api.csproj", "AuthCore/AuthCore.Api/"]
+COPY ["AuthCore/AuthCore.Application/AuthCore.Application.csproj", "AuthCore/AuthCore.Application/"]
+COPY ["AuthCore/AuthCore.Domain/AuthCore.Domain.csproj", "AuthCore/AuthCore.Domain/"]
+COPY ["AuthCore/AuthCore.Infrastructure/AuthCore.Infrastructure.csproj", "AuthCore/AuthCore.Infrastructure/"]
+COPY ["AuthCore/AuthCore.sln", "AuthCore/"]
+COPY ["AuthCore/Directory.Build.props", "AuthCore/"]
 
 RUN --mount=type=cache,target=/root/.nuget/packages \
-    dotnet restore "./AuthCore.Api/AuthCore.Api.csproj" --runtime linux-musl-x64
+    dotnet restore "./AuthCore/AuthCore.Api/AuthCore.Api.csproj" --runtime linux-musl-x64
 
 COPY . .
 
@@ -28,7 +28,7 @@ COPY . .
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN --mount=type=cache,target=/root/.nuget/packages \
-    dotnet publish "./AuthCore.Api/AuthCore.Api.csproj" \
+    dotnet publish "./AuthCore/AuthCore.Api/AuthCore.Api.csproj" \
     -c $BUILD_CONFIGURATION \
     -o /app/publish \
     --no-restore \
