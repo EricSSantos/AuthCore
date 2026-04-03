@@ -52,7 +52,40 @@ namespace MailCore.Service.Services
 
             using var mailMessage = BuildMailMessage(emailMessage.To, subject, htmlContent);
             using var smtpClient = BuildSmtpClient();
-            await smtpClient.SendMailAsync(mailMessage);
+
+            _logger.LogInformation(
+                "Conectando SMTP. Host={Host}, Port={Port}, Ssl={EnableSsl}, TimeoutSeconds={TimeoutSeconds}",
+                _smtpSettings.Host,
+                _smtpSettings.Port,
+                _smtpSettings.EnableSsl,
+                _smtpSettings.TimeoutSeconds);
+
+            try
+            {
+                await smtpClient
+                    .SendMailAsync(mailMessage)
+                    .WaitAsync(TimeSpan.FromSeconds(_smtpSettings.TimeoutSeconds));
+            }
+            catch (TimeoutException ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Timeout ao enviar e-mail via SMTP. Id={Id}, Host={Host}, Port={Port}",
+                    emailMessage.Id,
+                    _smtpSettings.Host,
+                    _smtpSettings.Port);
+                throw;
+            }
+            catch (SmtpException ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Falha SMTP ao enviar e-mail. Id={Id}, Host={Host}, Port={Port}",
+                    emailMessage.Id,
+                    _smtpSettings.Host,
+                    _smtpSettings.Port);
+                throw;
+            }
 
             _logger.LogInformation(
                 "E-mail enviado com sucesso. Id={Id}, Tipo={Type}, Destinatario={To}",
@@ -179,6 +212,7 @@ namespace MailCore.Service.Services
             {
                 Port = _smtpSettings.Port,
                 Credentials = new NetworkCredential(_smtpSettings.User, _smtpSettings.Password),
+                Timeout = _smtpSettings.TimeoutSeconds * 1000,
                 EnableSsl = _smtpSettings.EnableSsl
             };
         }

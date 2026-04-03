@@ -24,6 +24,9 @@ namespace MailCore.Service.Settings
         [Required(ErrorMessage = "O nome de origem do SMTP é obrigatório.")]
         public string FromName { get; set; } = string.Empty;
 
+        [Range(1, 300, ErrorMessage = "O timeout do SMTP deve estar entre 1 e 300 segundos.")]
+        public int TimeoutSeconds { get; set; } = 30;
+
         public bool EnableSsl { get; set; } = true;
     }
 }
